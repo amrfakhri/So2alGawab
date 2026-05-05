@@ -1,0 +1,77 @@
+[
+  {
+    "id": "egyptian",
+    "name": "مصري",
+    "subcategories": [
+      {
+        "id": "egyptian-movies",
+        "name": "أفلام مصرية",
+        "image": "egyptian-movies.png",
+        "description": "مشاهد وأبطال من أشهر الأفلام المصرية.",
+        "type": "mixed"
+      },
+      {
+        "id": "egyptian-actors",
+        "name": "ممثلين",
+        "image": "egyptian-actors.png",
+        "description": "تخمين الممثل من الصورة أو الوصف السريع.",
+        "type": "image"
+      },
+      {
+        "id": "egyptian-songs",
+        "name": "أغاني مصرية",
+        "image": "egyptian-songs.png",
+        "description": "كلمات ومطربين وأغاني معروفة.",
+        "type": "text"
+      },
+      {
+        "id": "egyptian-logos",
+        "name": "شعارات مصرية",
+        "image": "egyptian-logos.png",
+        "description": "شركات وعلامات مصرية معروفة.",
+        "type": "image"
+      }
+    ]
+  },
+  {
+    "id": "international",
+    "name": "عالمي",
+    "subcategories": [
+      {
+        "id": "international-movies",
+        "name": "أفلام عالمية",
+        "image": "international-movies.png",
+        "description": "Guess the movie from a famous scene.",
+        "type": "image"
+      },
+      {
+        "id": "international-celebrities",
+        "name": "مشاهير",
+        "image": "international-celebrities.png",
+        "description": "Guess the celebrity from a partial face.",
+        "type": "image"
+      },
+      {
+        "id": "international-logos",
+        "name": "شعارات",
+        "image": "international-logos.png",
+        "description": "Brand and company logo guessing.",
+        "type": "image"
+      },
+      {
+        "id": "international-tv-shows",
+        "name": "مسلسلات",
+        "image": "international-tv-shows.png",
+        "description": "Recognize iconic series and characters.",
+        "type": "mixed"
+      },
+      {
+        "id": "international-music",
+        "name": "موسيقى",
+        "image": "international-music.png",
+        "description": "Songs, artists, and global music trivia.",
+        "type": "text"
+      }
+    ]
+  }
+]

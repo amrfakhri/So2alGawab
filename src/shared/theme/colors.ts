@@ -1,0 +1,17 @@
+export const colors = {
+  background: '#F7F1E8',
+  surface: '#FFFDF8',
+  card: '#FFFFFF',
+  text: '#1F2937',
+  mutedText: '#6B7280',
+  primary: '#D86F45',
+  primaryDark: '#B85B36',
+  secondary: '#1B4965',
+  success: '#2E8B57',
+  danger: '#C94F4F',
+  warning: '#D9A441',
+  border: '#E7D7C4',
+  shadow: 'rgba(31, 41, 55, 0.12)',
+  teamA: '#1B4965',
+  teamB: '#9C4A5B',
+};

@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "So2alGawab",
+    "slug": "so2algawab",
+    "scheme": "so2algawab",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#F7F1E8"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.amrfakhri.so2algawab"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#F7F1E8"
+      },
+      "package": "com.amrfakhri.so2algawab"
+    },
+    "plugins": [
+      "expo-asset"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "4bbc6c82-39fa-4db3-badf-23870acba098"
+      }
+    }
+  }
+}
