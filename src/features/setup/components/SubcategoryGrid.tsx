@@ -8,14 +8,12 @@ import { SubcategoryCard } from './SubcategoryCard';
 interface SubcategoryGridProps {
   categories: Category[];
   selectedSubcategoryIds: string[];
-  getRemainingGames: (subcategoryId: string) => number;
   onToggle: (subcategoryId: string) => void;
 }
 
 export function SubcategoryGrid({
   categories,
   selectedSubcategoryIds,
-  getRemainingGames,
   onToggle,
 }: SubcategoryGridProps) {
   return (
@@ -33,7 +31,7 @@ export function SubcategoryGrid({
               <SubcategoryCard
                 key={subcategory.id}
                 subcategory={subcategory}
-                remainingGames={getRemainingGames(subcategory.id)}
+                remainingGames={subcategory.remainingQuestionCount}
                 selected={selectedSubcategoryIds.includes(subcategory.id)}
                 onPress={() => onToggle(subcategory.id)}
               />

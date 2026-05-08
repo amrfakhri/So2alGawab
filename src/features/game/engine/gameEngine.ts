@@ -1,4 +1,3 @@
-import { availableCategories, buildQuestionDeck, isPresenterQuestion } from './matchBuilder';
 import { calculateQuestionScore } from './scoring';
 import {
   FeedbackStatus,
@@ -10,9 +9,9 @@ import {
   TeamId,
   TeamState,
 } from '../types/game';
+import { SUBCATEGORIES_PER_MATCH } from '../../../services/supabase/gameService';
 
 export const QUESTION_DURATION_MS = 20_000;
-export const SUBCATEGORIES_PER_MATCH = 2;
 
 function createTeam(id: TeamId, name: string): TeamState {
   return {
@@ -29,17 +28,13 @@ function createTeam(id: TeamId, name: string): TeamState {
 }
 
 function getQuestionStartPhase(question: Question | null): GamePhase {
-  if (!question) {
-    return 'question';
-  }
-
-  return isPresenterQuestion(question) ? 'question' : 'question';
+  return question?.answerMode === 'presenter' ? 'question' : 'question';
 }
 
 export function createInitialGameState(): GameState {
   return {
     phase: 'setup',
-    availableCategories,
+    availableCategories: [],
     selectedSubcategoryIds: [],
     teams: {
       A: createTeam('A', 'Team 1'),
@@ -53,6 +48,18 @@ export function createInitialGameState(): GameState {
     roundFeedback: null,
     revealedHint: null,
     endedEarly: false,
+    isStartingMatch: false,
+    matchError: null,
+  };
+}
+
+export function setAvailableCategories(
+  state: GameState,
+  availableCategories: GameState['availableCategories'],
+): GameState {
+  return {
+    ...state,
+    availableCategories,
   };
 }
 
@@ -98,13 +105,16 @@ export function setTeamName(
   };
 }
 
-export function startMatch(state: GameState): GameState {
+export function startMatch(
+  state: GameState,
+  questionDeck: Question[],
+): GameState {
   const teamAName = state.teams.A.name.trim() || 'Team 1';
   const teamBName = state.teams.B.name.trim() || 'Team 2';
-  const questionDeck = buildQuestionDeck(state.selectedSubcategoryIds);
 
   return {
     ...createInitialGameState(),
+    availableCategories: state.availableCategories,
     teams: {
       A: createTeam('A', teamAName),
       B: createTeam('B', teamBName),
@@ -213,7 +223,7 @@ export function answerQuestion(
   answerIndex: number,
 ): GameState {
   const question = getCurrentQuestion(state);
-  if (!question || state.phase !== 'question' || isPresenterQuestion(question)) {
+  if (!question || state.phase !== 'question' || question.answerMode === 'presenter') {
     return state;
   }
 
@@ -227,7 +237,7 @@ export function answerQuestion(
 
 export function revealPresenterAnswer(state: GameState): GameState {
   const question = getCurrentQuestion(state);
-  if (!question || state.phase !== 'waiting_answer' || !isPresenterQuestion(question)) {
+  if (!question || state.phase !== 'waiting_answer' || question.answerMode !== 'presenter') {
     return state;
   }
 
@@ -242,7 +252,7 @@ export function resolvePresenterAnswer(
   correct: boolean,
 ): GameState {
   const question = getCurrentQuestion(state);
-  if (!question || state.phase !== 'answer_revealed' || !isPresenterQuestion(question)) {
+  if (!question || state.phase !== 'answer_revealed' || question.answerMode !== 'presenter') {
     return state;
   }
 
@@ -272,7 +282,7 @@ export function tickQuestionTimer(state: GameState, elapsedMs: number): GameStat
     };
   }
 
-  if (isPresenterQuestion(question)) {
+  if (question.answerMode === 'presenter') {
     return {
       ...state,
       phase: 'waiting_answer',

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { Question } from '../types/game';
 import { colors } from '../../../shared/theme/colors';
@@ -26,9 +26,19 @@ export function QuestionCard({
         </View>
         <Text style={styles.points}>{question.points} pts</Text>
       </View>
-      {question.image ? (
+      {question.mediaUrl ? (
         <View style={styles.imageFrame}>
-          <Text style={styles.imageLabel}>{question.image}</Text>
+          {question.mediaType === 'image' ? (
+            <Image
+              source={{ uri: question.mediaUrl }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+          ) : (
+            <Text style={styles.imageLabel}>
+              {question.mediaType === 'video' ? 'VIDEO' : 'AUDIO'}
+            </Text>
+          )}
         </View>
       ) : null}
       <Text style={styles.prompt}>{question.prompt}</Text>
@@ -90,6 +100,11 @@ const styles = StyleSheet.create({
     borderColor: '#EDD2BE',
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
+  },
+  image: {
+    width: '100%',
+    height: 220,
   },
   imageLabel: {
     color: colors.primaryDark,

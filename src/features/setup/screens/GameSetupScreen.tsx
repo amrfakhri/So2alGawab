@@ -1,6 +1,7 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useQuery } from '@tanstack/react-query';
 
 import { RootStackParamList } from '../../../navigation/RootNavigator';
 import { SubcategoryGrid } from '../components/SubcategoryGrid';
@@ -9,7 +10,7 @@ import { useGameStore } from '../../game/store/useGameStore';
 import { PrimaryButton } from '../../../shared/components/PrimaryButton';
 import { Screen } from '../../../shared/components/Screen';
 import { colors } from '../../../shared/theme/colors';
-import { getQuestionCountBySubcategory } from '../../game/engine/matchBuilder';
+import { fetchGameCategories } from '../../../services/supabase/categoryService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameSetup'>;
 
@@ -18,12 +19,26 @@ export function GameSetupScreen({ navigation }: Props) {
     availableCategories,
     selectedSubcategoryIds,
     teams,
+    isStartingMatch,
+    matchError,
+    setAvailableCategories,
     setTeamName,
     toggleSubcategory,
     startMatch,
   } = useGameStore();
+  const categoriesQuery = useQuery({
+    queryKey: ['game-categories'],
+    queryFn: fetchGameCategories,
+    staleTime: 5 * 60 * 1000,
+  });
 
   const canStart = selectedSubcategoryIds.length === 2;
+
+  React.useEffect(() => {
+    if (categoriesQuery.data) {
+      setAvailableCategories(categoriesQuery.data);
+    }
+  }, [categoriesQuery.data, setAvailableCategories]);
 
   return (
     <Screen scroll>
@@ -43,19 +58,49 @@ export function GameSetupScreen({ navigation }: Props) {
           onChangeTeamB={(value) => setTeamName('B', value)}
         />
 
-        <SubcategoryGrid
-          categories={availableCategories}
-          selectedSubcategoryIds={selectedSubcategoryIds}
-          getRemainingGames={getQuestionCountBySubcategory}
-          onToggle={toggleSubcategory}
-        />
+        {categoriesQuery.isPending ? (
+          <View style={styles.stateCard}>
+            <ActivityIndicator color={colors.primary} />
+            <Text style={styles.stateTitle}>جاري تحميل الفئات</Text>
+            <Text style={styles.stateCopy}>
+              نحمّل التصنيفات والأسئلة المتاحة من قاعدة البيانات.
+            </Text>
+          </View>
+        ) : null}
+
+        {categoriesQuery.isError ? (
+          <View style={styles.stateCard}>
+            <Text style={styles.stateTitle}>تعذر تحميل الفئات</Text>
+            <Text style={styles.stateCopy}>
+              حدثت مشكلة أثناء الاتصال بقاعدة البيانات. حاول مرة أخرى.
+            </Text>
+            <PrimaryButton
+              label="إعادة المحاولة"
+              onPress={() => categoriesQuery.refetch()}
+            />
+          </View>
+        ) : null}
+
+        {!categoriesQuery.isPending && !categoriesQuery.isError ? (
+          <SubcategoryGrid
+            categories={availableCategories}
+            selectedSubcategoryIds={selectedSubcategoryIds}
+            onToggle={toggleSubcategory}
+          />
+        ) : null}
+
+        {matchError ? (
+          <Text style={styles.matchError}>{matchError}</Text>
+        ) : null}
 
         <PrimaryButton
-          label="ابدأ اللعبة"
-          disabled={!canStart}
-          onPress={() => {
-            startMatch();
-            navigation.replace('Question');
+          label={isStartingMatch ? 'جاري تحميل الأسئلة...' : 'ابدأ اللعبة'}
+          disabled={!canStart || categoriesQuery.isPending || isStartingMatch}
+          onPress={async () => {
+            const didStart = await startMatch();
+            if (didStart) {
+              navigation.replace('Question');
+            }
           }}
         />
       </View>
@@ -87,5 +132,31 @@ const styles = StyleSheet.create({
   body: {
     marginTop: 24,
     gap: 18,
+  },
+  stateCard: {
+    backgroundColor: colors.card,
+    borderRadius: 22,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: 10,
+    alignItems: 'center',
+  },
+  stateTitle: {
+    color: colors.text,
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  stateCopy: {
+    color: colors.mutedText,
+    fontSize: 14,
+    lineHeight: 22,
+    textAlign: 'center',
+  },
+  matchError: {
+    color: '#B42318',
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
   },
 });

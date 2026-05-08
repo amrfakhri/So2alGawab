@@ -1,5 +1,7 @@
 export type TeamId = 'A' | 'B';
 export type LifelineId = 'callFriend' | 'discardQuestion' | 'answerReward';
+export type QuestionAnswerMode = 'mcq' | 'presenter';
+export type QuestionMediaType = 'image' | 'video' | 'audio';
 export type GamePhase =
   | 'setup'
   | 'question'
@@ -12,10 +14,12 @@ export type SubcategoryType = 'image' | 'text' | 'mixed';
 
 export interface Subcategory {
   id: string;
+  categoryId: string;
   name: string;
   image: string;
   description: string;
   type: SubcategoryType;
+  remainingQuestionCount: number;
 }
 
 export interface Category {
@@ -27,13 +31,18 @@ export interface Category {
 export interface Question {
   id: string;
   categoryId: string;
+  categoryName: string;
   subcategoryId: string;
+  subcategoryName: string;
   prompt: string;
-  image?: string;
+  mediaType?: QuestionMediaType;
+  mediaUrl?: string;
   options: string[];
   correctIndex: number;
+  correctAnswerText: string;
   points: number;
   hint: string;
+  answerMode: QuestionAnswerMode;
 }
 
 export interface TeamLifelines {
@@ -72,4 +81,6 @@ export interface GameState {
   roundFeedback: RoundFeedback | null;
   revealedHint: string | null;
   endedEarly: boolean;
+  isStartingMatch: boolean;
+  matchError: string | null;
 }

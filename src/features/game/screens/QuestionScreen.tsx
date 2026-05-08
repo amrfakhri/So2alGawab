@@ -19,12 +19,6 @@ import { LifelineBar } from '../components/LifelineBar';
 import { PresenterControls } from '../components/PresenterControls';
 import { QuestionCard } from '../components/QuestionCard';
 import { useGameStore } from '../store/useGameStore';
-import { QUESTION_DURATION_MS } from '../engine/gameEngine';
-import {
-  availableCategories,
-  findSubcategoryById,
-  isPresenterQuestion,
-} from '../engine/matchBuilder';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Question'>;
 
@@ -51,16 +45,11 @@ export function QuestionScreen({ navigation }: Props) {
 
   const question = questionDeck[currentQuestionIndex];
   const activeTeam = teams[activeTeamId];
-  const isPresenter = question ? isPresenterQuestion(question) : false;
-  const categoryName = useMemo(
-    () =>
-      availableCategories.find((category) => category.id === question?.categoryId)?.name ??
-      'الفئة',
-    [question?.categoryId],
-  );
+  const isPresenter = question?.answerMode === 'presenter';
+  const categoryName = useMemo(() => question?.categoryName ?? 'الفئة', [question?.categoryName]);
   const subcategoryName = useMemo(
-    () => findSubcategoryById(question?.subcategoryId ?? '')?.name ?? 'التصنيف',
-    [question?.subcategoryId],
+    () => question?.subcategoryName ?? 'التصنيف',
+    [question?.subcategoryName],
   );
 
   useEffect(() => {
@@ -86,7 +75,7 @@ export function QuestionScreen({ navigation }: Props) {
   }
 
   const totalQuestions = questionDeck.length;
-  const showAnswers = !isPresenter;
+  const showAnswers = !isPresenter && question.options.length > 1;
   const showReveal = isPresenter && (phase === 'answer_revealed' || phase === 'result');
   const shouldShowPresenterControls =
     isPresenter && (phase === 'waiting_answer' || phase === 'answer_revealed');
@@ -170,7 +159,7 @@ export function QuestionScreen({ navigation }: Props) {
 
               {showReveal ? (
                 <AnswerRevealSection
-                  answer={question.options[question.correctIndex] ?? ''}
+                  answer={question.correctAnswerText}
                 />
               ) : null}
 
