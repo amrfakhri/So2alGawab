@@ -23,6 +23,11 @@
       },
       "package": "com.amrfakhri.so2algawab"
     },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "baseUrl": "/So2alGawab"
+    },
     "plugins": [
       "expo-asset"
     ],
