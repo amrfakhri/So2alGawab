@@ -34,6 +34,11 @@ jobs:
           EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
           EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
 
+      - name: Fix asset paths for GitHub Pages subdirectory
+        run: |
+          sed -i 's|src="/_expo/|src="/So2alGawab/_expo/|g' dist/index.html
+          sed -i 's|href="/_expo/|href="/So2alGawab/_expo/|g' dist/index.html
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
