@@ -25,8 +25,7 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "single",
-      "baseUrl": "/So2alGawab"
+      "output": "single"
     },
     "plugins": [
       "expo-asset"
