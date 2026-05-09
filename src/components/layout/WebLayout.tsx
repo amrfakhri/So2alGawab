@@ -22,16 +22,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#111111',
     alignItems: 'center',
-    justifyContent: 'center',
   },
   shell: {
-    width: 430,
-    // @ts-ignore — maxHeight is web-only
-    maxHeight: '100vh',
+    flex: 1,
+    width: '100%',
+    maxWidth: 430,
     overflow: 'hidden',
-    alignSelf: 'center',
-    // subtle shadow to lift the shell off the dark bg
-    // @ts-ignore
-    boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
+    backgroundColor: '#F7F1E8',
   },
 });
