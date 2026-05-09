@@ -15,6 +15,7 @@ import {
   fetchTvDevice,
   linkTvDeviceToSession,
 } from '../../services/supabase/sessionService';
+import { useGameStore } from '../game/store/useGameStore';
 
 type State =
   | { phase: 'idle' }
@@ -77,6 +78,7 @@ export function ConnectTvModal({ visible, onClose }: ConnectTvModalProps) {
 
       const session = await createGameSession();
       await linkTvDeviceToSession(code, session.id);
+      useGameStore.getState().setTvSessionId(session.id);
 
       setState({ phase: 'success', sessionCode: session.session_code });
       setTimeout(() => {

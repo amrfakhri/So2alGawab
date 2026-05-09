@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
+import { supabase } from '../../services/supabase/supabaseClient';
 import { fetchSessionByCode, GameSession } from '../../services/supabase/sessionService';
 
 type LoadState =
@@ -23,17 +24,28 @@ export function TvScreen({ sessionCode }: TvScreenProps) {
       setState(session ? { status: 'loaded', session } : { status: 'not_found' });
     });
 
-    // ─── Future: add Supabase realtime subscription here ─────────────────
-    // const channel = supabase
-    //   .channel(`session:${sessionCode}`)
-    //   .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'game_sessions',
-    //       filter: `session_code=eq.${sessionCode}` },
-    //     (payload) => setState({ status: 'loaded', session: payload.new as GameSession }))
-    //   .subscribe();
-    // return () => { cancelled = true; supabase.removeChannel(channel); };
-    // ─────────────────────────────────────────────────────────────────────
+    const channel = supabase
+      .channel(`session_${sessionCode}`)
+      .on(
+        'postgres_changes' as any,
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'game_sessions',
+          filter: `session_code=eq.${sessionCode}`,
+        },
+        (payload: any) => {
+          if (!cancelled) {
+            setState({ status: 'loaded', session: payload.new as GameSession });
+          }
+        },
+      )
+      .subscribe();
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
   }, [sessionCode]);
 
   if (state.status === 'loading') {

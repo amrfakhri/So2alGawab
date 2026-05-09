@@ -101,6 +101,19 @@ export async function fetchTvDevice(pairingCode: string): Promise<TvDevice | nul
   return data as TvDevice | null;
 }
 
+export async function updateGameSession(
+  sessionId: string,
+  fields: {
+    current_question?: string | null;
+    current_category?: string | null;
+    current_phase?: string | null;
+    team1_score?: number;
+    team2_score?: number;
+  },
+): Promise<void> {
+  await supabase.from('game_sessions').update(fields).eq('id', sessionId);
+}
+
 // sessionId = game_sessions.id (UUID)
 export async function linkTvDeviceToSession(
   pairingCode: string,

@@ -13,6 +13,7 @@ import QRCode from 'react-native-qrcode-svg';
 
 import { colors } from '../../shared/theme/colors';
 import { createGameSession, GameSession, TV_BASE_URL } from '../../services/supabase/sessionService';
+import { useGameStore } from '../game/store/useGameStore';
 
 type State =
   | { phase: 'idle' }
@@ -41,6 +42,7 @@ export function TvSessionModal({ visible, onClose }: TvSessionModalProps) {
     setState({ phase: 'creating' });
     try {
       const session = await createGameSession();
+      useGameStore.getState().setTvSessionId(session.id);
       setState({ phase: 'created', session });
     } catch (e) {
       setState({ phase: 'error', message: e instanceof Error ? e.message : 'خطأ غير معروف' });
