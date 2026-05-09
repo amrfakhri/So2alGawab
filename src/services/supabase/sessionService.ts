@@ -67,6 +67,7 @@ export type TvDevice = {
   id: string;
   pairing_code: string;
   session_code: string | null;
+  status: 'waiting' | 'connected';
   created_at: string;
   updated_at: string;
 };
@@ -75,7 +76,7 @@ export async function createTvDevice(): Promise<TvDevice> {
   const pairing_code = generateSessionCode();
   const { data, error } = await supabase
     .from('tv_devices')
-    .insert({ pairing_code })
+    .insert({ pairing_code, status: 'waiting' })
     .select()
     .single();
   if (error || !data) throw new Error(error?.message ?? 'فشل إنشاء الجهاز');
@@ -89,4 +90,15 @@ export async function fetchTvDevice(pairingCode: string): Promise<TvDevice | nul
     .eq('pairing_code', pairingCode)
     .maybeSingle();
   return data as TvDevice | null;
+}
+
+export async function linkTvDeviceToSession(
+  pairingCode: string,
+  sessionCode: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from('tv_devices')
+    .update({ session_code: sessionCode, status: 'connected' })
+    .eq('pairing_code', pairingCode);
+  if (error) throw new Error(error.message ?? 'فشل ربط الجهاز');
 }

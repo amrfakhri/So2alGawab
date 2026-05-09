@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 
+import { supabase } from '../../services/supabase/supabaseClient';
 import { createTvDevice, fetchTvDevice, TvDevice } from '../../services/supabase/sessionService';
 
 type State =
@@ -9,7 +10,14 @@ type State =
   | { phase: 'waiting'; device: TvDevice }
   | { phase: 'error'; message: string };
 
-const POLL_INTERVAL_MS = 3000;
+const POLL_FALLBACK_MS = 5000;
+
+const STEPS = [
+  { num: '١', text: 'افتح تطبيق So2alGawab على هاتفك' },
+  { num: '٢', text: 'اضغط على "ربط TV" في شاشة الإعداد' },
+  { num: '٣', text: 'امسح رمز QR أو أدخل الرمز يدوياً' },
+  { num: '٤', text: 'ستبدأ الجلسة تلقائياً على هذه الشاشة' },
+];
 
 export function TvLobbyScreen() {
   const [state, setState] = useState<State>({ phase: 'creating' });
@@ -17,6 +25,7 @@ export function TvLobbyScreen() {
 
   useEffect(() => {
     let cancelled = false;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
 
     async function init() {
       try {
@@ -24,15 +33,37 @@ export function TvLobbyScreen() {
         if (cancelled) return;
         setState({ phase: 'waiting', device });
 
-        pollRef.current = setInterval(async () => {
-          const updated = await fetchTvDevice(device.pairing_code);
+        function handleConnected(sessionCode: string) {
           if (cancelled) return;
-          if (updated?.session_code) {
-            clearInterval(pollRef.current!);
-            // Navigate to active session — full page replace so TvScreen takes over
-            window.location.replace(`/tv/${updated.session_code}`);
-          }
-        }, POLL_INTERVAL_MS);
+          if (pollRef.current) clearInterval(pollRef.current);
+          if (channel) supabase.removeChannel(channel);
+          window.location.replace(`/tv/${sessionCode}`);
+        }
+
+        // Realtime subscription for instant response
+        channel = supabase
+          .channel(`tv_device_${device.id}`)
+          .on(
+            'postgres_changes' as any,
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'tv_devices',
+              filter: `id=eq.${device.id}`,
+            },
+            (payload: any) => {
+              const updated = payload.new as TvDevice;
+              if (updated.session_code) handleConnected(updated.session_code);
+            },
+          )
+          .subscribe();
+
+        // Fallback poll in case realtime isn't enabled on the table
+        pollRef.current = setInterval(async () => {
+          if (cancelled) return;
+          const updated = await fetchTvDevice(device.pairing_code);
+          if (updated?.session_code) handleConnected(updated.session_code);
+        }, POLL_FALLBACK_MS);
       } catch (e) {
         if (!cancelled) {
           setState({ phase: 'error', message: e instanceof Error ? e.message : 'خطأ غير معروف' });
@@ -44,18 +75,19 @@ export function TvLobbyScreen() {
     return () => {
       cancelled = true;
       if (pollRef.current) clearInterval(pollRef.current);
+      if (channel) supabase.removeChannel(channel);
     };
   }, []);
 
   return (
     <View style={styles.root}>
-      {/* Header */}
+      {/* ── Header ─────────────────────────────────────────────── */}
       <View style={styles.header}>
         <Text style={styles.brand}>So2alGawab</Text>
         <Text style={styles.tagline}>شاشة العرض الثانية</Text>
       </View>
 
-      {/* Main content */}
+      {/* ── Main stage ─────────────────────────────────────────── */}
       <View style={styles.stage}>
         {state.phase === 'creating' && (
           <View style={styles.centerCol}>
@@ -71,44 +103,51 @@ export function TvLobbyScreen() {
         )}
 
         {state.phase === 'waiting' && (
-          <View style={styles.centerCol}>
-            {/* QR code */}
-            <View style={styles.qrContainer}>
-              <QRCode
-                value={`so2algawab://connect-tv?code=${state.device.pairing_code}`}
-                size={240}
-                color="#111111"
-                backgroundColor="#FFFFFF"
-              />
+          <View style={styles.layout}>
+            {/* Left: QR + code */}
+            <View style={styles.qrSection}>
+              <View style={styles.qrContainer}>
+                <QRCode
+                  value={`so2algawab://connect-tv?code=${state.device.pairing_code}`}
+                  size={220}
+                  color="#111111"
+                  backgroundColor="#FFFFFF"
+                />
+              </View>
+
+              <View style={styles.codeRow}>
+                {state.device.pairing_code.split('').map((char, i) => (
+                  <View key={i} style={styles.codeCell}>
+                    <Text style={styles.codeChar}>{char}</Text>
+                  </View>
+                ))}
+              </View>
+
+              <View style={styles.waitingRow}>
+                <ActivityIndicator size="small" color={tv.muted} />
+                <Text style={styles.waitingText}>في انتظار الاتصال…</Text>
+              </View>
             </View>
 
-            {/* Pairing code */}
-            <View style={styles.codeRow}>
-              {state.device.pairing_code.split('').map((char, i) => (
-                <View key={i} style={styles.codeCell}>
-                  <Text style={styles.codeChar}>{char}</Text>
-                </View>
-              ))}
-            </View>
-
-            {/* Instructions */}
-            <Text style={styles.instructionTitle}>كيف تتصل؟</Text>
-            <View style={styles.steps}>
-              <Text style={styles.step}>١  افتح تطبيق So2alGawab على الهاتف</Text>
-              <Text style={styles.step}>٢  اضغط "ربط TV" وأدخل الرمز</Text>
-              <Text style={styles.step}>٣  ستنتقل الشاشة تلقائياً للجلسة</Text>
-            </View>
-
-            {/* Waiting indicator */}
-            <View style={styles.waitingRow}>
-              <ActivityIndicator size="small" color={tv.muted} />
-              <Text style={styles.waitingText}>في انتظار الاتصال…</Text>
+            {/* Right: instructions */}
+            <View style={styles.stepsSection}>
+              <Text style={styles.stepsTitle}>كيف تتصل بالشاشة؟</Text>
+              <View style={styles.stepsList}>
+                {STEPS.map((s) => (
+                  <View key={s.num} style={styles.stepRow}>
+                    <View style={styles.stepBadge}>
+                      <Text style={styles.stepBadgeText}>{s.num}</Text>
+                    </View>
+                    <Text style={styles.stepText}>{s.text}</Text>
+                  </View>
+                ))}
+              </View>
             </View>
           </View>
         )}
       </View>
 
-      {/* Footer */}
+      {/* ── Footer ─────────────────────────────────────────────── */}
       <View style={styles.footer}>
         <Text style={styles.footerText}>game.amrfakhri.com/tv</Text>
       </View>
@@ -119,6 +158,7 @@ export function TvLobbyScreen() {
 const tv = {
   bg: '#111111',
   surface: '#1C1C1E',
+  surfaceHigh: '#2C2C2E',
   yellow: '#FFD54A',
   white: '#FFFFFF',
   muted: '#8E8E93',
@@ -132,26 +172,30 @@ const styles = StyleSheet.create({
     backgroundColor: tv.bg,
     minHeight: '100vh' as any,
   },
+
+  // Header
   header: {
     alignItems: 'center',
-    paddingTop: 48,
-    paddingBottom: 32,
-    gap: 8,
+    paddingTop: 40,
+    paddingBottom: 28,
+    gap: 6,
     borderBottomWidth: 1,
     borderBottomColor: tv.border,
   },
   brand: {
     color: tv.yellow,
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: '900',
     letterSpacing: 1.5,
   },
   tagline: {
     color: tv.muted,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
     letterSpacing: 0.5,
   },
+
+  // Stage
   stage: {
     flex: 1,
     alignItems: 'center',
@@ -161,56 +205,56 @@ const styles = StyleSheet.create({
   },
   centerCol: {
     alignItems: 'center',
-    gap: 32,
+    gap: 24,
+  },
+
+  // Two-column layout (QR left, steps right)
+  layout: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 64,
     width: '100%',
-    maxWidth: 480,
+    maxWidth: 900,
   },
+  qrSection: {
+    alignItems: 'center',
+    gap: 28,
+    flexShrink: 0,
+  },
+  stepsSection: {
+    flex: 1,
+    gap: 28,
+  },
+
+  // QR
   qrContainer: {
-    padding: 24,
+    padding: 20,
     backgroundColor: tv.white,
-    borderRadius: 28,
+    borderRadius: 24,
   },
+
+  // Pairing code cells
   codeRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
   },
   codeCell: {
-    width: 72,
-    height: 88,
+    width: 68,
+    height: 84,
     backgroundColor: tv.surface,
-    borderRadius: 16,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: tv.border,
+    borderColor: tv.surfaceHigh,
   },
   codeChar: {
     color: tv.yellow,
-    fontSize: 48,
+    fontSize: 44,
     fontWeight: '900',
-    letterSpacing: 0,
   },
-  instructionTitle: {
-    color: tv.white,
-    fontSize: 20,
-    fontWeight: '800',
-  },
-  steps: {
-    gap: 10,
-    alignSelf: 'stretch',
-    backgroundColor: tv.surface,
-    borderRadius: 20,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: tv.border,
-  },
-  step: {
-    color: tv.muted,
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'right',
-    lineHeight: 24,
-  },
+
+  // Waiting
   waitingRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -221,6 +265,46 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
   },
+
+  // Steps
+  stepsTitle: {
+    color: tv.white,
+    fontSize: 26,
+    fontWeight: '900',
+    textAlign: 'right',
+  },
+  stepsList: {
+    gap: 18,
+  },
+  stepRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 18,
+  },
+  stepBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: tv.yellow,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  stepBadgeText: {
+    color: '#111111',
+    fontSize: 18,
+    fontWeight: '900',
+  },
+  stepText: {
+    color: tv.white,
+    fontSize: 20,
+    fontWeight: '600',
+    flex: 1,
+    textAlign: 'right',
+    lineHeight: 28,
+  },
+
+  // States
   statusText: {
     color: tv.muted,
     fontSize: 18,
@@ -232,14 +316,16 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center',
   },
+
+  // Footer
   footer: {
     alignItems: 'center',
-    paddingVertical: 24,
+    paddingVertical: 20,
     borderTopWidth: 1,
     borderTopColor: tv.border,
   },
   footerText: {
-    color: tv.border,
+    color: tv.surfaceHigh,
     fontSize: 13,
     fontWeight: '600',
     letterSpacing: 0.5,

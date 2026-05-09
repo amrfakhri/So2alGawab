@@ -13,11 +13,13 @@ import { colors } from '../../../shared/theme/colors';
 import { fetchGameCategories } from '../../../services/supabase/categoryService';
 import { MIN_SUBCATEGORIES_PER_MATCH } from '../../../services/supabase/gameService';
 import { TvSessionModal } from '../../tv/TvSessionModal';
+import { ConnectTvModal } from '../../tv/ConnectTvModal';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameSetup'>;
 
 export function GameSetupScreen({ navigation }: Props) {
   const [showTvModal, setShowTvModal] = useState(false);
+  const [showConnectModal, setShowConnectModal] = useState(false);
   const {
     availableCategories,
     selectedSubcategoryIds,
@@ -110,15 +112,24 @@ export function GameSetupScreen({ navigation }: Props) {
             }
           }}
         />
-        <Pressable
-          style={({ pressed }) => [styles.tvBtn, pressed && styles.tvBtnPressed]}
-          onPress={() => setShowTvModal(true)}
-        >
-          <Text style={styles.tvBtnText}>📺  بدء جلسة TV</Text>
-        </Pressable>
+        <View style={styles.tvRow}>
+          <Pressable
+            style={({ pressed }) => [styles.tvBtn, pressed && styles.tvBtnPressed]}
+            onPress={() => setShowTvModal(true)}
+          >
+            <Text style={styles.tvBtnText}>📺  بدء جلسة TV</Text>
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => [styles.tvBtn, pressed && styles.tvBtnPressed]}
+            onPress={() => setShowConnectModal(true)}
+          >
+            <Text style={styles.tvBtnText}>🔗  ربط TV</Text>
+          </Pressable>
+        </View>
       </View>
 
       <TvSessionModal visible={showTvModal} onClose={() => setShowTvModal(false)} />
+      <ConnectTvModal visible={showConnectModal} onClose={() => setShowConnectModal(false)} />
     </SafeAreaView>
   );
 }
@@ -192,8 +203,13 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     textAlign: 'center',
   },
-  tvBtn: {
+  tvRow: {
+    flexDirection: 'row',
     marginTop: 10,
+    gap: 10,
+  },
+  tvBtn: {
+    flex: 1,
     borderRadius: 16,
     paddingVertical: 14,
     alignItems: 'center',
