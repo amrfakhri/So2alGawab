@@ -61,15 +61,24 @@ export async function fetchSessionByCode(code: string): Promise<GameSession | nu
   return data as GameSession;
 }
 
+export async function fetchSessionById(id: string): Promise<GameSession | null> {
+  const { data } = await supabase
+    .from('game_sessions')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+  return data as GameSession | null;
+}
+
 // ── TV devices ────────────────────────────────────────────────────────────────
+// Schema: id, pairing_code, status, game_session_id, created_at
 
 export type TvDevice = {
   id: string;
   pairing_code: string;
-  session_code: string | null;
+  game_session_id: string | null;
   status: 'waiting' | 'connected';
   created_at: string;
-  updated_at: string;
 };
 
 export async function createTvDevice(): Promise<TvDevice> {
@@ -92,13 +101,14 @@ export async function fetchTvDevice(pairingCode: string): Promise<TvDevice | nul
   return data as TvDevice | null;
 }
 
+// sessionId = game_sessions.id (UUID)
 export async function linkTvDeviceToSession(
   pairingCode: string,
-  sessionCode: string,
+  sessionId: string,
 ): Promise<void> {
   const { error } = await supabase
     .from('tv_devices')
-    .update({ session_code: sessionCode, status: 'connected' })
+    .update({ game_session_id: sessionId, status: 'connected' })
     .eq('pairing_code', pairingCode);
   if (error) throw new Error(error.message ?? 'فشل ربط الجهاز');
 }

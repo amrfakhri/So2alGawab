@@ -76,7 +76,7 @@ export function ConnectTvModal({ visible, onClose }: ConnectTvModalProps) {
       }
 
       const session = await createGameSession();
-      await linkTvDeviceToSession(code, session.session_code);
+      await linkTvDeviceToSession(code, session.id);
 
       setState({ phase: 'success', sessionCode: session.session_code });
       setTimeout(() => {

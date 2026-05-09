@@ -3,7 +3,12 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 
 import { supabase } from '../../services/supabase/supabaseClient';
-import { createTvDevice, fetchTvDevice, TvDevice } from '../../services/supabase/sessionService';
+import {
+  createTvDevice,
+  fetchTvDevice,
+  fetchSessionById,
+  TvDevice,
+} from '../../services/supabase/sessionService';
 
 type State =
   | { phase: 'creating' }
@@ -51,9 +56,12 @@ export function TvLobbyScreen() {
               table: 'tv_devices',
               filter: `id=eq.${device.id}`,
             },
-            (payload: any) => {
+            async (payload: any) => {
               const updated = payload.new as TvDevice;
-              if (updated.session_code) handleConnected(updated.session_code);
+              if (updated.game_session_id) {
+                const session = await fetchSessionById(updated.game_session_id);
+                if (session?.session_code) handleConnected(session.session_code);
+              }
             },
           )
           .subscribe();
@@ -62,7 +70,10 @@ export function TvLobbyScreen() {
         pollRef.current = setInterval(async () => {
           if (cancelled) return;
           const updated = await fetchTvDevice(device.pairing_code);
-          if (updated?.session_code) handleConnected(updated.session_code);
+          if (updated?.game_session_id) {
+            const session = await fetchSessionById(updated.game_session_id);
+            if (session?.session_code) handleConnected(session.session_code);
+          }
         }, POLL_FALLBACK_MS);
       } catch (e) {
         if (!cancelled) {
