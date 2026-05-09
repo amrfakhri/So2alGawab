@@ -60,3 +60,33 @@ export async function fetchSessionByCode(code: string): Promise<GameSession | nu
 
   return data as GameSession;
 }
+
+// ── TV devices ────────────────────────────────────────────────────────────────
+
+export type TvDevice = {
+  id: string;
+  pairing_code: string;
+  session_code: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export async function createTvDevice(): Promise<TvDevice> {
+  const pairing_code = generateSessionCode();
+  const { data, error } = await supabase
+    .from('tv_devices')
+    .insert({ pairing_code })
+    .select()
+    .single();
+  if (error || !data) throw new Error(error?.message ?? 'فشل إنشاء الجهاز');
+  return data as TvDevice;
+}
+
+export async function fetchTvDevice(pairingCode: string): Promise<TvDevice | null> {
+  const { data } = await supabase
+    .from('tv_devices')
+    .select('*')
+    .eq('pairing_code', pairingCode)
+    .maybeSingle();
+  return data as TvDevice | null;
+}

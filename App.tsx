@@ -7,19 +7,33 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { WebLayout } from './src/components/layout/WebLayout';
 import { TvScreen } from './src/features/tv/TvScreen';
+import { TvLobbyScreen } from './src/features/tv/TvLobbyScreen';
 
 const queryClient = new QueryClient();
 
-function getTvSessionCode(): string | null {
+type TvRoute =
+  | { type: 'lobby' }
+  | { type: 'session'; code: string }
+  | null;
+
+function getTvRoute(): TvRoute {
   if (Platform.OS !== 'web' || typeof window === 'undefined') return null;
-  const match = window.location.pathname.match(/^\/tv\/([^/]+)$/);
-  return match?.[1] ?? null;
+  const path = window.location.pathname;
+  if (path === '/tv' || path === '/tv/') return { type: 'lobby' };
+  const match = path.match(/^\/tv\/([^/]+)$/);
+  if (match?.[1]) return { type: 'session', code: match[1] };
+  return null;
 }
 
 export default function App() {
-  const tvCode = getTvSessionCode();
-  if (tvCode) {
-    return <TvScreen sessionCode={tvCode} />;
+  const tvRoute = getTvRoute();
+
+  if (tvRoute?.type === 'lobby') {
+    return <TvLobbyScreen />;
+  }
+
+  if (tvRoute?.type === 'session') {
+    return <TvScreen sessionCode={tvRoute.code} />;
   }
 
   return (
