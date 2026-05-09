@@ -5,6 +5,7 @@ import {
   answerQuestion,
   createInitialGameState,
   endGame,
+  QUESTION_DURATION_MS,
   revealPresenterAnswer,
   resolvePresenterAnswer,
   setAvailableCategories,
@@ -111,12 +112,16 @@ useGameStore.subscribe((state) => {
   const { tvSessionId, phase, currentQuestionIndex, teams, questionDeck } = state;
   if (!tvSessionId || phase === 'setup' || phase === 'finished') return;
 
-  const syncKey = `${tvSessionId}|${phase}|${currentQuestionIndex}|${teams.A.score}|${teams.B.score}`;
+  const la = teams.A.lifelines;
+  const lb = teams.B.lifelines;
+  const lifelineKey = `${+la.callFriend}${+la.discardQuestion}${+la.answerReward}${+lb.callFriend}${+lb.discardQuestion}${+lb.answerReward}`;
+  const syncKey = `${tvSessionId}|${phase}|${currentQuestionIndex}|${teams.A.score}|${teams.B.score}|${lifelineKey}`;
   if (syncKey === _lastSyncKey) return;
   _lastSyncKey = syncKey;
 
   const question = questionDeck[currentQuestionIndex] ?? null;
   const revealAnswer = phase === 'answer_revealed' || phase === 'result';
+  const isQuestion = phase === 'question';
 
   updateGameSession(tvSessionId, {
     current_question: question?.prompt ?? null,
@@ -126,7 +131,12 @@ useGameStore.subscribe((state) => {
     current_media_type: question?.mediaType ?? null,
     current_answer: revealAnswer ? (question?.correctAnswerText ?? null) : null,
     reveal_answer: revealAnswer,
+    timer_duration_ms: isQuestion ? QUESTION_DURATION_MS : null,
+    timer_started_at: isQuestion ? new Date().toISOString() : null,
+    timer_running: isQuestion,
     team1_score: teams.A.score,
     team2_score: teams.B.score,
+    team1_lifelines: la,
+    team2_lifelines: lb,
   }).catch(() => {});
 });

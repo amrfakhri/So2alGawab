@@ -2,6 +2,12 @@ import { supabase } from './supabaseClient';
 
 export const TV_BASE_URL = 'https://game.amrfakhri.com/tv';
 
+type Lifelines = {
+  callFriend: boolean;
+  discardQuestion: boolean;
+  answerReward: boolean;
+};
+
 export type GameSession = {
   id: string;
   session_code: string;
@@ -12,8 +18,13 @@ export type GameSession = {
   current_media_type: string | null;
   current_answer: string | null;
   reveal_answer: boolean;
+  timer_duration_ms: number | null;
+  timer_started_at: string | null;
+  timer_running: boolean;
   team1_score: number;
   team2_score: number;
+  team1_lifelines: Lifelines | null;
+  team2_lifelines: Lifelines | null;
   created_at: string;
   updated_at: string;
 };
@@ -115,8 +126,13 @@ export async function updateGameSession(
     current_media_type?: string | null;
     current_answer?: string | null;
     reveal_answer?: boolean;
+    timer_duration_ms?: number | null;
+    timer_started_at?: string | null;
+    timer_running?: boolean;
     team1_score?: number;
     team2_score?: number;
+    team1_lifelines?: Record<string, boolean> | null;
+    team2_lifelines?: Record<string, boolean> | null;
   },
 ): Promise<void> {
   await supabase.from('game_sessions').update(fields).eq('id', sessionId);
