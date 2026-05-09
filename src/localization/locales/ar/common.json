@@ -1,0 +1,17 @@
+{
+  "app_name": "So2alGawab",
+  "retry": "إعادة المحاولة",
+  "close": "إغلاق",
+  "cancel": "إلغاء",
+  "confirm": "تأكيد",
+  "copy_link": "📋  نسخ الرابط",
+  "share": "📤  مشاركة",
+  "settings": {
+    "title": "الإعدادات",
+    "language_label": "اللغة"
+  },
+  "languages": {
+    "ar": "العربية",
+    "en": "English"
+  }
+}

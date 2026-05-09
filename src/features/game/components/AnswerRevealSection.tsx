@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { colors } from '../../../shared/theme/colors';
 
@@ -8,9 +9,11 @@ interface AnswerRevealSectionProps {
 }
 
 export function AnswerRevealSection({ answer }: AnswerRevealSectionProps) {
+  const { t } = useTranslation('game');
+
   return (
     <View style={styles.card}>
-      <Text style={styles.eyebrow}>الإجابة الصحيحة</Text>
+      <Text style={styles.eyebrow}>{t('correct_answer_eyebrow')}</Text>
       <Text style={styles.answer}>{answer}</Text>
     </View>
   );

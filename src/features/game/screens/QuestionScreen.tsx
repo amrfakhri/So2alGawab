@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 
 import { RootStackParamList } from '../../../navigation/RootNavigator';
 import { PrimaryButton } from '../../../shared/components/PrimaryButton';
@@ -21,10 +22,13 @@ import { LifelineBar } from '../components/LifelineBar';
 import { PresenterControls } from '../components/PresenterControls';
 import { QuestionCard } from '../components/QuestionCard';
 import { useGameStore } from '../store/useGameStore';
+import { useLanguageStore } from '../../../localization/languageStore';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Question'>;
 
 export function QuestionScreen({ navigation }: Props) {
+  const { t } = useTranslation('game');
+  const { isRTL } = useLanguageStore();
   const {
     phase,
     teams,
@@ -51,11 +55,8 @@ export function QuestionScreen({ navigation }: Props) {
   const question = questionDeck[currentQuestionIndex];
   const activeTeam = teams[activeTeamId];
   const isPresenter = question?.answerMode === 'presenter';
-  const categoryName = useMemo(() => question?.categoryName ?? 'الفئة', [question?.categoryName]);
-  const subcategoryName = useMemo(
-    () => question?.subcategoryName ?? 'التصنيف',
-    [question?.subcategoryName],
-  );
+  const categoryName = useMemo(() => question?.categoryName ?? '', [question?.categoryName]);
+  const subcategoryName = useMemo(() => question?.subcategoryName ?? '', [question?.subcategoryName]);
 
   useEffect(() => {
     if (phase === 'finished') {
@@ -64,20 +65,12 @@ export function QuestionScreen({ navigation }: Props) {
   }, [navigation, phase]);
 
   useEffect(() => {
-    if (phase !== 'question') {
-      return;
-    }
-
-    const id = setInterval(() => {
-      tickQuestionTimer(250);
-    }, 250);
-
+    if (phase !== 'question') return;
+    const id = setInterval(() => { tickQuestionTimer(250); }, 250);
     return () => clearInterval(id);
   }, [phase, tickQuestionTimer]);
 
-  if (!question) {
-    return null;
-  }
+  if (!question) return null;
 
   const totalQuestions = questionDeck.length;
   const showAnswers = !isPresenter && question.options.length > 1;
@@ -85,42 +78,40 @@ export function QuestionScreen({ navigation }: Props) {
   const shouldShowPresenterControls =
     isPresenter && (phase === 'waiting_answer' || phase === 'answer_revealed');
   const nextLabel =
-    currentQuestionIndex + 1 === totalQuestions ? 'عرض النتيجة' : 'السؤال التالي';
+    currentQuestionIndex + 1 === totalQuestions
+      ? t('show_result')
+      : t('next_question');
+  const textAlign = isRTL ? 'right' : 'left';
 
   return (
     <>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.layout}>
-          {/* Top row: always the same */}
+          {/* Top row */}
           <View style={styles.topRow}>
             <View style={styles.topSlotStart}>
               <Pressable
                 onPress={() => setShowExitModal(true)}
-                style={({ pressed }) => [
-                  styles.endButton,
-                  pressed && styles.endButtonPressed,
-                ]}
+                style={({ pressed }) => [styles.endButton, pressed && styles.endButtonPressed]}
               >
-                <Text style={styles.endButtonText}>إنهاء اللعبة</Text>
+                <Text style={styles.endButtonText}>{t('end_game_btn')}</Text>
               </Pressable>
             </View>
 
             <View style={styles.timerShell}>
-              <Text style={styles.timerLabel}>الوقت</Text>
-              <Text style={styles.timerValue}>
-                {Math.ceil(remainingMs / 1000)}
-              </Text>
+              <Text style={styles.timerLabel}>{t('timer_label')}</Text>
+              <Text style={styles.timerValue}>{Math.ceil(remainingMs / 1000)}</Text>
             </View>
 
             <View style={styles.topSlotEnd}>
-              <Text style={styles.roundText}>
-                الجولة {currentQuestionIndex + 1}/{totalQuestions}
+              <Text style={[styles.roundText, { textAlign }]}>
+                {t('round', { current: currentQuestionIndex + 1, total: totalQuestions })}
               </Text>
-              <Text style={styles.categoryText}>{subcategoryName}</Text>
+              <Text style={[styles.categoryText, { textAlign }]}>{subcategoryName}</Text>
             </View>
           </View>
 
-          {/* Portrait: compact team scores + lifelines strip */}
+          {/* Portrait: compact team scores + lifelines */}
           {isPortrait ? (
             <View style={styles.portraitBar}>
               <View style={styles.portraitTeams}>
@@ -135,7 +126,7 @@ export function QuestionScreen({ navigation }: Props) {
                         active && { borderColor: accent, borderWidth: 2 },
                       ]}
                     >
-                      <Text style={styles.portraitTeamName}>{team.name}</Text>
+                      <Text style={[styles.portraitTeamName, { textAlign }]}>{team.name}</Text>
                       <Text style={[styles.portraitTeamScore, { color: accent }]}>
                         {team.score}
                       </Text>
@@ -144,15 +135,16 @@ export function QuestionScreen({ navigation }: Props) {
                 })}
               </View>
               <View style={styles.portraitLifelines}>
-                <Text style={styles.portraitLifelinesLabel}>وسائل المساعدة</Text>
+                <Text style={[styles.portraitLifelinesLabel, { textAlign }]}>
+                  {t('lifelines_title')}
+                </Text>
                 <LifelineBar team={activeTeam} onUseLifeline={useLifeline} />
               </View>
             </View>
           ) : null}
 
           {/* Body row */}
-          <View style={styles.bodyRow}>
-            {/* Main content column */}
+          <View style={[styles.bodyRow, { flexDirection: isRTL ? 'row' : 'row-reverse' }]}>
             <View style={styles.mainColumn}>
               <QuestionCard
                 categoryName={categoryName}
@@ -163,8 +155,8 @@ export function QuestionScreen({ navigation }: Props) {
 
               {isPresenter && phase === 'question' ? (
                 <View style={styles.presenterNotice}>
-                  <Text style={styles.presenterNoticeText}>
-                    هذا السؤال بنظام المقدم. أجب شفهيا قبل انتهاء الوقت.
+                  <Text style={[styles.presenterNoticeText, { textAlign }]}>
+                    {t('presenter_notice')}
                   </Text>
                 </View>
               ) : null}
@@ -177,7 +169,7 @@ export function QuestionScreen({ navigation }: Props) {
                     pressed && styles.revealButtonPressed,
                   ]}
                 >
-                  <Text style={styles.revealButtonText}>كشف الإجابة</Text>
+                  <Text style={styles.revealButtonText}>{t('reveal_answer_btn')}</Text>
                 </Pressable>
               ) : null}
 
@@ -186,13 +178,9 @@ export function QuestionScreen({ navigation }: Props) {
                   {question.options.map((option, index) => {
                     let revealState: 'correct' | 'wrong' | 'neutral' = 'neutral';
                     if (phase === 'result' && roundFeedback) {
-                      if (index === roundFeedback.correctIndex) {
-                        revealState = 'correct';
-                      } else if (index === roundFeedback.selectedAnswerIndex) {
-                        revealState = 'wrong';
-                      }
+                      if (index === roundFeedback.correctIndex) revealState = 'correct';
+                      else if (index === roundFeedback.selectedAnswerIndex) revealState = 'wrong';
                     }
-
                     return (
                       <AnswerOption
                         key={`${question.id}-${option}`}
@@ -207,9 +195,7 @@ export function QuestionScreen({ navigation }: Props) {
                 </View>
               ) : null}
 
-              {showReveal ? (
-                <AnswerRevealSection answer={question.correctAnswerText} />
-              ) : null}
+              {showReveal ? <AnswerRevealSection answer={question.correctAnswerText} /> : null}
 
               {shouldShowPresenterControls ? (
                 <PresenterControls
@@ -222,14 +208,11 @@ export function QuestionScreen({ navigation }: Props) {
 
               {phase === 'result' && roundFeedback ? (
                 <View style={styles.resultCard}>
-                  <Text style={styles.resultStatus}>{roundFeedback.message}</Text>
-                  <Text style={styles.resultPoints}>
-                    {activeTeam.name} حصل على {roundFeedback.earnedPoints} نقطة
+                  <Text style={[styles.resultStatus, { textAlign }]}>{roundFeedback.message}</Text>
+                  <Text style={[styles.resultPoints, { textAlign }]}>
+                    {t('result_points', { team: activeTeam.name, points: roundFeedback.earnedPoints })}
                   </Text>
-                  <PrimaryButton
-                    label={nextLabel}
-                    onPress={() => advanceToNextTurn()}
-                  />
+                  <PrimaryButton label={nextLabel} onPress={() => advanceToNextTurn()} />
                 </View>
               ) : null}
             </View>
@@ -249,20 +232,18 @@ export function QuestionScreen({ navigation }: Props) {
                       ]}
                     >
                       <Text style={styles.teamCardTitle}>{team.name}</Text>
-                      <Text style={[styles.teamCardScore, { color: accent }]}>
-                        {team.score}
-                      </Text>
+                      <Text style={[styles.teamCardScore, { color: accent }]}>{team.score}</Text>
                     </View>
                   );
                 })}
 
                 <View style={styles.lifelinePanel}>
-                  <Text style={styles.panelTitle}>وسائل المساعدة</Text>
+                  <Text style={styles.panelTitle}>{t('lifelines_title')}</Text>
                   <LifelineBar team={activeTeam} onUseLifeline={useLifeline} vertical />
                 </View>
 
                 <View style={styles.footerMeta}>
-                  <Text style={styles.footerMetaLabel}>الفئة الحالية</Text>
+                  <Text style={styles.footerMetaLabel}>{t('current_category')}</Text>
                   <Text style={styles.footerMetaValue}>{categoryName}</Text>
                 </View>
               </View>
@@ -279,22 +260,17 @@ export function QuestionScreen({ navigation }: Props) {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>هل تريد إنهاء اللعبة؟</Text>
-            <Text style={styles.modalCopy}>
-              سيتم حفظ النقاط الحالية والانتقال إلى شاشة النتائج.
-            </Text>
-            <View style={styles.modalActions}>
+            <Text style={[styles.modalTitle, { textAlign }]}>{t('exit_dialog.title')}</Text>
+            <Text style={[styles.modalCopy, { textAlign }]}>{t('exit_dialog.body')}</Text>
+            <View style={[styles.modalActions, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
               <PrimaryButton
-                label="إلغاء"
+                label={t('exit_dialog.cancel')}
                 onPress={() => setShowExitModal(false)}
                 style={styles.cancelButton}
               />
               <PrimaryButton
-                label="إنهاء"
-                onPress={() => {
-                  setShowExitModal(false);
-                  endGame();
-                }}
+                label={t('exit_dialog.confirm')}
+                onPress={() => { setShowExitModal(false); endGame(); }}
               />
             </View>
           </View>
@@ -305,29 +281,16 @@ export function QuestionScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  layout: {
-    padding: 20,
-    gap: 18,
-  },
+  safeArea: { flex: 1, backgroundColor: colors.background },
+  layout: { padding: 20, gap: 18 },
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
   },
-  topSlotStart: {
-    flex: 1,
-    alignItems: 'flex-start',
-  },
-  topSlotEnd: {
-    flex: 1,
-    alignItems: 'flex-end',
-    gap: 4,
-  },
+  topSlotStart: { flex: 1, alignItems: 'flex-start' },
+  topSlotEnd: { flex: 1, alignItems: 'flex-end', gap: 4 },
   timerShell: {
     minWidth: 110,
     paddingHorizontal: 18,
@@ -337,26 +300,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 2,
   },
-  timerLabel: {
-    color: '#D1D5DB',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  timerValue: {
-    color: '#FFFFFF',
-    fontSize: 28,
-    fontWeight: '900',
-  },
-  roundText: {
-    color: colors.mutedText,
-    fontWeight: '700',
-    textAlign: 'right',
-  },
-  categoryText: {
-    color: colors.secondary,
-    fontWeight: '800',
-    textAlign: 'right',
-  },
+  timerLabel: { color: '#D1D5DB', fontSize: 12, fontWeight: '700' },
+  timerValue: { color: '#FFFFFF', fontSize: 28, fontWeight: '900' },
+  roundText: { color: colors.mutedText, fontWeight: '700' },
+  categoryText: { color: colors.secondary, fontWeight: '800' },
   endButton: {
     backgroundColor: '#FFF1E9',
     borderColor: '#F0C7B5',
@@ -365,21 +312,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
-  endButtonPressed: {
-    opacity: 0.8,
-  },
-  endButtonText: {
-    color: colors.danger,
-    fontWeight: '800',
-    fontSize: 14,
-  },
-  portraitBar: {
-    gap: 10,
-  },
-  portraitTeams: {
-    flexDirection: 'row',
-    gap: 10,
-  },
+  endButtonPressed: { opacity: 0.8 },
+  endButtonText: { color: colors.danger, fontWeight: '800', fontSize: 14 },
+  portraitBar: { gap: 10 },
+  portraitTeams: { flexDirection: 'row', gap: 10 },
   portraitTeamCard: {
     flex: 1,
     backgroundColor: colors.card,
@@ -391,18 +327,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  portraitTeamName: {
-    color: colors.text,
-    fontWeight: '700',
-    fontSize: 13,
-    flexShrink: 1,
-    textAlign: 'right',
-  },
-  portraitTeamScore: {
-    fontSize: 22,
-    fontWeight: '900',
-    marginStart: 8,
-  },
+  portraitTeamName: { color: colors.text, fontWeight: '700', fontSize: 13, flexShrink: 1 },
+  portraitTeamScore: { fontSize: 22, fontWeight: '900', marginStart: 8 },
   portraitLifelines: {
     backgroundColor: colors.card,
     borderRadius: 16,
@@ -411,24 +337,10 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     gap: 10,
   },
-  portraitLifelinesLabel: {
-    color: colors.text,
-    fontWeight: '800',
-    fontSize: 13,
-    textAlign: 'right',
-  },
-  bodyRow: {
-    flexDirection: I18nManager.isRTL ? 'row' : 'row-reverse',
-    gap: 14,
-  },
-  mainColumn: {
-    flex: 1,
-    gap: 14,
-  },
-  sidebar: {
-    width: 132,
-    gap: 12,
-  },
+  portraitLifelinesLabel: { color: colors.text, fontWeight: '800', fontSize: 13 },
+  bodyRow: { gap: 14 },
+  mainColumn: { flex: 1, gap: 14 },
+  sidebar: { width: 132, gap: 12 },
   teamCard: {
     backgroundColor: colors.card,
     borderRadius: 20,
@@ -438,16 +350,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
   },
-  teamCardTitle: {
-    color: colors.text,
-    fontWeight: '700',
-    textAlign: 'center',
-    fontSize: 14,
-  },
-  teamCardScore: {
-    fontSize: 30,
-    fontWeight: '900',
-  },
+  teamCardTitle: { color: colors.text, fontWeight: '700', textAlign: 'center', fontSize: 14 },
+  teamCardScore: { fontSize: 30, fontWeight: '900' },
   lifelinePanel: {
     backgroundColor: colors.card,
     borderRadius: 20,
@@ -456,30 +360,10 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     gap: 12,
   },
-  panelTitle: {
-    color: colors.text,
-    fontWeight: '800',
-    fontSize: 14,
-    textAlign: 'center',
-  },
-  footerMeta: {
-    backgroundColor: '#F2E7DB',
-    borderRadius: 18,
-    padding: 12,
-    gap: 4,
-  },
-  footerMetaLabel: {
-    color: colors.primaryDark,
-    fontSize: 12,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  footerMetaValue: {
-    color: colors.text,
-    fontSize: 14,
-    fontWeight: '800',
-    textAlign: 'center',
-  },
+  panelTitle: { color: colors.text, fontWeight: '800', fontSize: 14, textAlign: 'center' },
+  footerMeta: { backgroundColor: '#F2E7DB', borderRadius: 18, padding: 12, gap: 4 },
+  footerMetaLabel: { color: colors.primaryDark, fontSize: 12, fontWeight: '700', textAlign: 'center' },
+  footerMetaValue: { color: colors.text, fontSize: 14, fontWeight: '800', textAlign: 'center' },
   presenterNotice: {
     backgroundColor: '#FFF5EA',
     borderRadius: 18,
@@ -487,12 +371,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#F1D8C5',
   },
-  presenterNoticeText: {
-    color: colors.primaryDark,
-    textAlign: 'center',
-    fontWeight: '700',
-    lineHeight: 22,
-  },
+  presenterNoticeText: { color: colors.primaryDark, fontWeight: '700', lineHeight: 22 },
   revealButton: {
     borderWidth: 1.5,
     borderColor: colors.border,
@@ -502,18 +381,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.card,
   },
-  revealButtonPressed: {
-    backgroundColor: '#F2E7DB',
-    borderColor: colors.primary,
-  },
-  revealButtonText: {
-    color: colors.primaryDark,
-    fontWeight: '700',
-    fontSize: 15,
-  },
-  answers: {
-    gap: 12,
-  },
+  revealButtonPressed: { backgroundColor: '#F2E7DB', borderColor: colors.primary },
+  revealButtonText: { color: colors.primaryDark, fontWeight: '700', fontSize: 15 },
+  answers: { gap: 12 },
   resultCard: {
     backgroundColor: colors.card,
     borderRadius: 22,
@@ -522,46 +392,17 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     gap: 12,
   },
-  resultStatus: {
-    color: colors.text,
-    fontSize: 22,
-    fontWeight: '800',
-    textAlign: 'center',
-  },
-  resultPoints: {
-    color: colors.secondary,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
+  resultStatus: { color: colors.text, fontSize: 22, fontWeight: '800' },
+  resultPoints: { color: colors.secondary, fontWeight: '700' },
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
     padding: 24,
     backgroundColor: 'rgba(31, 41, 55, 0.45)',
   },
-  modalCard: {
-    backgroundColor: colors.card,
-    borderRadius: 24,
-    padding: 22,
-    gap: 16,
-  },
-  modalTitle: {
-    color: colors.text,
-    fontSize: 24,
-    fontWeight: '800',
-    textAlign: 'center',
-  },
-  modalCopy: {
-    color: colors.mutedText,
-    lineHeight: 22,
-    textAlign: 'center',
-  },
-  modalActions: {
-    flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
-    gap: 12,
-  },
-  cancelButton: {
-    flex: 1,
-    backgroundColor: colors.secondary,
-  },
+  modalCard: { backgroundColor: colors.card, borderRadius: 24, padding: 22, gap: 16 },
+  modalTitle: { color: colors.text, fontSize: 24, fontWeight: '800' },
+  modalCopy: { color: colors.mutedText, lineHeight: 22 },
+  modalActions: { gap: 12 },
+  cancelButton: { flex: 1, backgroundColor: colors.secondary },
 });

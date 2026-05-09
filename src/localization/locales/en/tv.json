@@ -1,0 +1,66 @@
+{
+  "lobby": {
+    "tagline": "Second Screen Display",
+    "waiting": "Waiting for connection…",
+    "initializing": "Initializing…",
+    "how_to_connect": "How to connect?",
+    "footer_url": "game.amrfakhri.com/tv",
+    "steps": [
+      "Open the So2alGawab app on your phone",
+      "Tap \"Connect TV\" on the setup screen",
+      "Scan the QR code or enter the code manually",
+      "The session will start automatically on this screen"
+    ],
+    "step_nums": ["1", "2", "3", "4"]
+  },
+  "cast": {
+    "modal_title": "Cast to TV 📺",
+    "step_1": "Open game.amrfakhri.com/tv on your TV screen",
+    "step_2": "A pairing screen will show a 4-character code",
+    "step_3": "Enter the code below to link your phone to the TV",
+    "connect_btn": "Connect Screen",
+    "connected_btn": "✓ Connected",
+    "success_msg": "✓ Connected successfully",
+    "creating_session": "Creating session…",
+    "alt_qr_collapsed": "Alternative: QR / Link  ▾",
+    "alt_qr_expanded": "Alternative: QR / Link",
+    "or": "or",
+    "errors": {
+      "device_not_found": "No device found with this code. Check the code on your screen.",
+      "device_in_use": "This screen is already linked to another session.",
+      "generic": "An error occurred. Please try again."
+    }
+  },
+  "session_modal": {
+    "title": "Live TV Session 📺",
+    "creating": "Creating session…",
+    "code_label": "Session Code",
+    "unknown_error": "Unknown error"
+  },
+  "game": {
+    "loading": "Loading…",
+    "not_found_title": "Session not found",
+    "not_found_sub": "Check the code and try again.",
+    "waiting_session": "Waiting for session to start…",
+    "correct_answer_label": "✓  Correct Answer",
+    "points_suffix": "pts",
+    "timer_unit": "s",
+    "team1_label": "Team A",
+    "team2_label": "Team B",
+    "phases": {
+      "lobby": "Lobby",
+      "question": "Question",
+      "waiting_answer": "Answer",
+      "answer_revealed": "Reveal",
+      "result": "Result",
+      "finished": "Done"
+    },
+    "finished": {
+      "title": "Game Over",
+      "score_unit": "pts",
+      "team1_wins": "🎉  Team A wins!",
+      "team2_wins": "🎉  Team B wins!",
+      "draw": "It's a tie!"
+    }
+  }
+}

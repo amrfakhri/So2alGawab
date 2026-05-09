@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 
 import { RootStackParamList } from '../../../navigation/RootNavigator';
 import { SubcategoryGrid } from '../components/SubcategoryGrid';
@@ -12,14 +13,18 @@ import { PrimaryButton } from '../../../shared/components/PrimaryButton';
 import { colors } from '../../../shared/theme/colors';
 import { fetchGameCategories } from '../../../services/supabase/categoryService';
 import { MIN_SUBCATEGORIES_PER_MATCH } from '../../../services/supabase/gameService';
-import { TvSessionModal } from '../../tv/TvSessionModal';
-import { ConnectTvModal } from '../../tv/ConnectTvModal';
+import { CastToTvModal } from '../../tv/CastToTvModal';
+import { LanguageSwitcher } from '../../settings/LanguageSwitcher';
+import { useLanguageStore } from '../../../localization/languageStore';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameSetup'>;
 
 export function GameSetupScreen({ navigation }: Props) {
-  const [showTvModal, setShowTvModal] = useState(false);
-  const [showConnectModal, setShowConnectModal] = useState(false);
+  const [showCastModal, setShowCastModal] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const { t } = useTranslation(['setup', 'common']);
+  const { isRTL } = useLanguageStore();
+
   const {
     availableCategories,
     selectedSubcategoryIds,
@@ -31,6 +36,7 @@ export function GameSetupScreen({ navigation }: Props) {
     toggleSubcategory,
     startMatch,
   } = useGameStore();
+
   const categoriesQuery = useQuery({
     queryKey: ['game-categories'],
     queryFn: fetchGameCategories,
@@ -49,10 +55,23 @@ export function GameSetupScreen({ navigation }: Props) {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>So2alGawab</Text>
-          <Text style={styles.title}>اختر نوع التحدي وابدأ العرض.</Text>
-          <Text style={styles.subtitle}>
-            اختَر من فئتين إلى ست فئات من الشبكة التالية، وبعدها يبدأ المقدم إدارة الجولة مباشرة.
+          <View style={styles.headerRow}>
+            <Text style={[styles.eyebrow, { textAlign: isRTL ? 'right' : 'left' }]}>
+              {t('setup:eyebrow')}
+            </Text>
+            <Pressable
+              onPress={() => setShowSettings(true)}
+              style={({ pressed }) => [styles.settingsBtn, pressed && { opacity: 0.6 }]}
+              hitSlop={10}
+            >
+              <Text style={styles.settingsBtnText}>⚙️</Text>
+            </Pressable>
+          </View>
+          <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>
+            {t('setup:title')}
+          </Text>
+          <Text style={[styles.subtitle, { textAlign: isRTL ? 'right' : 'left' }]}>
+            {t('setup:subtitle')}
           </Text>
         </View>
 
@@ -67,21 +86,17 @@ export function GameSetupScreen({ navigation }: Props) {
           {categoriesQuery.isPending ? (
             <View style={styles.stateCard}>
               <ActivityIndicator color={colors.primary} />
-              <Text style={styles.stateTitle}>جاري تحميل الفئات</Text>
-              <Text style={styles.stateCopy}>
-                نحمّل التصنيفات والأسئلة المتاحة من قاعدة البيانات.
-              </Text>
+              <Text style={styles.stateTitle}>{t('setup:categories.loading_title')}</Text>
+              <Text style={styles.stateCopy}>{t('setup:categories.loading_body')}</Text>
             </View>
           ) : null}
 
           {categoriesQuery.isError ? (
             <View style={styles.stateCard}>
-              <Text style={styles.stateTitle}>تعذر تحميل الفئات</Text>
-              <Text style={styles.stateCopy}>
-                حدثت مشكلة أثناء الاتصال بقاعدة البيانات. حاول مرة أخرى.
-              </Text>
+              <Text style={styles.stateTitle}>{t('setup:categories.error_title')}</Text>
+              <Text style={styles.stateCopy}>{t('setup:categories.error_body')}</Text>
               <PrimaryButton
-                label="إعادة المحاولة"
+                label={t('common:retry')}
                 onPress={() => categoriesQuery.refetch()}
               />
             </View>
@@ -103,7 +118,7 @@ export function GameSetupScreen({ navigation }: Props) {
 
       <View style={styles.footer}>
         <PrimaryButton
-          label={isStartingMatch ? 'جاري تحميل الأسئلة...' : 'ابدأ اللعبة'}
+          label={isStartingMatch ? t('setup:loading_questions') : t('setup:start_game')}
           disabled={!canStart || categoriesQuery.isPending || isStartingMatch}
           onPress={async () => {
             const didStart = await startMatch();
@@ -115,21 +130,15 @@ export function GameSetupScreen({ navigation }: Props) {
         <View style={styles.tvRow}>
           <Pressable
             style={({ pressed }) => [styles.tvBtn, pressed && styles.tvBtnPressed]}
-            onPress={() => setShowTvModal(true)}
+            onPress={() => setShowCastModal(true)}
           >
-            <Text style={styles.tvBtnText}>📺  بدء جلسة TV</Text>
-          </Pressable>
-          <Pressable
-            style={({ pressed }) => [styles.tvBtn, pressed && styles.tvBtnPressed]}
-            onPress={() => setShowConnectModal(true)}
-          >
-            <Text style={styles.tvBtnText}>🔗  ربط TV</Text>
+            <Text style={styles.tvBtnText}>{t('setup:cast_to_tv')}</Text>
           </Pressable>
         </View>
       </View>
 
-      <TvSessionModal visible={showTvModal} onClose={() => setShowTvModal(false)} />
-      <ConnectTvModal visible={showConnectModal} onClose={() => setShowConnectModal(false)} />
+      <CastToTvModal visible={showCastModal} onClose={() => setShowCastModal(false)} />
+      <LanguageSwitcher visible={showSettings} onClose={() => setShowSettings(false)} />
     </SafeAreaView>
   );
 }
@@ -153,25 +162,33 @@ const styles = StyleSheet.create({
   header: {
     gap: 8,
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   eyebrow: {
     color: colors.primary,
     fontWeight: '800',
     textTransform: 'uppercase',
     letterSpacing: 0.6,
-    textAlign: 'right',
+  },
+  settingsBtn: {
+    padding: 4,
+  },
+  settingsBtnText: {
+    fontSize: 20,
   },
   title: {
     color: colors.text,
     fontSize: 32,
     lineHeight: 38,
     fontWeight: '800',
-    textAlign: 'right',
   },
   subtitle: {
     color: colors.mutedText,
     fontSize: 16,
     lineHeight: 24,
-    textAlign: 'right',
   },
   body: {
     marginTop: 24,
@@ -204,12 +221,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   tvRow: {
-    flexDirection: 'row',
     marginTop: 10,
-    gap: 10,
   },
   tvBtn: {
-    flex: 1,
     borderRadius: 16,
     paddingVertical: 14,
     alignItems: 'center',

@@ -1,0 +1,45 @@
+{
+  "timer_label": "الوقت",
+  "round": "الجولة {{current}}/{{total}}",
+  "lifelines_title": "وسائل المساعدة",
+  "current_category": "الفئة الحالية",
+  "lifelines": {
+    "callFriend": "مساعدة",
+    "discardQuestion": "تخطي",
+    "answerReward": "مضاعفة"
+  },
+  "presenter_notice": "هذا السؤال بنظام المقدم. أجب شفهيا قبل انتهاء الوقت.",
+  "reveal_answer_btn": "كشف الإجابة",
+  "end_game_btn": "إنهاء اللعبة",
+  "exit_dialog": {
+    "title": "هل تريد إنهاء اللعبة؟",
+    "body": "سيتم حفظ النقاط الحالية والانتقال إلى شاشة النتائج.",
+    "cancel": "إلغاء",
+    "confirm": "إنهاء"
+  },
+  "next_question": "السؤال التالي",
+  "show_result": "عرض النتيجة",
+  "result_points": "{{team}} حصل على {{points}} نقطة",
+  "correct_answer_eyebrow": "الإجابة الصحيحة",
+  "presenter": {
+    "reveal_answer": "عرض الإجابة",
+    "correct": "إجابة صحيحة",
+    "wrong": "إجابة خاطئة"
+  },
+  "feedback": {
+    "points_earned": "حصل {{team}} على {{points}} نقطة",
+    "double_points": "تم مضاعفة النقاط.",
+    "progress": "{{current}} من {{total}} سؤال مكتمل",
+    "next_turn": "الدور التالي",
+    "final_results": "عرض النتائج النهائية"
+  },
+  "results": {
+    "game_over_eyebrow": "انتهت المباراة",
+    "ended_early_eyebrow": "انتهت اللعبة مبكراً",
+    "winner_title": "{{name}} يفوز",
+    "draw_title": "تعادل الفريقان",
+    "subtitle": "النتيجة النهائية بعد {{count}} سؤال.",
+    "subtitle_early": "النتيجة عند إنهاء اللعبة.",
+    "new_game": "لعبة جديدة"
+  }
+}

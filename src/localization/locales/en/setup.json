@@ -1,0 +1,19 @@
+{
+  "eyebrow": "So2alGawab",
+  "title": "Choose your challenge and start the show.",
+  "subtitle": "Pick 2–6 categories from the grid below, then the host manages the round live.",
+  "teams": {
+    "section_title": "Team Names",
+    "team_a_placeholder": "Team A name",
+    "team_b_placeholder": "Team B name"
+  },
+  "categories": {
+    "loading_title": "Loading Categories",
+    "loading_body": "Fetching categories and available questions from the database.",
+    "error_title": "Failed to Load Categories",
+    "error_body": "A problem occurred connecting to the database. Try again."
+  },
+  "start_game": "Start Game",
+  "loading_questions": "Loading questions...",
+  "cast_to_tv": "📺 Cast to TV"
+}

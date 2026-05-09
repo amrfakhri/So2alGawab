@@ -1,16 +1,22 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 
 import { RootStackParamList } from '../../../navigation/RootNavigator';
 import { Screen } from '../../../shared/components/Screen';
 import { PrimaryButton } from '../../../shared/components/PrimaryButton';
 import { colors } from '../../../shared/theme/colors';
 import { useGameStore } from '../store/useGameStore';
+import { useLanguageStore } from '../../../localization/languageStore';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Feedback'>;
 
 export function FeedbackScreen({ navigation }: Props) {
+  const { t } = useTranslation('game');
+  const { isRTL } = useLanguageStore();
+  const textAlign = isRTL ? 'right' : 'left';
+
   const {
     phase,
     roundFeedback,
@@ -27,9 +33,7 @@ export function FeedbackScreen({ navigation }: Props) {
     }
   }, [navigation, phase]);
 
-  if (!roundFeedback) {
-    return null;
-  }
+  if (!roundFeedback) return null;
 
   const accent =
     roundFeedback.status === 'correct'
@@ -43,22 +47,28 @@ export function FeedbackScreen({ navigation }: Props) {
   return (
     <Screen>
       <View style={styles.card}>
-        <Text style={[styles.status, { color: accent }]}>
+        <Text style={[styles.status, { color: accent, textAlign }]}>
           {roundFeedback.message}
         </Text>
-        <Text style={styles.points}>
-          حصل {teams[activeTeamId].name} على {roundFeedback.earnedPoints} نقطة
+        <Text style={[styles.points, { textAlign }]}>
+          {t('feedback.points_earned', {
+            team: teams[activeTeamId].name,
+            points: roundFeedback.earnedPoints,
+          })}
         </Text>
         {roundFeedback.usedAnswerReward ? (
-          <Text style={styles.reward}>تم مضاعفة النقاط.</Text>
+          <Text style={[styles.reward, { textAlign }]}>{t('feedback.double_points')}</Text>
         ) : null}
-        <Text style={styles.progress}>
-          {currentQuestionIndex + 1} من {questionDeck.length} سؤال مكتمل
+        <Text style={[styles.progress, { textAlign }]}>
+          {t('feedback.progress', {
+            current: currentQuestionIndex + 1,
+            total: questionDeck.length,
+          })}
         </Text>
       </View>
 
       <PrimaryButton
-        label={isLast ? 'عرض النتائج النهائية' : 'الدور التالي'}
+        label={isLast ? t('feedback.final_results') : t('feedback.next_turn')}
         onPress={() => {
           advanceToNextTurn();
           navigation.replace(isLast ? 'Results' : 'Question');
@@ -79,27 +89,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 12,
   },
-  status: {
-    fontSize: 28,
-    lineHeight: 34,
-    fontWeight: '800',
-    textAlign: 'right',
-  },
-  points: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.secondary,
-    textAlign: 'right',
-  },
-  reward: {
-    color: colors.primaryDark,
-    fontWeight: '700',
-    textAlign: 'right',
-  },
-  progress: {
-    marginTop: 10,
-    color: colors.mutedText,
-    fontSize: 15,
-    textAlign: 'right',
-  },
+  status: { fontSize: 28, lineHeight: 34, fontWeight: '800' },
+  points: { fontSize: 18, fontWeight: '700', color: colors.secondary },
+  reward: { color: colors.primaryDark, fontWeight: '700' },
+  progress: { marginTop: 10, color: colors.mutedText, fontSize: 15 },
 });

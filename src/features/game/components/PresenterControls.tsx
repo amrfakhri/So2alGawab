@@ -1,5 +1,6 @@
 import React from 'react';
 import { I18nManager, StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { PrimaryButton } from '../../../shared/components/PrimaryButton';
 import { GamePhase } from '../types/game';
@@ -17,19 +18,21 @@ export function PresenterControls({
   onMarkCorrect,
   onMarkWrong,
 }: PresenterControlsProps) {
+  const { t } = useTranslation('game');
+
   if (phase === 'waiting_answer') {
-    return <PrimaryButton label="عرض الإجابة" onPress={onReveal} />;
+    return <PrimaryButton label={t('presenter.reveal_answer')} onPress={onReveal} />;
   }
 
   if (phase === 'answer_revealed') {
     return (
       <View style={styles.row}>
         <PrimaryButton
-          label="إجابة خاطئة"
+          label={t('presenter.wrong')}
           onPress={onMarkWrong}
           style={styles.secondaryAction}
         />
-        <PrimaryButton label="إجابة صحيحة" onPress={onMarkCorrect} />
+        <PrimaryButton label={t('presenter.correct')} onPress={onMarkCorrect} />
       </View>
     );
   }

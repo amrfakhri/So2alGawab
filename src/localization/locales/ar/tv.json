@@ -1,0 +1,66 @@
+{
+  "lobby": {
+    "tagline": "شاشة العرض الثانية",
+    "waiting": "في انتظار الاتصال…",
+    "initializing": "جاري التهيئة…",
+    "how_to_connect": "كيف تتصل بالشاشة؟",
+    "footer_url": "game.amrfakhri.com/tv",
+    "steps": [
+      "افتح تطبيق So2alGawab على هاتفك",
+      "اضغط على \"ربط TV\" في شاشة الإعداد",
+      "امسح رمز QR أو أدخل الرمز يدوياً",
+      "ستبدأ الجلسة تلقائياً على هذه الشاشة"
+    ],
+    "step_nums": ["١", "٢", "٣", "٤"]
+  },
+  "cast": {
+    "modal_title": "عرض على التلفزيون 📺",
+    "step_1": "افتح game.amrfakhri.com/tv على شاشة التلفزيون",
+    "step_2": "ستظهر شاشة الربط برمز مكوّن من 4 أحرف",
+    "step_3": "أدخل الرمز أدناه لربط هاتفك بالشاشة",
+    "connect_btn": "ربط الشاشة",
+    "connected_btn": "✓ تم الربط",
+    "success_msg": "✓ تم الربط بنجاح",
+    "creating_session": "جاري إنشاء الجلسة…",
+    "alt_qr_collapsed": "طريقة بديلة: رابط QR  ▾",
+    "alt_qr_expanded": "طريقة بديلة: رابط QR",
+    "or": "أو",
+    "errors": {
+      "device_not_found": "لم يُعثر على جهاز بهذا الرمز. تأكد من الرمز الظاهر على الشاشة.",
+      "device_in_use": "هذه الشاشة مرتبطة بالفعل بجلسة أخرى.",
+      "generic": "حدث خطأ. حاول مرة أخرى."
+    }
+  },
+  "session_modal": {
+    "title": "جلسة TV مباشرة 📺",
+    "creating": "جاري إنشاء الجلسة…",
+    "code_label": "رمز الجلسة",
+    "unknown_error": "خطأ غير معروف"
+  },
+  "game": {
+    "loading": "جاري التحميل…",
+    "not_found_title": "لم يتم العثور على الجلسة",
+    "not_found_sub": "تحقق من الرمز وأعد المحاولة.",
+    "waiting_session": "في انتظار بدء الجلسة…",
+    "correct_answer_label": "✓  الإجابة الصحيحة",
+    "points_suffix": "نقطة",
+    "timer_unit": "ث",
+    "team1_label": "الفريق الأول",
+    "team2_label": "الفريق الثاني",
+    "phases": {
+      "lobby": "انتظار",
+      "question": "سؤال",
+      "waiting_answer": "إجابة",
+      "answer_revealed": "الكشف",
+      "result": "النتيجة",
+      "finished": "انتهت"
+    },
+    "finished": {
+      "title": "انتهت اللعبة",
+      "score_unit": "نقطة",
+      "team1_wins": "🎉  الفريق الأول يفوز!",
+      "team2_wins": "🎉  الفريق الثاني يفوز!",
+      "draw": "تعادل الفريقان!"
+    }
+  }
+}

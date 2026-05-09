@@ -1,7 +1,9 @@
 import React from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { colors } from '../../../shared/theme/colors';
+import { useLanguageStore } from '../../../localization/languageStore';
 
 interface TeamNameFieldsProps {
   teamAName: string;
@@ -16,24 +18,26 @@ export function TeamNameFields({
   onChangeTeamA,
   onChangeTeamB,
 }: TeamNameFieldsProps) {
+  const { t } = useTranslation('setup');
+  const { isRTL } = useLanguageStore();
+  const textAlign = isRTL ? 'right' : 'left';
+
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>أسماء الفرق</Text>
+      <Text style={[styles.title, { textAlign }]}>{t('teams.section_title')}</Text>
       <TextInput
-        placeholder="اسم الفريق الأول"
+        placeholder={t('teams.team_a_placeholder')}
         placeholderTextColor={colors.mutedText}
         value={teamAName}
         onChangeText={onChangeTeamA}
-        style={styles.input}
-        textAlign="right"
+        style={[styles.input, { textAlign }]}
       />
       <TextInput
-        placeholder="اسم الفريق الثاني"
+        placeholder={t('teams.team_b_placeholder')}
         placeholderTextColor={colors.mutedText}
         value={teamBName}
         onChangeText={onChangeTeamB}
-        style={styles.input}
-        textAlign="right"
+        style={[styles.input, { textAlign }]}
       />
     </View>
   );
@@ -52,7 +56,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: colors.text,
-    textAlign: 'right',
   },
   input: {
     backgroundColor: colors.surface,

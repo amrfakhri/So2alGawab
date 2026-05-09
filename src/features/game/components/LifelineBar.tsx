@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { LifelineId, TeamState } from '../types/game';
 import { colors } from '../../../shared/theme/colors';
@@ -10,20 +11,15 @@ interface LifelineBarProps {
   vertical?: boolean;
 }
 
-const labels: Record<LifelineId, string> = {
-  callFriend: 'مساعدة',
-  discardQuestion: 'تخطي',
-  answerReward: 'مضاعفة',
-};
+const LIFELINE_IDS: LifelineId[] = ['callFriend', 'discardQuestion', 'answerReward'];
 
 export function LifelineBar({ team, onUseLifeline, vertical }: LifelineBarProps) {
-  const ids = Object.keys(labels) as LifelineId[];
+  const { t } = useTranslation('game');
 
   return (
     <View style={[styles.wrapper, vertical && styles.verticalWrapper]}>
-      {ids.map((id) => {
+      {LIFELINE_IDS.map((id) => {
         const available = team.lifelines[id];
-
         return (
           <Pressable
             key={id}
@@ -36,7 +32,7 @@ export function LifelineBar({ team, onUseLifeline, vertical }: LifelineBarProps)
             ]}
           >
             <Text style={[styles.text, !available && styles.disabledText]}>
-              {labels[id]}
+              {t(`lifelines.${id}`)}
             </Text>
           </Pressable>
         );

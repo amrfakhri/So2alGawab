@@ -1,0 +1,45 @@
+{
+  "timer_label": "Time",
+  "round": "Round {{current}}/{{total}}",
+  "lifelines_title": "Lifelines",
+  "current_category": "Current Category",
+  "lifelines": {
+    "callFriend": "Hint",
+    "discardQuestion": "Skip",
+    "answerReward": "Double"
+  },
+  "presenter_notice": "Presenter mode: answer verbally before time runs out.",
+  "reveal_answer_btn": "Reveal Answer",
+  "end_game_btn": "End Game",
+  "exit_dialog": {
+    "title": "End the game?",
+    "body": "Current scores will be saved and you'll go to the results screen.",
+    "cancel": "Cancel",
+    "confirm": "End Game"
+  },
+  "next_question": "Next Question",
+  "show_result": "Show Result",
+  "result_points": "{{team}} earned {{points}} points",
+  "correct_answer_eyebrow": "Correct Answer",
+  "presenter": {
+    "reveal_answer": "Reveal Answer",
+    "correct": "Correct Answer",
+    "wrong": "Wrong Answer"
+  },
+  "feedback": {
+    "points_earned": "{{team}} earned {{points}} points",
+    "double_points": "Points doubled!",
+    "progress": "{{current}} of {{total}} questions done",
+    "next_turn": "Next Turn",
+    "final_results": "Final Results"
+  },
+  "results": {
+    "game_over_eyebrow": "Match Over",
+    "ended_early_eyebrow": "Game Ended Early",
+    "winner_title": "{{name}} wins!",
+    "draw_title": "It's a tie!",
+    "subtitle": "Final score after {{count}} questions.",
+    "subtitle_early": "Score at end of game.",
+    "new_game": "New Game"
+  }
+}
