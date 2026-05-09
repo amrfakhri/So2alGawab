@@ -18,6 +18,7 @@ export type GameSession = {
   current_media_type: string | null;
   current_answer: string | null;
   reveal_answer: boolean;
+  question_points: number | null;
   timer_duration_ms: number | null;
   timer_started_at: string | null;
   timer_running: boolean;
@@ -126,6 +127,7 @@ export async function updateGameSession(
     current_media_type?: string | null;
     current_answer?: string | null;
     reveal_answer?: boolean;
+    question_points?: number | null;
     timer_duration_ms?: number | null;
     timer_started_at?: string | null;
     timer_running?: boolean;

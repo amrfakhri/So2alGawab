@@ -110,7 +110,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 let _lastSyncKey = '';
 useGameStore.subscribe((state) => {
   const { tvSessionId, phase, currentQuestionIndex, teams, questionDeck } = state;
-  if (!tvSessionId || phase === 'setup' || phase === 'finished') return;
+  if (!tvSessionId || phase === 'setup') return;
 
   const la = teams.A.lifelines;
   const lb = teams.B.lifelines;
@@ -131,6 +131,7 @@ useGameStore.subscribe((state) => {
     current_media_type: question?.mediaType ?? null,
     current_answer: revealAnswer ? (question?.correctAnswerText ?? null) : null,
     reveal_answer: revealAnswer,
+    question_points: question?.points ?? null,
     timer_duration_ms: isQuestion ? QUESTION_DURATION_MS : null,
     timer_started_at: isQuestion ? new Date().toISOString() : null,
     timer_running: isQuestion,

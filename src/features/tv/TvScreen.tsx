@@ -68,7 +68,7 @@ export function TvScreen({ sessionCode }: { sessionCode: string }) {
   return <TvSessionView session={state.session} sessionCode={sessionCode} />;
 }
 
-// ── Session view (manages local timer) ────────────────────────────────────────
+// ── Session view ───────────────────────────────────────────────────────────────
 
 function TvSessionView({ session, sessionCode }: { session: GameSession; sessionCode: string }) {
   const [timerMs, setTimerMs] = useState<number | null>(null);
@@ -89,12 +89,13 @@ function TvSessionView({ session, sessionCode }: { session: GameSession; session
     return () => clearInterval(id);
   }, [session.timer_running, session.timer_started_at, session.timer_duration_ms]);
 
+  const isFinished = session.current_phase === 'finished';
   const isLobby = !session.current_phase || session.current_phase === 'lobby';
   const hasMedia = Boolean(session.current_media_url && session.current_media_type);
 
   return (
     <View style={styles.root}>
-      {/* ── Header ──────────────────────────────────────────────────── */}
+      {/* ── Header ────────────────────────────────────────────────── */}
       <View style={styles.header}>
         <Text style={styles.brandText}>So2alGawab</Text>
         <View style={styles.liveChip}>
@@ -104,82 +105,148 @@ function TvSessionView({ session, sessionCode }: { session: GameSession; session
         <Text style={styles.sessionCodeText}>#{sessionCode}</Text>
       </View>
 
-      {/* ── Stage ───────────────────────────────────────────────────── */}
-      <View style={styles.stage}>
-        {isLobby ? (
-          <View style={styles.fullCenter}>
-            <Text style={styles.waitingEmoji}>⏳</Text>
-            <Text style={styles.waitingText}>في انتظار بدء الجلسة…</Text>
-          </View>
-        ) : (
-          <View style={styles.contentRow}>
-            {/* Left: question info */}
-            <View style={[styles.leftPanel, !hasMedia && styles.leftPanelFull]}>
-              {/* Category + timer row */}
-              <View style={styles.topRow}>
-                {session.current_category ? (
-                  <View style={styles.categoryBadge}>
-                    <Text style={styles.categoryText}>{session.current_category}</Text>
+      {/* ── Main area ─────────────────────────────────────────────── */}
+      {isFinished ? (
+        <FinishedScreen session={session} />
+      ) : (
+        <>
+          <View style={styles.stage}>
+            {isLobby ? (
+              <View style={styles.fullCenter}>
+                <Text style={styles.waitingEmoji}>⏳</Text>
+                <Text style={styles.waitingText}>في انتظار بدء الجلسة…</Text>
+              </View>
+            ) : (
+              <View style={styles.contentRow}>
+                {/* LEFT — media */}
+                {hasMedia ? (
+                  <View style={styles.mediaPanel}>
+                    <TvMedia
+                      mediaType={session.current_media_type!}
+                      mediaUrl={session.current_media_url!}
+                    />
                   </View>
                 ) : null}
-                {timerMs !== null && session.timer_duration_ms ? (
-                  <TimerBadge remainingMs={timerMs} totalMs={session.timer_duration_ms} />
-                ) : null}
-              </View>
 
-              {/* Question */}
-              {session.current_question ? (
-                <Text style={[
-                  styles.questionText,
-                  { fontSize: hasMedia ? 34 : 48, lineHeight: hasMedia ? 46 : 62 },
-                ]}>
-                  {session.current_question}
-                </Text>
-              ) : null}
+                {/* RIGHT — game info */}
+                <View style={[styles.infoPanel, !hasMedia && styles.infoPanelFull]}>
+                  {/* Top row: category + points + timer */}
+                  <View style={styles.topRow}>
+                    {session.current_category ? (
+                      <View style={styles.categoryBadge}>
+                        <Text style={styles.categoryText}>{session.current_category}</Text>
+                      </View>
+                    ) : null}
+                    {session.question_points ? (
+                      <View style={styles.pointsChip}>
+                        <Text style={styles.pointsText}>{session.question_points} نقطة</Text>
+                      </View>
+                    ) : null}
+                    {timerMs !== null && session.timer_duration_ms ? (
+                      <TimerBadge remainingMs={timerMs} totalMs={session.timer_duration_ms} />
+                    ) : null}
+                  </View>
 
-              {/* Answer reveal */}
-              {session.reveal_answer && session.current_answer ? (
-                <View style={styles.answerReveal}>
-                  <Text style={styles.answerRevealLabel}>✓  الإجابة الصحيحة</Text>
-                  <Text style={styles.answerRevealText}>{session.current_answer}</Text>
+                  {/* Question */}
+                  {session.current_question ? (
+                    <Text style={[
+                      styles.questionText,
+                      { fontSize: hasMedia ? 34 : 48, lineHeight: hasMedia ? 46 : 62 },
+                    ]}>
+                      {session.current_question}
+                    </Text>
+                  ) : null}
+
+                  {/* Answer reveal */}
+                  {session.reveal_answer && session.current_answer ? (
+                    <View style={styles.answerReveal}>
+                      <Text style={styles.answerRevealLabel}>✓  الإجابة الصحيحة</Text>
+                      <Text style={styles.answerRevealText}>{session.current_answer}</Text>
+                    </View>
+                  ) : null}
                 </View>
-              ) : null}
-            </View>
+              </View>
+            )}
+          </View>
 
-            {/* Right: media */}
-            {hasMedia ? (
-              <View style={styles.rightPanel}>
-                <TvMedia
-                  mediaType={session.current_media_type!}
-                  mediaUrl={session.current_media_url!}
-                />
+          {/* ── Score bar ───────────────────────────────────────────── */}
+          <View style={styles.scoreBar}>
+            <ScoreCard
+              label="الفريق الأول"
+              score={session.team1_score}
+              color={tv.teamA}
+              lifelines={session.team1_lifelines}
+            />
+            {session.current_phase ? (
+              <View style={styles.phaseChip}>
+                <Text style={styles.phaseText}>{phaseLabel(session.current_phase)}</Text>
               </View>
             ) : null}
+            <ScoreCard
+              label="الفريق الثاني"
+              score={session.team2_score}
+              color={tv.teamB}
+              lifelines={session.team2_lifelines}
+            />
           </View>
-        )}
+        </>
+      )}
+    </View>
+  );
+}
+
+// ── Finished screen ────────────────────────────────────────────────────────────
+
+function FinishedScreen({ session }: { session: GameSession }) {
+  const { team1_score, team2_score } = session;
+  const team1Wins = team1_score > team2_score;
+  const team2Wins = team2_score > team1_score;
+  const isTie = team1_score === team2_score;
+
+  return (
+    <View style={styles.finishedRoot}>
+      <Text style={styles.finishedEmoji}>{isTie ? '🤝' : '🏆'}</Text>
+      <Text style={styles.finishedTitle}>انتهت اللعبة</Text>
+
+      <View style={styles.finishedScoreRow}>
+        {/* Team A */}
+        <View style={[
+          styles.finishedCard,
+          { borderColor: tv.teamA },
+          team1Wins && styles.finishedWinnerCard,
+        ]}>
+          {team1Wins ? <Text style={styles.winnerCrown}>👑</Text> : null}
+          <Text style={[styles.finishedTeamLabel, { color: tv.teamA }]}>الفريق الأول</Text>
+          <Text style={[styles.finishedScore, { color: tv.teamA }]}>{team1_score}</Text>
+          <Text style={styles.finishedScoreUnit}>نقطة</Text>
+        </View>
+
+        <Text style={styles.finishedVs}>VS</Text>
+
+        {/* Team B */}
+        <View style={[
+          styles.finishedCard,
+          { borderColor: tv.teamB },
+          team2Wins && styles.finishedWinnerCard,
+        ]}>
+          {team2Wins ? <Text style={styles.winnerCrown}>👑</Text> : null}
+          <Text style={[styles.finishedTeamLabel, { color: tv.teamB }]}>الفريق الثاني</Text>
+          <Text style={[styles.finishedScore, { color: tv.teamB }]}>{team2_score}</Text>
+          <Text style={styles.finishedScoreUnit}>نقطة</Text>
+        </View>
       </View>
 
-      {/* ── Score bar ───────────────────────────────────────────────── */}
-      <View style={styles.scoreBar}>
-        <ScoreCard
-          label="الفريق الأول"
-          score={session.team1_score}
-          color={tv.teamA}
-          lifelines={session.team1_lifelines}
-        />
-
-        {session.current_phase ? (
-          <View style={styles.phaseChip}>
-            <Text style={styles.phaseText}>{phaseLabel(session.current_phase)}</Text>
-          </View>
-        ) : null}
-
-        <ScoreCard
-          label="الفريق الثاني"
-          score={session.team2_score}
-          color={tv.teamB}
-          lifelines={session.team2_lifelines}
-        />
+      <View style={[
+        styles.resultChip,
+        isTie ? styles.resultChipTie : styles.resultChipWin,
+      ]}>
+        <Text style={styles.resultText}>
+          {isTie
+            ? 'تعادل الفريقان!'
+            : team1Wins
+            ? '🎉  الفريق الأول يفوز!'
+            : '🎉  الفريق الثاني يفوز!'}
+        </Text>
       </View>
     </View>
   );
@@ -245,7 +312,6 @@ function TvMedia({ mediaType, mediaUrl }: { mediaType: string; mediaUrl: string 
       />
     );
   }
-
   if (mediaType === 'video') {
     return (
       <View style={styles.mediaVideoWrapper}>
@@ -257,7 +323,6 @@ function TvMedia({ mediaType, mediaUrl }: { mediaType: string; mediaUrl: string 
       </View>
     );
   }
-
   if (mediaType === 'audio') {
     return (
       <View style={styles.mediaAudioWrapper}>
@@ -270,7 +335,6 @@ function TvMedia({ mediaType, mediaUrl }: { mediaType: string; mediaUrl: string 
       </View>
     );
   }
-
   return null;
 }
 
@@ -328,12 +392,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: tv.border,
   },
-  brandText: {
-    color: tv.yellow,
-    fontSize: 22,
-    fontWeight: '800',
-    letterSpacing: 1,
-  },
+  brandText: { color: tv.yellow, fontSize: 22, fontWeight: '800', letterSpacing: 1 },
   liveChip: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -345,47 +404,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#FF3B30',
   },
-  liveDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#FF3B30',
-  },
-  liveText: {
-    color: '#FF3B30',
-    fontWeight: '800',
-    fontSize: 14,
-    letterSpacing: 1.5,
-  },
-  sessionCodeText: {
-    color: tv.muted,
-    fontSize: 18,
-    fontWeight: '700',
-    letterSpacing: 2,
-  },
+  liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#FF3B30' },
+  liveText: { color: '#FF3B30', fontWeight: '800', fontSize: 14, letterSpacing: 1.5 },
+  sessionCodeText: { color: tv.muted, fontSize: 18, fontWeight: '700', letterSpacing: 2 },
 
   // Stage
-  stage: {
-    flex: 1,
-    padding: 40,
-  },
-  contentRow: {
-    flex: 1,
-    flexDirection: 'row',
-    gap: 40,
-  },
-  leftPanel: {
-    flex: 5,
-    gap: 24,
-    justifyContent: 'center',
-  },
-  leftPanelFull: {
-    flex: 1,
-    alignItems: 'center',
-  },
+  stage: { flex: 1, padding: 40 },
+  contentRow: { flex: 1, flexDirection: 'row', gap: 40 },
 
-  // Right panel (media)
-  rightPanel: {
+  // Media panel (LEFT)
+  mediaPanel: {
     flex: 4,
     backgroundColor: tv.surface,
     borderRadius: 24,
@@ -396,11 +424,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // Top row (category + timer)
+  // Info panel (RIGHT)
+  infoPanel: {
+    flex: 5,
+    gap: 24,
+    justifyContent: 'center',
+  },
+  infoPanelFull: {
+    flex: 1,
+    alignItems: 'center',
+  },
+
+  // Top row (category + points + timer)
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     flexWrap: 'wrap',
     gap: 12,
   },
@@ -410,40 +448,34 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 10,
   },
-  categoryText: {
-    color: '#111111',
-    fontWeight: '900',
-    fontSize: 20,
-    letterSpacing: 0.5,
+  categoryText: { color: '#111111', fontWeight: '900', fontSize: 20, letterSpacing: 0.5 },
+
+  // Points chip
+  pointsChip: {
+    backgroundColor: '#1A1400',
+    borderRadius: 999,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderWidth: 1.5,
+    borderColor: tv.yellow,
   },
+  pointsText: { color: tv.yellow, fontSize: 15, fontWeight: '800' },
 
   // Timer
   timerBadge: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     borderWidth: 3,
     backgroundColor: tv.surface,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 0,
   },
-  timerSeconds: {
-    fontSize: 28,
-    fontWeight: '900',
-    lineHeight: 30,
-  },
-  timerUnit: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
+  timerSeconds: { fontSize: 26, fontWeight: '900', lineHeight: 28 },
+  timerUnit: { fontSize: 11, fontWeight: '700' },
 
   // Question
-  questionText: {
-    color: tv.white,
-    fontWeight: '800',
-    textAlign: 'center',
-  },
+  questionText: { color: tv.white, fontWeight: '800', textAlign: 'center' },
 
   // Answer reveal
   answerReveal: {
@@ -457,48 +489,18 @@ const styles = StyleSheet.create({
     gap: 10,
     alignSelf: 'stretch',
   },
-  answerRevealLabel: {
-    color: tv.answerGreen,
-    fontSize: 17,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  answerRevealText: {
-    color: tv.white,
-    fontSize: 40,
-    fontWeight: '900',
-    textAlign: 'center',
-    lineHeight: 52,
-  },
+  answerRevealLabel: { color: tv.answerGreen, fontSize: 16, fontWeight: '800', letterSpacing: 0.5 },
+  answerRevealText: { color: tv.white, fontSize: 38, fontWeight: '900', textAlign: 'center', lineHeight: 50 },
 
   // Media
-  mediaImage: {
-    flex: 1,
-    alignSelf: 'stretch',
-  },
-  mediaVideoWrapper: {
-    flex: 1,
-    alignSelf: 'stretch',
-  },
-  mediaAudioWrapper: {
-    padding: 40,
-    alignItems: 'center',
-    gap: 8,
-  },
-  audioIcon: {
-    fontSize: 64,
-  },
+  mediaImage: { flex: 1, alignSelf: 'stretch' },
+  mediaVideoWrapper: { flex: 1, alignSelf: 'stretch' },
+  mediaAudioWrapper: { padding: 40, alignItems: 'center', gap: 8 },
+  audioIcon: { fontSize: 64 },
 
   // Lobby waiting
-  waitingEmoji: {
-    fontSize: 64,
-  },
-  waitingText: {
-    color: tv.muted,
-    fontSize: 28,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
+  waitingEmoji: { fontSize: 64 },
+  waitingText: { color: tv.muted, fontSize: 28, fontWeight: '600', textAlign: 'center' },
 
   // Score bar
   scoreBar: {
@@ -521,21 +523,9 @@ const styles = StyleSheet.create({
     gap: 4,
     borderWidth: 2,
   },
-  teamLabel: {
-    color: tv.muted,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  teamScore: {
-    fontSize: 48,
-    fontWeight: '900',
-    lineHeight: 52,
-  },
-  lifelineRow: {
-    flexDirection: 'row',
-    gap: 6,
-    marginTop: 6,
-  },
+  teamLabel: { color: tv.muted, fontSize: 14, fontWeight: '700' },
+  teamScore: { fontSize: 48, fontWeight: '900', lineHeight: 52 },
+  lifelineRow: { flexDirection: 'row', gap: 6, marginTop: 6 },
   lifelineChip: {
     width: 30,
     height: 30,
@@ -546,12 +536,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: tv.border,
   },
-  lifelineChipUsed: {
-    opacity: 0.2,
-  },
-  lifelineIcon: {
-    fontSize: 15,
-  },
+  lifelineChipUsed: { opacity: 0.2 },
+  lifelineIcon: { fontSize: 15 },
   phaseChip: {
     backgroundColor: tv.surface,
     borderRadius: 14,
@@ -560,34 +546,59 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: tv.border,
   },
-  phaseText: {
-    color: tv.muted,
-    fontWeight: '700',
-    fontSize: 15,
-    textAlign: 'center',
+  phaseText: { color: tv.muted, fontWeight: '700', fontSize: 15, textAlign: 'center' },
+
+  // ── Finished screen ──────────────────────────────────────────────────────
+  finishedRoot: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 36,
+    paddingHorizontal: 80,
+    paddingVertical: 48,
   },
+  finishedEmoji: { fontSize: 80 },
+  finishedTitle: { color: tv.white, fontSize: 42, fontWeight: '900', letterSpacing: 1 },
+  finishedScoreRow: {
+    flexDirection: 'row',
+    gap: 40,
+    alignItems: 'center',
+    width: '100%' as any,
+    maxWidth: 800,
+    justifyContent: 'center',
+  },
+  finishedCard: {
+    flex: 1,
+    backgroundColor: tv.surface,
+    borderRadius: 28,
+    borderWidth: 2,
+    paddingVertical: 36,
+    paddingHorizontal: 28,
+    alignItems: 'center',
+    gap: 8,
+  },
+  finishedWinnerCard: {
+    borderWidth: 3,
+    backgroundColor: '#171717',
+  },
+  winnerCrown: { fontSize: 40 },
+  finishedTeamLabel: { fontSize: 18, fontWeight: '800' },
+  finishedScore: { fontSize: 80, fontWeight: '900', lineHeight: 84 },
+  finishedScoreUnit: { color: tv.muted, fontSize: 16, fontWeight: '700' },
+  finishedVs: { color: tv.muted, fontSize: 28, fontWeight: '900' },
+  resultChip: {
+    borderRadius: 999,
+    paddingHorizontal: 40,
+    paddingVertical: 18,
+    borderWidth: 2,
+  },
+  resultChipWin: { backgroundColor: '#0A2E0A', borderColor: '#34D399' },
+  resultChipTie: { backgroundColor: '#1A1A2E', borderColor: '#6B7FFF' },
+  resultText: { color: tv.white, fontSize: 28, fontWeight: '900', textAlign: 'center' },
 
   // Loading / not found
-  loadingText: {
-    color: tv.muted,
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  notFoundCode: {
-    color: tv.yellow,
-    fontSize: 48,
-    fontWeight: '900',
-    letterSpacing: 6,
-  },
-  notFoundTitle: {
-    color: tv.white,
-    fontSize: 28,
-    fontWeight: '800',
-    textAlign: 'center',
-  },
-  notFoundSub: {
-    color: tv.muted,
-    fontSize: 18,
-    textAlign: 'center',
-  },
+  loadingText: { color: tv.muted, fontSize: 18, fontWeight: '600' },
+  notFoundCode: { color: tv.yellow, fontSize: 48, fontWeight: '900', letterSpacing: 6 },
+  notFoundTitle: { color: tv.white, fontSize: 28, fontWeight: '800', textAlign: 'center' },
+  notFoundSub: { color: tv.muted, fontSize: 18, textAlign: 'center' },
 });
