@@ -13,6 +13,16 @@
     "error_title": "تعذر تحميل الفئات",
     "error_body": "حدثت مشكلة أثناء الاتصال بقاعدة البيانات. حاول مرة أخرى."
   },
+  "subcategory_grid": {
+    "title": "اختر الفئات",
+    "hint": "اختر من {{min}} إلى {{max}} فئات"
+  },
+  "subcategory_card": {
+    "remaining": "باقي {{count}} لعبة"
+  },
+  "category_picker": {
+    "header": "اختر فئتين فرعيتين"
+  },
   "start_game": "ابدأ اللعبة",
   "loading_questions": "جاري تحميل الأسئلة...",
   "cast_to_tv": "📺 عرض على التلفزيون"

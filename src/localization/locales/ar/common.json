@@ -5,13 +5,5 @@
   "cancel": "إلغاء",
   "confirm": "تأكيد",
   "copy_link": "📋  نسخ الرابط",
-  "share": "📤  مشاركة",
-  "settings": {
-    "title": "الإعدادات",
-    "language_label": "اللغة"
-  },
-  "languages": {
-    "ar": "العربية",
-    "en": "English"
-  }
+  "share": "📤  مشاركة"
 }

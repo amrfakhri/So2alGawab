@@ -1,10 +1,12 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { Category } from '../../game/types/game';
 import { colors } from '../../../shared/theme/colors';
 import { MAX_SUBCATEGORIES_PER_MATCH, MIN_SUBCATEGORIES_PER_MATCH } from '../../../services/supabase/gameService';
 import { SubcategoryCard } from './SubcategoryCard';
+import { useLocale } from '../../../localization/useLocale';
 
 interface SubcategoryGridProps {
   categories: Category[];
@@ -17,21 +19,24 @@ export function SubcategoryGrid({
   selectedSubcategoryIds,
   onToggle,
 }: SubcategoryGridProps) {
+  const { t } = useTranslation('setup');
+  const { isRTL } = useLocale();
   const count = selectedSubcategoryIds.length;
+  const textAlign = isRTL ? 'right' : 'left';
 
   return (
     <View style={styles.wrapper}>
       <View style={styles.header}>
-        <Text style={styles.title}>اختر الفئات</Text>
+        <Text style={[styles.title, { textAlign }]}>{t('subcategory_grid.title')}</Text>
         <Text style={styles.count}>{count} / {MAX_SUBCATEGORIES_PER_MATCH}</Text>
       </View>
-      <Text style={styles.hint}>
-        اختر من {MIN_SUBCATEGORIES_PER_MATCH} إلى {MAX_SUBCATEGORIES_PER_MATCH} فئات
+      <Text style={[styles.hint, { textAlign }]}>
+        {t('subcategory_grid.hint', { min: MIN_SUBCATEGORIES_PER_MATCH, max: MAX_SUBCATEGORIES_PER_MATCH })}
       </Text>
 
       {categories.map((category) => (
         <View key={category.id} style={styles.section}>
-          <Text style={styles.sectionTitle}>{category.name}</Text>
+          <Text style={[styles.sectionTitle, { textAlign }]}>{category.name}</Text>
           <View style={styles.grid}>
             {category.subcategories.map((subcategory) => (
               <SubcategoryCard
@@ -71,7 +76,6 @@ const styles = StyleSheet.create({
   hint: {
     color: colors.mutedText,
     fontSize: 13,
-    textAlign: 'right',
     marginTop: -12,
   },
   section: {
@@ -81,7 +85,6 @@ const styles = StyleSheet.create({
     color: colors.secondary,
     fontSize: 18,
     fontWeight: '800',
-    textAlign: 'right',
   },
   grid: {
     flexDirection: 'row',

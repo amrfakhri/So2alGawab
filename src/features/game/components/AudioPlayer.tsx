@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Audio, AVPlaybackStatus } from 'expo-av';
+import { useTranslation } from 'react-i18next';
 
 import { colors } from '../../../shared/theme/colors';
 
@@ -9,6 +10,7 @@ interface AudioPlayerProps {
 }
 
 export function AudioPlayer({ uri }: AudioPlayerProps) {
+  const { t } = useTranslation('game');
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,9 +22,7 @@ export function AudioPlayer({ uri }: AudioPlayerProps) {
   }, [sound]);
 
   async function togglePlay() {
-    if (isLoading) {
-      return;
-    }
+    if (isLoading) return;
 
     if (sound) {
       if (isPlaying) {
@@ -50,11 +50,19 @@ export function AudioPlayer({ uri }: AudioPlayerProps) {
       setSound(newSound);
       setIsPlaying(true);
     } catch {
-      // if loading fails, reset silently so the user can retry
+      // Loading failure is handled silently so the user can retry
     } finally {
       setIsLoading(false);
     }
   }
+
+  const statusLabel = isLoading
+    ? t('audio.loading')
+    : isPlaying
+      ? t('audio.playing')
+      : t('audio.tap_to_play');
+
+  const playIcon = isLoading ? '…' : isPlaying ? '⏸' : '▶';
 
   return (
     <View style={styles.container}>
@@ -63,13 +71,9 @@ export function AudioPlayer({ uri }: AudioPlayerProps) {
         disabled={isLoading}
         style={({ pressed }) => [styles.playButton, pressed && styles.playButtonPressed]}
       >
-        <Text style={styles.playIcon}>
-          {isLoading ? '…' : isPlaying ? '⏸' : '▶'}
-        </Text>
+        <Text style={styles.playIcon}>{playIcon}</Text>
       </Pressable>
-      <Text style={styles.label}>
-        {isLoading ? 'جاري التحميل…' : isPlaying ? 'جاري التشغيل' : 'اضغط للتشغيل'}
-      </Text>
+      <Text style={styles.label}>{statusLabel}</Text>
     </View>
   );
 }

@@ -13,6 +13,16 @@
     "error_title": "Failed to Load Categories",
     "error_body": "A problem occurred connecting to the database. Try again."
   },
+  "subcategory_grid": {
+    "title": "Choose Categories",
+    "hint": "Choose {{min}}–{{max}} categories"
+  },
+  "subcategory_card": {
+    "remaining": "{{count}} left"
+  },
+  "category_picker": {
+    "header": "Choose two subcategories"
+  },
   "start_game": "Start Game",
   "loading_questions": "Loading questions...",
   "cast_to_tv": "📺 Cast to TV"

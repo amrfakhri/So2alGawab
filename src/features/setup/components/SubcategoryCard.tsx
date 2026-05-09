@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { Subcategory } from '../../game/types/game';
 import { colors } from '../../../shared/theme/colors';
@@ -23,6 +24,8 @@ export function SubcategoryCard({
   selected,
   onPress,
 }: SubcategoryCardProps) {
+  const { t } = useTranslation('setup');
+
   return (
     <Pressable
       onPress={onPress}
@@ -33,7 +36,9 @@ export function SubcategoryCard({
       ]}
     >
       <View style={styles.badgeRow}>
-        <Text style={styles.badge}>باقي {remainingGames} لعبة</Text>
+        <Text style={styles.badge}>
+          {t('subcategory_card.remaining', { count: remainingGames })}
+        </Text>
         {selected ? <Text style={styles.checkmark}>✓</Text> : null}
       </View>
 

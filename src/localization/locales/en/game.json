@@ -8,6 +8,15 @@
     "discardQuestion": "Skip",
     "answerReward": "Double"
   },
+  "question_card": {
+    "points": "{{points}} pts",
+    "hint_label": "Hint"
+  },
+  "audio": {
+    "loading": "Loading…",
+    "playing": "Playing",
+    "tap_to_play": "Tap to play"
+  },
   "presenter_notice": "Presenter mode: answer verbally before time runs out.",
   "reveal_answer_btn": "Reveal Answer",
   "end_game_btn": "End Game",

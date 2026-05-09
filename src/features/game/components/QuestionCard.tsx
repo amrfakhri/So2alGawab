@@ -1,6 +1,7 @@
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { ResizeMode, Video } from 'expo-av';
+import { useTranslation } from 'react-i18next';
 
 import { Question } from '../types/game';
 import { colors } from '../../../shared/theme/colors';
@@ -19,6 +20,8 @@ export function QuestionCard({
   question,
   hint,
 }: QuestionCardProps) {
+  const { t } = useTranslation('game');
+
   return (
     <View style={styles.card}>
       <View style={styles.metaRow}>
@@ -26,7 +29,9 @@ export function QuestionCard({
           <Text style={styles.category}>{categoryName}</Text>
           <Text style={styles.subcategory}>{subcategoryName}</Text>
         </View>
-        <Text style={styles.points}>{question.points} نقطة</Text>
+        <Text style={styles.points}>
+          {t('question_card.points', { points: question.points })}
+        </Text>
       </View>
 
       {question.mediaUrl ? (
@@ -64,7 +69,7 @@ export function QuestionCard({
 
       {hint ? (
         <View style={styles.hintBox}>
-          <Text style={styles.hintLabel}>إشارة</Text>
+          <Text style={styles.hintLabel}>{t('question_card.hint_label')}</Text>
           <Text style={styles.hintText}>{hint}</Text>
         </View>
       ) : null}
@@ -141,7 +146,7 @@ const styles = StyleSheet.create({
   prompt: {
     color: colors.text,
     fontSize: 24,
-    lineHeight: 32,
+    lineHeight: 36,
     fontWeight: '800',
     textAlign: 'right',
   },
@@ -158,7 +163,7 @@ const styles = StyleSheet.create({
   },
   hintText: {
     color: colors.text,
-    lineHeight: 20,
+    lineHeight: 22,
     textAlign: 'right',
   },
 });

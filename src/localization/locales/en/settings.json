@@ -1,0 +1,12 @@
+{
+  "title": "Settings",
+  "language_label": "Language",
+  "language_subtitle": "Choose the app interface language",
+  "direction_note": "Layout direction will apply after restarting the app",
+  "languages": {
+    "ar": "العربية",
+    "en": "English",
+    "ar_native": "Arabic",
+    "en_native": "English"
+  }
+}

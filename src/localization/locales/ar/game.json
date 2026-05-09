@@ -8,6 +8,15 @@
     "discardQuestion": "تخطي",
     "answerReward": "مضاعفة"
   },
+  "question_card": {
+    "points": "{{points}} نقطة",
+    "hint_label": "إشارة"
+  },
+  "audio": {
+    "loading": "جاري التحميل…",
+    "playing": "جاري التشغيل",
+    "tap_to_play": "اضغط للتشغيل"
+  },
   "presenter_notice": "هذا السؤال بنظام المقدم. أجب شفهيا قبل انتهاء الوقت.",
   "reveal_answer_btn": "كشف الإجابة",
   "end_game_btn": "إنهاء اللعبة",

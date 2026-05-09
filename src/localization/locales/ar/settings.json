@@ -1,0 +1,12 @@
+{
+  "title": "الإعدادات",
+  "language_label": "اللغة",
+  "language_subtitle": "اختر لغة واجهة التطبيق",
+  "direction_note": "سيتم تطبيق اتجاه الصفحة عند إعادة تشغيل التطبيق",
+  "languages": {
+    "ar": "العربية",
+    "en": "English",
+    "ar_native": "العربية",
+    "en_native": "English"
+  }
+}

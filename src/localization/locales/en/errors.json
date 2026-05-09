@@ -1,0 +1,8 @@
+{
+  "generic": "An error occurred. Please try again.",
+  "unknown": "Unknown error",
+  "network": "Could not connect to the server.",
+  "game_load": "Failed to load game data. Please try again.",
+  "categories_load": "A problem occurred connecting to the database. Try again.",
+  "session_create": "Failed to create session"
+}

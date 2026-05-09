@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { colors } from '../../shared/theme/colors';
@@ -11,9 +11,14 @@ interface LanguageSwitcherProps {
   onClose: () => void;
 }
 
+const LANGUAGE_META: Record<AppLanguage, { flag: string; code: string }> = {
+  ar: { flag: '🇸🇦', code: 'AR' },
+  en: { flag: '🇺🇸', code: 'EN' },
+};
+
 export function LanguageSwitcher({ visible, onClose }: LanguageSwitcherProps) {
-  const { t } = useTranslation('common');
-  const { language, setLanguage } = useLanguageStore();
+  const { t } = useTranslation('settings');
+  const { language, setLanguage, isRTL } = useLanguageStore();
 
   async function handleSelect(lang: AppLanguage) {
     if (lang !== language) {
@@ -21,6 +26,8 @@ export function LanguageSwitcher({ visible, onClose }: LanguageSwitcherProps) {
     }
     onClose();
   }
+
+  const showDirectionNote = Platform.OS !== 'web';
 
   return (
     <Modal
@@ -33,11 +40,20 @@ export function LanguageSwitcher({ visible, onClose }: LanguageSwitcherProps) {
         <Pressable style={styles.sheet} onPress={() => {}}>
           <View style={styles.handle} />
 
-          <Text style={styles.title}>{t('settings.language_label')}</Text>
+          {/* Header */}
+          <View style={styles.sheetHeader}>
+            <Text style={styles.sheetTitle}>{t('language_label')}</Text>
+            <Text style={styles.sheetSubtitle}>{t('language_subtitle')}</Text>
+          </View>
 
+          {/* Options */}
           <View style={styles.options}>
             {SUPPORTED_LANGUAGES.map((lang) => {
               const selected = lang === language;
+              const meta = LANGUAGE_META[lang];
+              const nativeName = t(`languages.${lang}_native`);
+              const translatedName = t(`languages.${lang}`);
+
               return (
                 <Pressable
                   key={lang}
@@ -47,15 +63,45 @@ export function LanguageSwitcher({ visible, onClose }: LanguageSwitcherProps) {
                     pressed && styles.optionPressed,
                   ]}
                   onPress={() => handleSelect(lang)}
+                  accessibilityRole="radio"
+                  accessibilityState={{ checked: selected }}
+                  accessibilityLabel={nativeName}
                 >
-                  <Text style={[styles.optionLabel, selected && styles.optionLabelSelected]}>
-                    {t(`languages.${lang}`)}
-                  </Text>
-                  {selected && <Text style={styles.checkmark}>✓</Text>}
+                  {/* Left side: flag + names */}
+                  <View style={[styles.optionLeft, { flexDirection: isRTL ? 'row' : 'row' }]}>
+                    <View style={[styles.flagBadge, selected && styles.flagBadgeSelected]}>
+                      <Text style={styles.flagEmoji}>{meta.flag}</Text>
+                      <Text style={[styles.langCode, selected && styles.langCodeSelected]}>
+                        {meta.code}
+                      </Text>
+                    </View>
+                    <View style={styles.nameBlock}>
+                      <Text style={[styles.nativeName, selected && styles.nativeNameSelected]}>
+                        {nativeName}
+                      </Text>
+                      {nativeName !== translatedName ? (
+                        <Text style={styles.translatedName}>{translatedName}</Text>
+                      ) : null}
+                    </View>
+                  </View>
+
+                  {/* Right side: selection indicator */}
+                  <View style={[styles.indicator, selected && styles.indicatorSelected]}>
+                    {selected ? <Text style={styles.indicatorCheck}>✓</Text> : null}
+                  </View>
                 </Pressable>
               );
             })}
           </View>
+
+          {/* Native direction note */}
+          {showDirectionNote && (
+            <View style={styles.noteRow}>
+              <Text style={styles.noteText}>
+                ℹ️  {t('direction_note')}
+              </Text>
+            </View>
+          )}
         </Pressable>
       </Pressable>
     </Modal>
@@ -66,7 +112,7 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   sheet: {
     backgroundColor: colors.card,
@@ -74,7 +120,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 28,
     paddingBottom: 48,
     paddingTop: 14,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   handle: {
     width: 40,
@@ -82,15 +128,27 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: colors.border,
     alignSelf: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
   },
-  title: {
-    fontSize: 18,
+
+  // Header
+  sheetHeader: {
+    alignItems: 'center',
+    marginBottom: 22,
+    gap: 6,
+  },
+  sheetTitle: {
+    fontSize: 20,
     fontWeight: '800',
     color: colors.text,
-    marginBottom: 18,
-    textAlign: 'center',
   },
+  sheetSubtitle: {
+    fontSize: 13,
+    color: colors.mutedText,
+    fontWeight: '500',
+  },
+
+  // Options
   options: {
     gap: 10,
   },
@@ -98,8 +156,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
     borderRadius: 18,
     borderWidth: 1.5,
     borderColor: colors.border,
@@ -107,22 +165,100 @@ const styles = StyleSheet.create({
   },
   optionSelected: {
     borderColor: colors.primary,
-    backgroundColor: colors.card,
+    backgroundColor: '#FFF8F5',
   },
   optionPressed: {
-    opacity: 0.75,
+    opacity: 0.8,
   },
-  optionLabel: {
-    fontSize: 16,
+  optionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    flex: 1,
+  },
+
+  // Flag badge
+  flagBadge: {
+    width: 52,
+    height: 52,
+    borderRadius: 14,
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+  },
+  flagBadgeSelected: {
+    backgroundColor: '#FFF3EC',
+    borderColor: colors.primary,
+  },
+  flagEmoji: {
+    fontSize: 20,
+  },
+  langCode: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: colors.mutedText,
+    letterSpacing: 0.5,
+  },
+  langCodeSelected: {
+    color: colors.primary,
+  },
+
+  // Language names
+  nameBlock: {
+    gap: 2,
+  },
+  nativeName: {
+    fontSize: 17,
     fontWeight: '700',
     color: colors.mutedText,
   },
-  optionLabelSelected: {
+  nativeNameSelected: {
     color: colors.text,
   },
-  checkmark: {
-    color: colors.primary,
-    fontSize: 18,
+  translatedName: {
+    fontSize: 13,
+    color: colors.mutedText,
+    fontWeight: '500',
+  },
+
+  // Selection indicator
+  indicator: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: colors.border,
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 8,
+  },
+  indicatorSelected: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  indicatorCheck: {
+    color: '#FFFFFF',
+    fontSize: 13,
     fontWeight: '900',
+  },
+
+  // Note
+  noteRow: {
+    marginTop: 16,
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  noteText: {
+    color: colors.mutedText,
+    fontSize: 12,
+    lineHeight: 18,
+    textAlign: 'center',
   },
 });
