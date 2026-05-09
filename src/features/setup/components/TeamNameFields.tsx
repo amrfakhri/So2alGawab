@@ -18,20 +18,22 @@ export function TeamNameFields({
 }: TeamNameFieldsProps) {
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>Teams</Text>
+      <Text style={styles.title}>أسماء الفرق</Text>
       <TextInput
-        placeholder="Team A name"
+        placeholder="اسم الفريق الأول"
         placeholderTextColor={colors.mutedText}
         value={teamAName}
         onChangeText={onChangeTeamA}
         style={styles.input}
+        textAlign="right"
       />
       <TextInput
-        placeholder="Team B name"
+        placeholder="اسم الفريق الثاني"
         placeholderTextColor={colors.mutedText}
         value={teamBName}
         onChangeText={onChangeTeamB}
         style={styles.input}
+        textAlign="right"
       />
     </View>
   );
@@ -50,6 +52,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: colors.text,
+    textAlign: 'right',
   },
   input: {
     backgroundColor: colors.surface,

@@ -29,11 +29,13 @@ const styles = StyleSheet.create({
     color: colors.success,
     fontWeight: '800',
     fontSize: 13,
+    textAlign: 'right',
   },
   answer: {
     color: colors.text,
     fontWeight: '800',
     fontSize: 22,
     lineHeight: 28,
+    textAlign: 'right',
   },
 });

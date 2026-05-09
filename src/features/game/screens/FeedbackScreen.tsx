@@ -38,35 +38,30 @@ export function FeedbackScreen({ navigation }: Props) {
         ? colors.warning
         : colors.danger;
 
+  const isLast = currentQuestionIndex + 1 === questionDeck.length;
+
   return (
     <Screen>
       <View style={styles.card}>
         <Text style={[styles.status, { color: accent }]}>
-          {roundFeedback.status.toUpperCase()}
+          {roundFeedback.message}
         </Text>
-        <Text style={styles.title}>{roundFeedback.message}</Text>
         <Text style={styles.points}>
-          {teams[activeTeamId].name} earned {roundFeedback.earnedPoints} points
+          حصل {teams[activeTeamId].name} على {roundFeedback.earnedPoints} نقطة
         </Text>
         {roundFeedback.usedAnswerReward ? (
-          <Text style={styles.reward}>Answer Reward doubled this score.</Text>
+          <Text style={styles.reward}>تم مضاعفة النقاط.</Text>
         ) : null}
         <Text style={styles.progress}>
-          Completed {currentQuestionIndex + 1} of {questionDeck.length} questions
+          {currentQuestionIndex + 1} من {questionDeck.length} سؤال مكتمل
         </Text>
       </View>
 
       <PrimaryButton
-        label={
-          currentQuestionIndex + 1 === questionDeck.length
-            ? 'See Final Results'
-            : 'Next Turn'
-        }
+        label={isLast ? 'عرض النتائج النهائية' : 'الدور التالي'}
         onPress={() => {
           advanceToNextTurn();
-          navigation.replace(
-            currentQuestionIndex + 1 === questionDeck.length ? 'Results' : 'Question',
-          );
+          navigation.replace(isLast ? 'Results' : 'Question');
         }}
       />
     </Screen>
@@ -85,28 +80,26 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   status: {
-    fontSize: 14,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  title: {
     fontSize: 28,
     lineHeight: 34,
     fontWeight: '800',
-    color: colors.text,
+    textAlign: 'right',
   },
   points: {
     fontSize: 18,
     fontWeight: '700',
     color: colors.secondary,
+    textAlign: 'right',
   },
   reward: {
     color: colors.primaryDark,
     fontWeight: '700',
+    textAlign: 'right',
   },
   progress: {
     marginTop: 10,
     color: colors.mutedText,
     fontSize: 15,
+    textAlign: 'right',
   },
 });

@@ -1,8 +1,10 @@
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
+import { ResizeMode, Video } from 'expo-av';
 
 import { Question } from '../types/game';
 import { colors } from '../../../shared/theme/colors';
+import { AudioPlayer } from './AudioPlayer';
 
 interface QuestionCardProps {
   categoryName: string;
@@ -24,27 +26,45 @@ export function QuestionCard({
           <Text style={styles.category}>{categoryName}</Text>
           <Text style={styles.subcategory}>{subcategoryName}</Text>
         </View>
-        <Text style={styles.points}>{question.points} pts</Text>
+        <Text style={styles.points}>{question.points} نقطة</Text>
       </View>
+
       {question.mediaUrl ? (
-        <View style={styles.imageFrame}>
-          {question.mediaType === 'image' ? (
-            <Image
-              source={{ uri: question.mediaUrl }}
-              style={styles.image}
-              resizeMode="cover"
-            />
-          ) : (
-            <Text style={styles.imageLabel}>
-              {question.mediaType === 'video' ? 'VIDEO' : 'AUDIO'}
-            </Text>
+        <>
+          {question.mediaType === 'image' && (
+            <View style={styles.imageFrame}>
+              <Image
+                source={{ uri: question.mediaUrl }}
+                style={styles.image}
+                resizeMode="cover"
+              />
+            </View>
           )}
-        </View>
+
+          {question.mediaType === 'video' && (
+            <View style={styles.videoFrame}>
+              <Video
+                source={{ uri: question.mediaUrl }}
+                style={styles.video}
+                useNativeControls
+                resizeMode={ResizeMode.CONTAIN}
+              />
+            </View>
+          )}
+
+          {question.mediaType === 'audio' && (
+            <View style={styles.audioFrame}>
+              <AudioPlayer uri={question.mediaUrl} />
+            </View>
+          )}
+        </>
       ) : null}
+
       <Text style={styles.prompt}>{question.prompt}</Text>
+
       {hint ? (
         <View style={styles.hintBox}>
-          <Text style={styles.hintLabel}>Hint</Text>
+          <Text style={styles.hintLabel}>إشارة</Text>
           <Text style={styles.hintText}>{hint}</Text>
         </View>
       ) : null}
@@ -75,42 +95,55 @@ const styles = StyleSheet.create({
     color: colors.secondary,
     fontWeight: '800',
     fontSize: 14,
+    textAlign: 'right',
   },
   subcategory: {
     color: colors.mutedText,
     fontWeight: '600',
     fontSize: 13,
+    textAlign: 'right',
   },
   points: {
     color: colors.primary,
     fontWeight: '800',
     fontSize: 14,
   },
-  prompt: {
-    color: colors.text,
-    fontSize: 24,
-    lineHeight: 32,
-    fontWeight: '800',
-  },
   imageFrame: {
-    minHeight: 180,
     borderRadius: 20,
-    backgroundColor: '#F6E7DB',
+    overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#EDD2BE',
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
   },
   image: {
     width: '100%',
     height: 220,
   },
-  imageLabel: {
-    color: colors.primaryDark,
-    fontSize: 32,
-    fontWeight: '900',
-    letterSpacing: 2,
+  videoFrame: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    backgroundColor: '#000000',
+    borderWidth: 1,
+    borderColor: '#EDD2BE',
+  },
+  video: {
+    width: '100%',
+    height: 220,
+  },
+  audioFrame: {
+    backgroundColor: '#FFF5EA',
+    borderRadius: 20,
+    paddingVertical: 28,
+    paddingHorizontal: 18,
+    borderWidth: 1,
+    borderColor: '#F1D8C5',
+    alignItems: 'center',
+  },
+  prompt: {
+    color: colors.text,
+    fontSize: 24,
+    lineHeight: 32,
+    fontWeight: '800',
+    textAlign: 'right',
   },
   hintBox: {
     backgroundColor: '#FFF5EA',
@@ -121,9 +154,11 @@ const styles = StyleSheet.create({
   hintLabel: {
     color: colors.primaryDark,
     fontWeight: '800',
+    textAlign: 'right',
   },
   hintText: {
     color: colors.text,
     lineHeight: 20,
+    textAlign: 'right',
   },
 });

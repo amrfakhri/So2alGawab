@@ -58,5 +58,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     lineHeight: 22,
+    textAlign: 'right',
   },
 });

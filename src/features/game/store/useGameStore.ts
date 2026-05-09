@@ -9,6 +9,7 @@ import {
   resolvePresenterAnswer,
   setAvailableCategories,
   setTeamName,
+  skipTimer,
   startMatch,
   tickQuestionTimer,
   toggleSubcategory,
@@ -26,6 +27,7 @@ interface GameStore extends GameState {
   revealPresenterAnswer: () => void;
   resolvePresenterAnswer: (correct: boolean) => void;
   tickQuestionTimer: (elapsedMs: number) => void;
+  skipTimer: () => void;
   useLifeline: (lifelineId: LifelineId) => void;
   advanceToNextTurn: () => void;
   endGame: () => void;
@@ -86,6 +88,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set((state) => resolvePresenterAnswer(state, correct)),
   tickQuestionTimer: (elapsedMs) =>
     set((state) => tickQuestionTimer(state, elapsedMs)),
+  skipTimer: () =>
+    set((state) => skipTimer(state)),
   useLifeline: (lifelineId) =>
     set((state) => useLifeline(state, lifelineId)),
   advanceToNextTurn: () =>

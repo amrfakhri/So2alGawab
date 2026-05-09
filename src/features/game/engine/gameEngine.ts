@@ -9,7 +9,7 @@ import {
   TeamId,
   TeamState,
 } from '../types/game';
-import { SUBCATEGORIES_PER_MATCH } from '../../../services/supabase/gameService';
+import { MAX_SUBCATEGORIES_PER_MATCH } from '../../../services/supabase/gameService';
 
 export const QUESTION_DURATION_MS = 20_000;
 
@@ -78,7 +78,7 @@ export function toggleSubcategory(
     };
   }
 
-  if (state.selectedSubcategoryIds.length >= SUBCATEGORIES_PER_MATCH) {
+  if (state.selectedSubcategoryIds.length >= MAX_SUBCATEGORIES_PER_MATCH) {
     return state;
   }
 
@@ -370,6 +370,40 @@ export function useLifeline(
           ...team.lifelines,
           discardQuestion: false,
         },
+      },
+    },
+  };
+}
+
+export function skipTimer(state: GameState): GameState {
+  if (state.phase !== 'question') {
+    return state;
+  }
+
+  const question = getCurrentQuestion(state);
+  if (!question) {
+    return state;
+  }
+
+  if (question.answerMode === 'presenter') {
+    return {
+      ...state,
+      phase: 'waiting_answer',
+      remainingMs: 0,
+    };
+  }
+
+  const activeTeam = state.teams[state.activeTeamId];
+  return {
+    ...state,
+    phase: 'result',
+    remainingMs: 0,
+    roundFeedback: buildFeedback('timeout', question, null, 0, false),
+    teams: {
+      ...state.teams,
+      [state.activeTeamId]: {
+        ...activeTeam,
+        answerRewardArmed: false,
       },
     },
   };

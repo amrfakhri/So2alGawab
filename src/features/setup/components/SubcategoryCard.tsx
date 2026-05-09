@@ -1,5 +1,5 @@
 import React from 'react';
-import { I18nManager, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Subcategory } from '../../game/types/game';
 import { colors } from '../../../shared/theme/colors';
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     opacity: 0.92,
   },
   badgeRow: {
-    flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
@@ -112,12 +112,12 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 16,
     fontWeight: '800',
-    textAlign: I18nManager.isRTL ? 'right' : 'left',
+    textAlign: 'right',
   },
   description: {
     color: colors.mutedText,
     fontSize: 12,
     lineHeight: 18,
-    textAlign: I18nManager.isRTL ? 'right' : 'left',
+    textAlign: 'right',
   },
 });

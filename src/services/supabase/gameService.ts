@@ -2,7 +2,8 @@ import { Category, Question } from '../../features/game/types/game';
 import { shuffle } from '../../shared/utils/shuffle';
 import { fetchQuestionsPage, normalizeQuestion } from './questionService';
 
-export const SUBCATEGORIES_PER_MATCH = 2;
+export const MIN_SUBCATEGORIES_PER_MATCH = 2;
+export const MAX_SUBCATEGORIES_PER_MATCH = 6;
 const QUESTIONS_PAGE_SIZE = 50;
 
 function buildCategoryLookups(categories: Category[]) {
@@ -27,8 +28,11 @@ export async function buildQuestionDeckForMatch(
   selectedSubcategoryIds: string[],
   categories: Category[],
 ): Promise<Question[]> {
-  if (selectedSubcategoryIds.length !== SUBCATEGORIES_PER_MATCH) {
-    throw new Error(`A match requires exactly ${SUBCATEGORIES_PER_MATCH} subcategories.`);
+  if (
+    selectedSubcategoryIds.length < MIN_SUBCATEGORIES_PER_MATCH ||
+    selectedSubcategoryIds.length > MAX_SUBCATEGORIES_PER_MATCH
+  ) {
+    throw new Error(`اختر من ${MIN_SUBCATEGORIES_PER_MATCH} إلى ${MAX_SUBCATEGORIES_PER_MATCH} فئات.`);
   }
 
   const rawQuestions = await fetchQuestionsPage({

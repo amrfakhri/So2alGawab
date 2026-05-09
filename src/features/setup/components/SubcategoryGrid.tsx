@@ -1,8 +1,9 @@
 import React from 'react';
-import { I18nManager, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Category } from '../../game/types/game';
 import { colors } from '../../../shared/theme/colors';
+import { MAX_SUBCATEGORIES_PER_MATCH, MIN_SUBCATEGORIES_PER_MATCH } from '../../../services/supabase/gameService';
 import { SubcategoryCard } from './SubcategoryCard';
 
 interface SubcategoryGridProps {
@@ -16,12 +17,17 @@ export function SubcategoryGrid({
   selectedSubcategoryIds,
   onToggle,
 }: SubcategoryGridProps) {
+  const count = selectedSubcategoryIds.length;
+
   return (
     <View style={styles.wrapper}>
       <View style={styles.header}>
-        <Text style={styles.title}>اختر فئتين للعبة</Text>
-        <Text style={styles.count}>{selectedSubcategoryIds.length}/2</Text>
+        <Text style={styles.title}>اختر الفئات</Text>
+        <Text style={styles.count}>{count} / {MAX_SUBCATEGORIES_PER_MATCH}</Text>
       </View>
+      <Text style={styles.hint}>
+        اختر من {MIN_SUBCATEGORIES_PER_MATCH} إلى {MAX_SUBCATEGORIES_PER_MATCH} فئات
+      </Text>
 
       {categories.map((category) => (
         <View key={category.id} style={styles.section}>
@@ -48,7 +54,7 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   header: {
-    flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
@@ -62,6 +68,12 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     fontSize: 16,
   },
+  hint: {
+    color: colors.mutedText,
+    fontSize: 13,
+    textAlign: 'right',
+    marginTop: -12,
+  },
   section: {
     gap: 12,
   },
@@ -69,7 +81,7 @@ const styles = StyleSheet.create({
     color: colors.secondary,
     fontSize: 18,
     fontWeight: '800',
-    textAlign: I18nManager.isRTL ? 'right' : 'left',
+    textAlign: 'right',
   },
   grid: {
     flexDirection: 'row',

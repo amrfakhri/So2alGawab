@@ -29,15 +29,15 @@ export function ResultsScreen({ navigation }: Props) {
     <Screen>
       <View style={styles.content}>
         <Text style={styles.eyebrow}>
-          {endedEarly ? 'Game Ended Early' : 'Match Complete'}
+          {endedEarly ? 'انتهت اللعبة مبكراً' : 'انتهت المباراة'}
         </Text>
         <Text style={styles.title}>
-          {winner ? `${winner.name} wins` : 'It ends in a draw'}
+          {winner ? `${winner.name} يفوز` : 'تعادل الفريقان'}
         </Text>
         <Text style={styles.subtitle}>
           {endedEarly
-            ? 'Current score at the time the game was ended.'
-            : `Final score after ${questionDeck.length} questions.`}
+            ? 'النتيجة عند إنهاء اللعبة.'
+            : `النتيجة النهائية بعد ${questionDeck.length} سؤال.`}
         </Text>
 
         <View style={styles.scoreRow}>
@@ -52,7 +52,7 @@ export function ResultsScreen({ navigation }: Props) {
         </View>
 
         <PrimaryButton
-          label="Play Again"
+          label="لعبة جديدة"
           onPress={() => {
             resetGame();
             navigation.replace('GameSetup');
@@ -72,19 +72,20 @@ const styles = StyleSheet.create({
   eyebrow: {
     color: colors.primary,
     fontWeight: '800',
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
+    textAlign: 'right',
   },
   title: {
     color: colors.text,
     fontSize: 32,
     lineHeight: 38,
     fontWeight: '800',
+    textAlign: 'right',
   },
   subtitle: {
     color: colors.mutedText,
     fontSize: 16,
     lineHeight: 22,
+    textAlign: 'right',
   },
   scoreRow: {
     flexDirection: 'row',
@@ -97,15 +98,17 @@ const styles = StyleSheet.create({
     padding: 18,
     borderWidth: 1,
     borderColor: colors.border,
+    gap: 10,
   },
   teamName: {
     color: colors.text,
     fontWeight: '700',
     fontSize: 16,
+    textAlign: 'center',
   },
   score: {
-    marginTop: 10,
     fontSize: 36,
     fontWeight: '900',
+    textAlign: 'center',
   },
 });

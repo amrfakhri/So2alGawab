@@ -3,14 +3,16 @@ import {
   I18nManager,
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { RootStackParamList } from '../../../navigation/RootNavigator';
-import { Screen } from '../../../shared/components/Screen';
 import { PrimaryButton } from '../../../shared/components/PrimaryButton';
 import { colors } from '../../../shared/theme/colors';
 import { AnswerOption } from '../components/AnswerOption';
@@ -37,11 +39,14 @@ export function QuestionScreen({ navigation }: Props) {
     revealPresenterAnswer,
     resolvePresenterAnswer,
     tickQuestionTimer,
+    skipTimer,
     useLifeline,
     advanceToNextTurn,
     endGame,
   } = useGameStore();
   const [showExitModal, setShowExitModal] = useState(false);
+  const { width, height } = useWindowDimensions();
+  const isPortrait = height > width;
 
   const question = questionDeck[currentQuestionIndex];
   const activeTeam = teams[activeTeamId];
@@ -84,10 +89,11 @@ export function QuestionScreen({ navigation }: Props) {
 
   return (
     <>
-      <Screen>
-        <View style={styles.layout}>
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.layout}>
+          {/* Top row: always the same */}
           <View style={styles.topRow}>
-            <View style={styles.topSlotLeft}>
+            <View style={styles.topSlotStart}>
               <Pressable
                 onPress={() => setShowExitModal(true)}
                 style={({ pressed }) => [
@@ -106,7 +112,7 @@ export function QuestionScreen({ navigation }: Props) {
               </Text>
             </View>
 
-            <View style={styles.topSlotRight}>
+            <View style={styles.topSlotEnd}>
               <Text style={styles.roundText}>
                 الجولة {currentQuestionIndex + 1}/{totalQuestions}
               </Text>
@@ -114,7 +120,39 @@ export function QuestionScreen({ navigation }: Props) {
             </View>
           </View>
 
+          {/* Portrait: compact team scores + lifelines strip */}
+          {isPortrait ? (
+            <View style={styles.portraitBar}>
+              <View style={styles.portraitTeams}>
+                {[teams.A, teams.B].map((team) => {
+                  const accent = team.id === 'A' ? colors.teamA : colors.teamB;
+                  const active = team.id === activeTeamId;
+                  return (
+                    <View
+                      key={team.id}
+                      style={[
+                        styles.portraitTeamCard,
+                        active && { borderColor: accent, borderWidth: 2 },
+                      ]}
+                    >
+                      <Text style={styles.portraitTeamName}>{team.name}</Text>
+                      <Text style={[styles.portraitTeamScore, { color: accent }]}>
+                        {team.score}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+              <View style={styles.portraitLifelines}>
+                <Text style={styles.portraitLifelinesLabel}>وسائل المساعدة</Text>
+                <LifelineBar team={activeTeam} onUseLifeline={useLifeline} />
+              </View>
+            </View>
+          ) : null}
+
+          {/* Body row */}
           <View style={styles.bodyRow}>
+            {/* Main content column */}
             <View style={styles.mainColumn}>
               <QuestionCard
                 categoryName={categoryName}
@@ -129,6 +167,18 @@ export function QuestionScreen({ navigation }: Props) {
                     هذا السؤال بنظام المقدم. أجب شفهيا قبل انتهاء الوقت.
                   </Text>
                 </View>
+              ) : null}
+
+              {phase === 'question' ? (
+                <Pressable
+                  onPress={skipTimer}
+                  style={({ pressed }) => [
+                    styles.revealButton,
+                    pressed && styles.revealButtonPressed,
+                  ]}
+                >
+                  <Text style={styles.revealButtonText}>كشف الإجابة</Text>
+                </Pressable>
               ) : null}
 
               {showAnswers ? (
@@ -158,9 +208,7 @@ export function QuestionScreen({ navigation }: Props) {
               ) : null}
 
               {showReveal ? (
-                <AnswerRevealSection
-                  answer={question.correctAnswerText}
-                />
+                <AnswerRevealSection answer={question.correctAnswerText} />
               ) : null}
 
               {shouldShowPresenterControls ? (
@@ -186,40 +234,42 @@ export function QuestionScreen({ navigation }: Props) {
               ) : null}
             </View>
 
-            <View style={styles.sidebar}>
-              {[teams.A, teams.B].map((team) => {
-                const accent = team.id === 'A' ? colors.teamA : colors.teamB;
-                const active = team.id === activeTeamId;
+            {/* Landscape sidebar */}
+            {!isPortrait ? (
+              <View style={styles.sidebar}>
+                {[teams.A, teams.B].map((team) => {
+                  const accent = team.id === 'A' ? colors.teamA : colors.teamB;
+                  const active = team.id === activeTeamId;
+                  return (
+                    <View
+                      key={team.id}
+                      style={[
+                        styles.teamCard,
+                        active && { borderColor: accent, borderWidth: 2 },
+                      ]}
+                    >
+                      <Text style={styles.teamCardTitle}>{team.name}</Text>
+                      <Text style={[styles.teamCardScore, { color: accent }]}>
+                        {team.score}
+                      </Text>
+                    </View>
+                  );
+                })}
 
-                return (
-                  <View
-                    key={team.id}
-                    style={[
-                      styles.teamCard,
-                      active && { borderColor: accent, borderWidth: 2 },
-                    ]}
-                  >
-                    <Text style={styles.teamCardTitle}>{team.name}</Text>
-                    <Text style={[styles.teamCardScore, { color: accent }]}>
-                      {team.score}
-                    </Text>
-                  </View>
-                );
-              })}
+                <View style={styles.lifelinePanel}>
+                  <Text style={styles.panelTitle}>وسائل المساعدة</Text>
+                  <LifelineBar team={activeTeam} onUseLifeline={useLifeline} vertical />
+                </View>
 
-              <View style={styles.lifelinePanel}>
-                <Text style={styles.panelTitle}>وسائل المساعدة</Text>
-                <LifelineBar team={activeTeam} onUseLifeline={useLifeline} vertical />
+                <View style={styles.footerMeta}>
+                  <Text style={styles.footerMetaLabel}>الفئة الحالية</Text>
+                  <Text style={styles.footerMetaValue}>{categoryName}</Text>
+                </View>
               </View>
-
-              <View style={styles.footerMeta}>
-                <Text style={styles.footerMetaLabel}>الفئة الحالية</Text>
-                <Text style={styles.footerMetaValue}>{categoryName}</Text>
-              </View>
-            </View>
+            ) : null}
           </View>
-        </View>
-      </Screen>
+        </ScrollView>
+      </SafeAreaView>
 
       <Modal
         transparent
@@ -255,8 +305,12 @@ export function QuestionScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  layout: {
+  safeArea: {
     flex: 1,
+    backgroundColor: colors.background,
+  },
+  layout: {
+    padding: 20,
     gap: 18,
   },
   topRow: {
@@ -265,11 +319,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 12,
   },
-  topSlotLeft: {
+  topSlotStart: {
     flex: 1,
     alignItems: 'flex-start',
   },
-  topSlotRight: {
+  topSlotEnd: {
     flex: 1,
     alignItems: 'flex-end',
     gap: 4,
@@ -296,10 +350,12 @@ const styles = StyleSheet.create({
   roundText: {
     color: colors.mutedText,
     fontWeight: '700',
+    textAlign: 'right',
   },
   categoryText: {
     color: colors.secondary,
     fontWeight: '800',
+    textAlign: 'right',
   },
   endButton: {
     backgroundColor: '#FFF1E9',
@@ -317,8 +373,51 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     fontSize: 14,
   },
-  bodyRow: {
+  portraitBar: {
+    gap: 10,
+  },
+  portraitTeams: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  portraitTeamCard: {
     flex: 1,
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  portraitTeamName: {
+    color: colors.text,
+    fontWeight: '700',
+    fontSize: 13,
+    flexShrink: 1,
+    textAlign: 'right',
+  },
+  portraitTeamScore: {
+    fontSize: 22,
+    fontWeight: '900',
+    marginStart: 8,
+  },
+  portraitLifelines: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: 10,
+  },
+  portraitLifelinesLabel: {
+    color: colors.text,
+    fontWeight: '800',
+    fontSize: 13,
+    textAlign: 'right',
+  },
+  bodyRow: {
     flexDirection: I18nManager.isRTL ? 'row' : 'row-reverse',
     gap: 14,
   },
@@ -393,6 +492,24 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '700',
     lineHeight: 22,
+  },
+  revealButton: {
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    alignItems: 'center',
+    backgroundColor: colors.card,
+  },
+  revealButtonPressed: {
+    backgroundColor: '#F2E7DB',
+    borderColor: colors.primary,
+  },
+  revealButtonText: {
+    color: colors.primaryDark,
+    fontWeight: '700',
+    fontSize: 15,
   },
   answers: {
     gap: 12,
