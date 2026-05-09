@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
 
 import { supabase } from '../../services/supabase/supabaseClient';
 import { fetchSessionByCode, GameSession } from '../../services/supabase/sessionService';
@@ -68,7 +68,9 @@ export function TvScreen({ sessionCode }: TvScreenProps) {
   }
 
   const { session } = state;
-  const hasQuestion = Boolean(session.current_question);
+  const isLobby = !session.current_phase || session.current_phase === 'lobby';
+  const hasMedia = Boolean(session.current_media_url && session.current_media_type);
+  const questionFontSize = hasMedia ? 36 : 52;
 
   return (
     <View style={styles.root}>
@@ -84,21 +86,43 @@ export function TvScreen({ sessionCode }: TvScreenProps) {
 
       {/* ── Main stage ──────────────────────────────────────────── */}
       <View style={styles.stage}>
-        {hasQuestion ? (
+        {isLobby ? (
+          <View style={styles.center}>
+            <Text style={styles.waitingEmoji}>⏳</Text>
+            <Text style={styles.waitingText}>في انتظار بدء الجلسة…</Text>
+          </View>
+        ) : (
           <>
+            {/* Category badge */}
             {session.current_category ? (
               <View style={styles.categoryBadge}>
                 <Text style={styles.categoryText}>{session.current_category}</Text>
               </View>
             ) : null}
 
-            <Text style={styles.questionText}>{session.current_question}</Text>
+            {/* Media section */}
+            {hasMedia ? (
+              <TvMedia
+                mediaType={session.current_media_type!}
+                mediaUrl={session.current_media_url!}
+              />
+            ) : null}
+
+            {/* Question text */}
+            {session.current_question ? (
+              <Text style={[styles.questionText, { fontSize: questionFontSize, lineHeight: questionFontSize * 1.3 }]}>
+                {session.current_question}
+              </Text>
+            ) : null}
+
+            {/* Answer reveal */}
+            {session.reveal_answer && session.current_answer ? (
+              <View style={styles.answerReveal}>
+                <Text style={styles.answerRevealLabel}>✓  الإجابة الصحيحة</Text>
+                <Text style={styles.answerRevealText}>{session.current_answer}</Text>
+              </View>
+            ) : null}
           </>
-        ) : (
-          <View style={styles.center}>
-            <Text style={styles.waitingEmoji}>⏳</Text>
-            <Text style={styles.waitingText}>في انتظار السؤال التالي…</Text>
-          </View>
         )}
       </View>
 
@@ -124,6 +148,55 @@ export function TvScreen({ sessionCode }: TvScreenProps) {
   );
 }
 
+// ── Media component (web-only) ─────────────────────────────────────────────
+
+function TvMedia({ mediaType, mediaUrl }: { mediaType: string; mediaUrl: string }) {
+  if (mediaType === 'image') {
+    return (
+      <Image
+        source={{ uri: mediaUrl }}
+        style={styles.mediaImage}
+        resizeMode="contain"
+      />
+    );
+  }
+
+  if (mediaType === 'video') {
+    return (
+      <View style={styles.mediaVideoWrapper}>
+        {React.createElement('video', {
+          src: mediaUrl,
+          controls: true,
+          style: {
+            width: '100%',
+            maxHeight: '320px',
+            borderRadius: '16px',
+            backgroundColor: '#000000',
+          },
+        })}
+      </View>
+    );
+  }
+
+  if (mediaType === 'audio') {
+    return (
+      <View style={styles.mediaAudioWrapper}>
+        <Text style={styles.audioIcon}>🎵</Text>
+        {React.createElement('audio', {
+          src: mediaUrl,
+          controls: true,
+          autoPlay: false,
+          style: { width: '100%', marginTop: '12px' },
+        })}
+      </View>
+    );
+  }
+
+  return null;
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+
 function phaseLabel(phase: string): string {
   const map: Record<string, string> = {
     lobby: 'انتظار',
@@ -136,7 +209,7 @@ function phaseLabel(phase: string): string {
   return map[phase] ?? phase;
 }
 
-// ── TV-specific design tokens ──────────────────────────────────────────────
+// ── Design tokens ──────────────────────────────────────────────────────────
 const tv = {
   bg: '#111111',
   surface: '#1C1C1E',
@@ -146,6 +219,9 @@ const tv = {
   teamA: '#4A9BFF',
   teamB: '#FF6B9B',
   border: '#2C2C2E',
+  answerBg: '#0A2E1A',
+  answerBorder: '#1A5C34',
+  answerText: '#34D399',
 };
 
 const styles = StyleSheet.create({
@@ -212,7 +288,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 80,
-    gap: 36,
+    paddingVertical: 32,
+    gap: 28,
   },
   categoryBadge: {
     backgroundColor: tv.yellow,
@@ -228,10 +305,8 @@ const styles = StyleSheet.create({
   },
   questionText: {
     color: tv.white,
-    fontSize: 52,
     fontWeight: '800',
     textAlign: 'center',
-    lineHeight: 68,
   },
   waitingEmoji: {
     fontSize: 64,
@@ -241,6 +316,57 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '600',
     textAlign: 'center',
+  },
+
+  // Media
+  mediaImage: {
+    width: 560,
+    height: 320,
+    borderRadius: 20,
+  },
+  mediaVideoWrapper: {
+    width: 600,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: '#000',
+  },
+  mediaAudioWrapper: {
+    width: 480,
+    backgroundColor: tv.surface,
+    borderRadius: 20,
+    padding: 28,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: tv.border,
+  },
+  audioIcon: {
+    fontSize: 52,
+  },
+
+  // Answer reveal
+  answerReveal: {
+    alignSelf: 'stretch',
+    backgroundColor: tv.answerBg,
+    borderRadius: 24,
+    borderWidth: 2,
+    borderColor: tv.answerBorder,
+    paddingHorizontal: 40,
+    paddingVertical: 28,
+    alignItems: 'center',
+    gap: 12,
+  },
+  answerRevealLabel: {
+    color: tv.answerText,
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  answerRevealText: {
+    color: tv.white,
+    fontSize: 44,
+    fontWeight: '900',
+    textAlign: 'center',
+    lineHeight: 56,
   },
 
   // Score bar

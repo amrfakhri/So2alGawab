@@ -8,6 +8,10 @@ export type GameSession = {
   current_question: string | null;
   current_category: string | null;
   current_phase: string | null;
+  current_media_url: string | null;
+  current_media_type: string | null;
+  current_answer: string | null;
+  reveal_answer: boolean;
   team1_score: number;
   team2_score: number;
   created_at: string;
@@ -107,6 +111,10 @@ export async function updateGameSession(
     current_question?: string | null;
     current_category?: string | null;
     current_phase?: string | null;
+    current_media_url?: string | null;
+    current_media_type?: string | null;
+    current_answer?: string | null;
+    reveal_answer?: boolean;
     team1_score?: number;
     team2_score?: number;
   },

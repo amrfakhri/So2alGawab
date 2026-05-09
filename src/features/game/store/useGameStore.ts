@@ -116,10 +116,16 @@ useGameStore.subscribe((state) => {
   _lastSyncKey = syncKey;
 
   const question = questionDeck[currentQuestionIndex] ?? null;
+  const revealAnswer = phase === 'answer_revealed' || phase === 'result';
+
   updateGameSession(tvSessionId, {
     current_question: question?.prompt ?? null,
     current_category: question?.categoryName ?? null,
     current_phase: phase,
+    current_media_url: question?.mediaUrl ?? null,
+    current_media_type: question?.mediaType ?? null,
+    current_answer: revealAnswer ? (question?.correctAnswerText ?? null) : null,
+    reveal_answer: revealAnswer,
     team1_score: teams.A.score,
     team2_score: teams.B.score,
   }).catch(() => {});
