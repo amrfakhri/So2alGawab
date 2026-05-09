@@ -1,5 +1,7 @@
 import { supabase } from './supabaseClient';
 
+export const TV_BASE_URL = 'https://game.amrfakhri.com/tv';
+
 export type GameSession = {
   id: string;
   session_code: string;
@@ -11,6 +13,39 @@ export type GameSession = {
   created_at: string;
   updated_at: string;
 };
+
+// Avoids visually ambiguous characters (0/O, 1/I/L)
+const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+function generateSessionCode(): string {
+  return Array.from(
+    { length: 4 },
+    () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)],
+  ).join('');
+}
+
+export async function createGameSession(): Promise<GameSession> {
+  const session_code = generateSessionCode();
+
+  const { data, error } = await supabase
+    .from('game_sessions')
+    .insert({
+      session_code,
+      current_question: 'في انتظار السؤال',
+      current_category: 'في انتظار الفئة',
+      current_phase: 'lobby',
+      team1_score: 0,
+      team2_score: 0,
+    })
+    .select()
+    .single();
+
+  if (error || !data) {
+    throw new Error(error?.message ?? 'فشل إنشاء الجلسة');
+  }
+
+  return data as GameSession;
+}
 
 export async function fetchSessionByCode(code: string): Promise<GameSession | null> {
   const { data, error } = await supabase

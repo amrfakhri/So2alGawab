@@ -1,5 +1,5 @@
-import React from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useQuery } from '@tanstack/react-query';
@@ -12,10 +12,12 @@ import { PrimaryButton } from '../../../shared/components/PrimaryButton';
 import { colors } from '../../../shared/theme/colors';
 import { fetchGameCategories } from '../../../services/supabase/categoryService';
 import { MIN_SUBCATEGORIES_PER_MATCH } from '../../../services/supabase/gameService';
+import { TvSessionModal } from '../../tv/TvSessionModal';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameSetup'>;
 
 export function GameSetupScreen({ navigation }: Props) {
+  const [showTvModal, setShowTvModal] = useState(false);
   const {
     availableCategories,
     selectedSubcategoryIds,
@@ -108,7 +110,15 @@ export function GameSetupScreen({ navigation }: Props) {
             }
           }}
         />
+        <Pressable
+          style={({ pressed }) => [styles.tvBtn, pressed && styles.tvBtnPressed]}
+          onPress={() => setShowTvModal(true)}
+        >
+          <Text style={styles.tvBtnText}>📺  بدء جلسة TV</Text>
+        </Pressable>
       </View>
+
+      <TvSessionModal visible={showTvModal} onClose={() => setShowTvModal(false)} />
     </SafeAreaView>
   );
 }
@@ -181,5 +191,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     textAlign: 'center',
+  },
+  tvBtn: {
+    marginTop: 10,
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  tvBtnPressed: {
+    opacity: 0.7,
+  },
+  tvBtnText: {
+    color: colors.text,
+    fontWeight: '700',
+    fontSize: 15,
   },
 });
