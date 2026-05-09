@@ -1,5 +1,5 @@
-import React from 'react';
-import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { ActivityIndicator, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { colors } from '../../shared/theme/colors';
@@ -20,11 +20,18 @@ const LANGUAGE_META: Record<AppLanguage, { flag: string; code: string }> = {
 export function LanguageSwitcher({ visible, onClose }: LanguageSwitcherProps) {
   const { t } = useTranslation('settings');
   const { language, setLanguage, isRTL } = useLanguageStore();
+  const [isApplying, setIsApplying] = useState(false);
 
   async function handleSelect(lang: AppLanguage) {
-    if (lang !== language) {
-      await setLanguage(lang);
+    if (lang === language) {
+      onClose();
+      return;
     }
+    setIsApplying(true);
+    await setLanguage(lang);
+    // If direction changed on native, Updates.reloadAsync() was called above and
+    // the app restarts — the lines below only run on web or same-direction switches.
+    setIsApplying(false);
     onClose();
   }
 
@@ -35,9 +42,9 @@ export function LanguageSwitcher({ visible, onClose }: LanguageSwitcherProps) {
       transparent
       visible={visible}
       animationType="slide"
-      onRequestClose={onClose}
+      onRequestClose={isApplying ? undefined : onClose}
     >
-      <Pressable style={styles.overlay} onPress={onClose}>
+      <Pressable style={styles.overlay} onPress={isApplying ? undefined : onClose}>
         <Pressable style={styles.sheet} onPress={() => {}}>
           <View style={styles.handle} />
 
@@ -108,6 +115,15 @@ export function LanguageSwitcher({ visible, onClose }: LanguageSwitcherProps) {
           )}
         </Pressable>
       </Pressable>
+
+      {isApplying && (
+        <View style={styles.applyingOverlay}>
+          <View style={styles.applyingCard}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={styles.applyingText}>{t('applying_language')}</Text>
+          </View>
+        </View>
+      )}
     </Modal>
   );
 }
@@ -265,5 +281,27 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 18,
     textAlign: 'center',
+  },
+
+  // Applying overlay
+  applyingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  applyingCard: {
+    backgroundColor: colors.card,
+    borderRadius: 24,
+    paddingVertical: 32,
+    paddingHorizontal: 40,
+    alignItems: 'center',
+    gap: 16,
+    minWidth: 200,
+  },
+  applyingText: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: '700',
   },
 });

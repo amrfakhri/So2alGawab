@@ -1,7 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Localization from 'expo-localization';
 
 import arCommon from './locales/ar/common.json';
 import arSettings from './locales/ar/settings.json';
@@ -28,11 +27,6 @@ export async function loadStoredLanguage(): Promise<AppLanguage> {
       return stored as AppLanguage;
     }
   } catch {}
-
-  const deviceCode = Localization.getLocales()?.[0]?.languageCode;
-  if (deviceCode && SUPPORTED_LANGUAGES.includes(deviceCode as AppLanguage)) {
-    return deviceCode as AppLanguage;
-  }
 
   return DEFAULT_LANGUAGE;
 }

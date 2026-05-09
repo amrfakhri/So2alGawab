@@ -2,7 +2,8 @@
   "title": "الإعدادات",
   "language_label": "اللغة",
   "language_subtitle": "اختر لغة واجهة التطبيق",
-  "direction_note": "سيتم تطبيق اتجاه الصفحة عند إعادة تشغيل التطبيق",
+  "applying_language": "جاري تطبيق اللغة...",
+  "direction_note": "سيُعيد التطبيق تشغيله تلقائياً عند تغيير اتجاه التخطيط",
   "languages": {
     "ar": "العربية",
     "en": "English",

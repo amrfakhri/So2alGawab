@@ -2,7 +2,8 @@
   "title": "Settings",
   "language_label": "Language",
   "language_subtitle": "Choose the app interface language",
-  "direction_note": "Layout direction will apply after restarting the app",
+  "applying_language": "Applying language...",
+  "direction_note": "The app will automatically restart to apply the new layout direction",
   "languages": {
     "ar": "العربية",
     "en": "English",
