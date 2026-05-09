@@ -41,7 +41,7 @@ export async function persistLanguage(lang: AppLanguage): Promise<void> {
   await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
 }
 
-i18n.use(initReactI18next).init({
+export const i18nInitPromise = i18n.use(initReactI18next).init({
   resources: {
     ar: {
       common: arCommon,

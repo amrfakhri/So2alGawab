@@ -1,7 +1,7 @@
 import { I18nManager, Platform } from 'react-native';
 import { create } from 'zustand';
 
-import i18n, { AppLanguage, persistLanguage } from './i18n';
+import i18n, { AppLanguage, persistLanguage, i18nInitPromise } from './i18n';
 
 interface LanguageStore {
   language: AppLanguage;
@@ -31,8 +31,12 @@ export const useLanguageStore = create<LanguageStore>((set) => ({
   },
 }));
 
-export function initializeLanguage(lang: AppLanguage) {
+export async function initializeLanguage(lang: AppLanguage): Promise<void> {
+  await i18nInitPromise;
   const isRTL = lang === 'ar';
+  if (i18n.language !== lang) {
+    await i18n.changeLanguage(lang);
+  }
   applyDirection(isRTL);
   useLanguageStore.setState({ language: lang, isRTL });
 }

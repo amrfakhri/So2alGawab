@@ -33,10 +33,12 @@ export default function App() {
   const tvRoute = getTvRoute();
 
   useEffect(() => {
-    loadStoredLanguage().then((lang) => {
-      initializeLanguage(lang);
+    async function bootstrap() {
+      const lang = await loadStoredLanguage();
+      await initializeLanguage(lang);
       setLangReady(true);
-    });
+    }
+    bootstrap();
   }, []);
 
   if (!langReady) return null;

@@ -1,6 +1,8 @@
 import React from 'react';
-import { I18nManager, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+
+import { useLanguageStore } from '../../../localization/languageStore';
 
 import { PrimaryButton } from '../../../shared/components/PrimaryButton';
 import { GamePhase } from '../types/game';
@@ -19,6 +21,7 @@ export function PresenterControls({
   onMarkWrong,
 }: PresenterControlsProps) {
   const { t } = useTranslation('game');
+  const { isRTL } = useLanguageStore();
 
   if (phase === 'waiting_answer') {
     return <PrimaryButton label={t('presenter.reveal_answer')} onPress={onReveal} />;
@@ -26,7 +29,7 @@ export function PresenterControls({
 
   if (phase === 'answer_revealed') {
     return (
-      <View style={styles.row}>
+      <View style={[styles.row, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <PrimaryButton
           label={t('presenter.wrong')}
           onPress={onMarkWrong}
@@ -42,7 +45,6 @@ export function PresenterControls({
 
 const styles = StyleSheet.create({
   row: {
-    flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
     gap: 12,
   },
   secondaryAction: {
