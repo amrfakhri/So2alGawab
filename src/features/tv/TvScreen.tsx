@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { supabase } from '../../services/supabase/supabaseClient';
 import { fetchSessionByCode, GameSession } from '../../services/supabase/sessionService';
+import { AppIcon, type AppIconName } from '../../shared/components/AppIcon';
 
 type LoadState =
   | { status: 'loading' }
@@ -109,7 +110,7 @@ function TvSessionView({ session, sessionCode }: { session: GameSession; session
           <View style={styles.stage}>
             {isLobby ? (
               <View style={styles.fullCenter}>
-                <Text style={styles.waitingEmoji}>⏳</Text>
+                <AppIcon name="waiting" size={64} color={tv.muted} weight="fill" />
                 <Text style={styles.waitingText}>{t('game.waiting_session')}</Text>
               </View>
             ) : (
@@ -202,12 +203,17 @@ function FinishedScreen({ session }: { session: GameSession }) {
 
   return (
     <View style={styles.finishedRoot}>
-      <Text style={styles.finishedEmoji}>{isTie ? '🤝' : '🏆'}</Text>
+      <AppIcon
+        name={isTie ? 'handshake' : 'trophy'}
+        size={80}
+        color={isTie ? '#6B7FFF' : tv.yellow}
+        weight="fill"
+      />
       <Text style={styles.finishedTitle}>{t('game.finished.title')}</Text>
 
       <View style={styles.finishedScoreRow}>
         <View style={[styles.finishedCard, { borderColor: tv.teamA }, team1Wins && styles.finishedWinnerCard]}>
-          {team1Wins ? <Text style={styles.winnerCrown}>👑</Text> : null}
+          {team1Wins ? <AppIcon name="crown" size={40} color={tv.yellow} weight="fill" /> : null}
           <Text style={[styles.finishedTeamLabel, { color: tv.teamA }]}>{t('game.team1_label')}</Text>
           <Text style={[styles.finishedScore, { color: tv.teamA }]}>{team1_score}</Text>
           <Text style={styles.finishedScoreUnit}>{t('game.finished.score_unit')}</Text>
@@ -216,7 +222,7 @@ function FinishedScreen({ session }: { session: GameSession }) {
         <Text style={styles.finishedVs}>VS</Text>
 
         <View style={[styles.finishedCard, { borderColor: tv.teamB }, team2Wins && styles.finishedWinnerCard]}>
-          {team2Wins ? <Text style={styles.winnerCrown}>👑</Text> : null}
+          {team2Wins ? <AppIcon name="crown" size={40} color={tv.yellow} weight="fill" /> : null}
           <Text style={[styles.finishedTeamLabel, { color: tv.teamB }]}>{t('game.team2_label')}</Text>
           <Text style={[styles.finishedScore, { color: tv.teamB }]}>{team2_score}</Text>
           <Text style={styles.finishedScoreUnit}>{t('game.finished.score_unit')}</Text>
@@ -258,20 +264,20 @@ function ScoreCard({ label, score, color, lifelines }: {
   );
 }
 
-const LIFELINE_ITEMS: Array<{ key: keyof Lifelines; icon: string }> = [
-  { key: 'callFriend', icon: '📞' },
-  { key: 'discardQuestion', icon: '✂️' },
-  { key: 'answerReward', icon: '💎' },
+const LIFELINE_ITEMS: Array<{ key: keyof Lifelines; iconName: AppIconName }> = [
+  { key: 'callFriend', iconName: 'lifeline-call' },
+  { key: 'discardQuestion', iconName: 'lifeline-discard' },
+  { key: 'answerReward', iconName: 'lifeline-reward' },
 ];
 
 function LifelineRow({ lifelines }: { lifelines: Lifelines | null }) {
   return (
     <View style={styles.lifelineRow}>
-      {LIFELINE_ITEMS.map(({ key, icon }) => {
+      {LIFELINE_ITEMS.map(({ key, iconName }) => {
         const available = lifelines?.[key] ?? true;
         return (
           <View key={key} style={[styles.lifelineChip, !available && styles.lifelineChipUsed]}>
-            <Text style={styles.lifelineIcon}>{icon}</Text>
+            <AppIcon name={iconName} size={15} color={tv.white} weight="bold" />
           </View>
         );
       })}
@@ -297,7 +303,7 @@ function TvMedia({ mediaType, mediaUrl }: { mediaType: string; mediaUrl: string 
   if (mediaType === 'audio') {
     return (
       <View style={styles.mediaAudioWrapper}>
-        <Text style={styles.audioIcon}>🎵</Text>
+        <AppIcon name="music-note" size={64} color={tv.muted} weight="fill" />
         {React.createElement('audio', {
           src: mediaUrl,
           controls: true,
@@ -414,8 +420,6 @@ const styles = StyleSheet.create({
   mediaImage: { flex: 1, alignSelf: 'stretch' },
   mediaVideoWrapper: { flex: 1, alignSelf: 'stretch' },
   mediaAudioWrapper: { padding: 40, alignItems: 'center', gap: 8 },
-  audioIcon: { fontSize: 64 },
-  waitingEmoji: { fontSize: 64 },
   waitingText: { color: tv.muted, fontSize: 28, fontWeight: '600', textAlign: 'center' },
   scoreBar: {
     flexDirection: 'row',
@@ -451,7 +455,6 @@ const styles = StyleSheet.create({
     borderColor: tv.border,
   },
   lifelineChipUsed: { opacity: 0.2 },
-  lifelineIcon: { fontSize: 15 },
   phaseChip: {
     backgroundColor: tv.surface,
     borderRadius: 14,
@@ -469,7 +472,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 80,
     paddingVertical: 48,
   },
-  finishedEmoji: { fontSize: 80 },
   finishedTitle: { color: tv.white, fontSize: 42, fontWeight: '900', letterSpacing: 1 },
   finishedScoreRow: {
     flexDirection: 'row',
@@ -490,7 +492,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   finishedWinnerCard: { borderWidth: 3, backgroundColor: '#171717' },
-  winnerCrown: { fontSize: 40 },
   finishedTeamLabel: { fontSize: 18, fontWeight: '800' },
   finishedScore: { fontSize: 80, fontWeight: '900', lineHeight: 84 },
   finishedScoreUnit: { color: tv.muted, fontSize: 16, fontWeight: '700' },

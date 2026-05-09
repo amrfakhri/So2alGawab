@@ -4,6 +4,7 @@ import { Audio, AVPlaybackStatus } from 'expo-av';
 import { useTranslation } from 'react-i18next';
 
 import { colors } from '../../../shared/theme/colors';
+import { AppIcon } from '../../../shared/components/AppIcon';
 
 interface AudioPlayerProps {
   uri: string;
@@ -62,8 +63,6 @@ export function AudioPlayer({ uri }: AudioPlayerProps) {
       ? t('audio.playing')
       : t('audio.tap_to_play');
 
-  const playIcon = isLoading ? '…' : isPlaying ? '⏸' : '▶';
-
   return (
     <View style={styles.container}>
       <Pressable
@@ -71,7 +70,12 @@ export function AudioPlayer({ uri }: AudioPlayerProps) {
         disabled={isLoading}
         style={({ pressed }) => [styles.playButton, pressed && styles.playButtonPressed]}
       >
-        <Text style={styles.playIcon}>{playIcon}</Text>
+        <AppIcon
+          name={isLoading ? 'audio-loading' : isPlaying ? 'pause' : 'play'}
+          size={30}
+          color="#FFFFFF"
+          weight={isLoading ? 'regular' : 'fill'}
+        />
       </Pressable>
       <Text style={styles.label}>{statusLabel}</Text>
     </View>
@@ -93,10 +97,6 @@ const styles = StyleSheet.create({
   },
   playButtonPressed: {
     backgroundColor: colors.primaryDark,
-  },
-  playIcon: {
-    fontSize: 30,
-    color: '#FFFFFF',
   },
   label: {
     color: colors.primaryDark,

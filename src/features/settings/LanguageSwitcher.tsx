@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { colors } from '../../shared/theme/colors';
 import { SUPPORTED_LANGUAGES, AppLanguage } from '../../localization/i18n';
 import { useLanguageStore } from '../../localization/languageStore';
+import { AppIcon } from '../../shared/components/AppIcon';
 
 interface LanguageSwitcherProps {
   visible: boolean;
@@ -87,7 +88,9 @@ export function LanguageSwitcher({ visible, onClose }: LanguageSwitcherProps) {
 
                   {/* Right side: selection indicator */}
                   <View style={[styles.indicator, selected && styles.indicatorSelected]}>
-                    {selected ? <Text style={styles.indicatorCheck}>✓</Text> : null}
+                    {selected ? (
+                      <AppIcon name="check" size={13} color="#FFFFFF" weight="bold" />
+                    ) : null}
                   </View>
                 </Pressable>
               );
@@ -97,9 +100,10 @@ export function LanguageSwitcher({ visible, onClose }: LanguageSwitcherProps) {
           {/* Native direction note */}
           {showDirectionNote && (
             <View style={styles.noteRow}>
-              <Text style={styles.noteText}>
-                ℹ️  {t('direction_note')}
-              </Text>
+              <View style={styles.noteContent}>
+                <AppIcon name="info" size={14} color={colors.mutedText} />
+                <Text style={styles.noteText}>{t('direction_note')}</Text>
+              </View>
             </View>
           )}
         </Pressable>
@@ -224,6 +228,13 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
+  // Note row
+  noteContent: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+
   // Selection indicator
   indicator: {
     width: 24,
@@ -240,12 +251,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     borderColor: colors.primary,
   },
-  indicatorCheck: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '900',
-  },
-
   // Note
   noteRow: {
     marginTop: 16,

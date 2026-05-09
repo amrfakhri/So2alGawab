@@ -16,6 +16,7 @@ import { MIN_SUBCATEGORIES_PER_MATCH } from '../../../services/supabase/gameServ
 import { CastToTvModal } from '../../tv/CastToTvModal';
 import { LanguageSwitcher } from '../../settings/LanguageSwitcher';
 import { useLanguageStore } from '../../../localization/languageStore';
+import { AppIcon } from '../../../shared/components/AppIcon';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameSetup'>;
 
@@ -64,7 +65,7 @@ export function GameSetupScreen({ navigation }: Props) {
               style={({ pressed }) => [styles.settingsBtn, pressed && { opacity: 0.6 }]}
               hitSlop={10}
             >
-              <Text style={styles.settingsBtnText}>⚙️</Text>
+              <AppIcon name="settings" size={22} color={colors.mutedText} />
             </Pressable>
           </View>
           <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>
@@ -175,9 +176,6 @@ const styles = StyleSheet.create({
   },
   settingsBtn: {
     padding: 4,
-  },
-  settingsBtnText: {
-    fontSize: 20,
   },
   title: {
     color: colors.text,

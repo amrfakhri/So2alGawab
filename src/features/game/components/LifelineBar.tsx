@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { LifelineId, TeamState } from '../types/game';
 import { colors } from '../../../shared/theme/colors';
+import { AppIcon, type AppIconName } from '../../../shared/components/AppIcon';
 
 interface LifelineBarProps {
   team: TeamState;
@@ -12,6 +13,12 @@ interface LifelineBarProps {
 }
 
 const LIFELINE_IDS: LifelineId[] = ['callFriend', 'discardQuestion', 'answerReward'];
+
+const LIFELINE_ICON_MAP: Record<LifelineId, AppIconName> = {
+  callFriend: 'lifeline-call',
+  discardQuestion: 'lifeline-discard',
+  answerReward: 'lifeline-reward',
+};
 
 export function LifelineBar({ team, onUseLifeline, vertical }: LifelineBarProps) {
   const { t } = useTranslation('game');
@@ -31,9 +38,17 @@ export function LifelineBar({ team, onUseLifeline, vertical }: LifelineBarProps)
               !available && styles.disabled,
             ]}
           >
-            <Text style={[styles.text, !available && styles.disabledText]}>
-              {t(`lifelines.${id}`)}
-            </Text>
+            <View style={styles.buttonContent}>
+              <AppIcon
+                name={LIFELINE_ICON_MAP[id]}
+                size={13}
+                color={available ? colors.text : colors.mutedText}
+                weight="bold"
+              />
+              <Text style={[styles.text, !available && styles.disabledText]}>
+                {t(`lifelines.${id}`)}
+              </Text>
+            </View>
           </Pressable>
         );
       })}
@@ -65,6 +80,11 @@ const styles = StyleSheet.create({
   },
   disabled: {
     opacity: 0.4,
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
   },
   text: {
     color: colors.text,

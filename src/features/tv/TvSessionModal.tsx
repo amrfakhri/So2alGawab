@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { colors } from '../../shared/theme/colors';
 import { createGameSession, GameSession, TV_BASE_URL } from '../../services/supabase/sessionService';
 import { useGameStore } from '../game/store/useGameStore';
+import { AppIcon } from '../../shared/components/AppIcon';
 
 type State =
   | { phase: 'idle' }
@@ -64,7 +65,7 @@ export function TvSessionModal({ visible, onClose }: TvSessionModalProps) {
           <View style={styles.header}>
             <Text style={styles.headerTitle}>{t('tv:session_modal.title')}</Text>
             <Pressable onPress={onClose} style={styles.closeBtn} hitSlop={12}>
-              <Text style={styles.closeBtnText}>✕</Text>
+              <AppIcon name="close" size={14} color={colors.mutedText} weight="bold" />
             </Pressable>
           </View>
 
@@ -153,7 +154,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  closeBtnText: { color: colors.mutedText, fontWeight: '700', fontSize: 14 },
   stateCenter: { alignItems: 'center', justifyContent: 'center', paddingVertical: 48, gap: 16 },
   stateText: { color: colors.mutedText, fontSize: 16, fontWeight: '600', textAlign: 'right' },
   errorText: { color: '#B42318', fontSize: 15, fontWeight: '600', textAlign: 'center', paddingHorizontal: 24 },

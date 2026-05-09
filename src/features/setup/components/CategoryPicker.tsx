@@ -9,6 +9,7 @@ import {
 
 import { Category } from '../../game/types/game';
 import { colors } from '../../../shared/theme/colors';
+import { AppIcon } from '../../../shared/components/AppIcon';
 
 interface CategoryPickerProps {
   categories: Category[];
@@ -45,7 +46,12 @@ export function CategoryPicker({
                   ]}
                 >
                   <View style={styles.cardTopRow}>
-                    <Text style={styles.imageStub}>{selected ? '✓' : '◌'}</Text>
+                    <AppIcon
+                      name={selected ? 'check' : 'circle'}
+                      size={18}
+                      color={selected ? colors.primary : colors.border}
+                      weight={selected ? 'bold' : 'regular'}
+                    />
                     <Text style={styles.typeBadge}>{subcategory.type}</Text>
                   </View>
 
@@ -117,11 +123,6 @@ const styles = StyleSheet.create({
     flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  imageStub: {
-    color: colors.primary,
-    fontWeight: '900',
-    fontSize: 18,
   },
   typeBadge: {
     color: colors.primaryDark,

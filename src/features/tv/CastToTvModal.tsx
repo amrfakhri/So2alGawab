@@ -24,6 +24,7 @@ import {
 } from '../../services/supabase/sessionService';
 import { useGameStore } from '../game/store/useGameStore';
 import { useLanguageStore } from '../../localization/languageStore';
+import { AppIcon } from '../../shared/components/AppIcon';
 
 type PairingState =
   | { phase: 'idle' }
@@ -150,7 +151,7 @@ export function CastToTvModal({ visible, onClose }: CastToTvModalProps) {
           <View style={styles.header}>
             <Text style={styles.headerTitle}>{t('cast.modal_title')}</Text>
             <Pressable onPress={handleClose} style={styles.closeBtn} hitSlop={12}>
-              <Text style={styles.closeBtnText}>✕</Text>
+              <AppIcon name="close" size={14} color={colors.mutedText} weight="bold" />
             </Pressable>
           </View>
 
@@ -345,7 +346,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  closeBtnText: { color: colors.mutedText, fontWeight: '700', fontSize: 14 },
   scrollContent: {
     paddingHorizontal: 24,
     paddingTop: 24,

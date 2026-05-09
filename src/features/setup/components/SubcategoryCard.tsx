@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Subcategory } from '../../game/types/game';
 import { colors } from '../../../shared/theme/colors';
+import { AppIcon, type AppIconName } from '../../../shared/components/AppIcon';
 
 interface SubcategoryCardProps {
   subcategory: Subcategory;
@@ -12,10 +13,10 @@ interface SubcategoryCardProps {
   onPress: () => void;
 }
 
-const artworkByType = {
-  image: '🖼️',
-  text: '📝',
-  mixed: '🎭',
+const artworkByType: Record<string, AppIconName> = {
+  image: 'image-type',
+  text: 'text-type',
+  mixed: 'mixed-type',
 };
 
 export function SubcategoryCard({
@@ -39,11 +40,18 @@ export function SubcategoryCard({
         <Text style={styles.badge}>
           {t('subcategory_card.remaining', { count: remainingGames })}
         </Text>
-        {selected ? <Text style={styles.checkmark}>✓</Text> : null}
+        {selected ? (
+          <AppIcon name="check" size={18} color={colors.primary} weight="bold" />
+        ) : null}
       </View>
 
       <View style={styles.artPanel}>
-        <Text style={styles.artEmoji}>{artworkByType[subcategory.type]}</Text>
+        <AppIcon
+          name={artworkByType[subcategory.type] ?? 'mixed-type'}
+          size={36}
+          color={colors.primaryDark}
+          weight="duotone"
+        />
         <Text style={styles.artLabel}>{subcategory.image.replace('.png', '')}</Text>
       </View>
 
@@ -88,11 +96,6 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     overflow: 'hidden',
   },
-  checkmark: {
-    color: colors.primary,
-    fontWeight: '900',
-    fontSize: 18,
-  },
   artPanel: {
     borderRadius: 18,
     backgroundColor: '#F6E7DB',
@@ -100,9 +103,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 8,
-  },
-  artEmoji: {
-    fontSize: 32,
   },
   artLabel: {
     color: colors.primaryDark,
