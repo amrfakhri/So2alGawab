@@ -2,6 +2,7 @@ export type TeamId = 'A' | 'B';
 export type LifelineId = 'callFriend' | 'discardQuestion' | 'answerReward';
 export type QuestionAnswerMode = 'mcq' | 'presenter';
 export type QuestionMediaType = 'image' | 'video' | 'audio';
+export type GameMode = 'classic' | 'selection';
 export type GamePhase =
   | 'setup'
   | 'question'
@@ -70,6 +71,7 @@ export interface RoundFeedback {
 
 export interface GameState {
   phase: GamePhase;
+  gameMode: GameMode;
   availableCategories: Category[];
   selectedSubcategoryIds: string[];
   teams: Record<TeamId, TeamState>;
@@ -83,4 +85,5 @@ export interface GameState {
   endedEarly: boolean;
   isStartingMatch: boolean;
   matchError: string | null;
+  answeredQuestionIds: string[];
 }

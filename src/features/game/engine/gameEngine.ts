@@ -1,6 +1,7 @@
 import { calculateQuestionScore } from './scoring';
 import {
   FeedbackStatus,
+  GameMode,
   GamePhase,
   GameState,
   LifelineId,
@@ -34,6 +35,7 @@ function getQuestionStartPhase(question: Question | null): GamePhase {
 export function createInitialGameState(): GameState {
   return {
     phase: 'setup',
+    gameMode: 'classic',
     availableCategories: [],
     selectedSubcategoryIds: [],
     teams: {
@@ -50,6 +52,7 @@ export function createInitialGameState(): GameState {
     endedEarly: false,
     isStartingMatch: false,
     matchError: null,
+    answeredQuestionIds: [],
   };
 }
 
@@ -108,6 +111,7 @@ export function setTeamName(
 export function startMatch(
   state: GameState,
   questionDeck: Question[],
+  mode: GameMode = 'classic',
 ): GameState {
   const teamAName = state.teams.A.name.trim() || 'Team 1';
   const teamBName = state.teams.B.name.trim() || 'Team 2';
@@ -121,7 +125,39 @@ export function startMatch(
     },
     selectedSubcategoryIds: [...state.selectedSubcategoryIds],
     questionDeck,
+    gameMode: mode,
     phase: getQuestionStartPhase(questionDeck[0] ?? null),
+  };
+}
+
+export function selectBoardQuestion(state: GameState, questionId: string): GameState {
+  const idx = state.questionDeck.findIndex((q) => q.id === questionId);
+  if (idx === -1) return state;
+  const question = state.questionDeck[idx];
+  return {
+    ...state,
+    currentQuestionIndex: idx,
+    phase: getQuestionStartPhase(question),
+    remainingMs: QUESTION_DURATION_MS,
+    selectedAnswerIndex: null,
+    roundFeedback: null,
+    revealedHint: null,
+  };
+}
+
+export function completeSelectionQuestion(state: GameState): GameState {
+  const question = getCurrentQuestion(state);
+  const nextTeamId: TeamId = state.activeTeamId === 'A' ? 'B' : 'A';
+  return {
+    ...state,
+    answeredQuestionIds: question
+      ? [...state.answeredQuestionIds, question.id]
+      : state.answeredQuestionIds,
+    activeTeamId: nextTeamId,
+    remainingMs: QUESTION_DURATION_MS,
+    selectedAnswerIndex: null,
+    roundFeedback: null,
+    revealedHint: null,
   };
 }
 

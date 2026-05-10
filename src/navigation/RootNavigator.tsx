@@ -6,12 +6,14 @@ import { GameSetupScreen } from '../features/setup/screens/GameSetupScreen';
 import { QuestionScreen } from '../features/game/screens/QuestionScreen';
 import { FeedbackScreen } from '../features/game/screens/FeedbackScreen';
 import { ResultsScreen } from '../features/results/screens/ResultsScreen';
+import { SelectionBoardScreen } from '../features/game/screens/SelectionBoardScreen';
 
 export type RootStackParamList = {
   GameSetup: undefined;
   Question: undefined;
   Feedback: undefined;
   Results: undefined;
+  SelectionBoard: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -24,6 +26,7 @@ export function RootNavigator() {
         <Stack.Screen name="Question" component={QuestionScreen} />
         <Stack.Screen name="Feedback" component={FeedbackScreen} />
         <Stack.Screen name="Results" component={ResultsScreen} />
+        <Stack.Screen name="SelectionBoard" component={SelectionBoardScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

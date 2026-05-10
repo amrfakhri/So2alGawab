@@ -18,12 +18,15 @@ import { LanguageSwitcher } from '../../settings/LanguageSwitcher';
 import { useLanguageStore } from '../../../localization/languageStore';
 import { AppIcon } from '../../../shared/components/AppIcon';
 import { SelectedCategoriesPreview } from '../components/SelectedCategoriesPreview';
+import { GameModeSheet } from '../../game/components/GameModeSheet';
+import { GameMode } from '../../game/types/game';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameSetup'>;
 
 export function GameSetupScreen({ navigation }: Props) {
   const [showCastModal, setShowCastModal] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showModeSheet, setShowModeSheet] = useState(false);
   const { t } = useTranslation(['setup', 'common']);
   const { isRTL } = useLanguageStore();
 
@@ -129,14 +132,9 @@ export function GameSetupScreen({ navigation }: Props) {
 
       <View style={styles.footer}>
         <PrimaryButton
-          label={isStartingMatch ? t('setup:loading_questions') : t('setup:start_game')}
-          disabled={!canStart || categoriesQuery.isPending || isStartingMatch}
-          onPress={async () => {
-            const didStart = await startMatch();
-            if (didStart) {
-              navigation.replace('Question');
-            }
-          }}
+          label={t('setup:start_game')}
+          disabled={!canStart || categoriesQuery.isPending}
+          onPress={() => setShowModeSheet(true)}
         />
         <View style={styles.tvRow}>
           <Pressable
@@ -150,6 +148,19 @@ export function GameSetupScreen({ navigation }: Props) {
 
       <CastToTvModal visible={showCastModal} onClose={() => setShowCastModal(false)} />
       <LanguageSwitcher visible={showSettings} onClose={() => setShowSettings(false)} />
+      <GameModeSheet
+        visible={showModeSheet}
+        isLoading={isStartingMatch}
+        error={matchError}
+        onClose={() => !isStartingMatch && setShowModeSheet(false)}
+        onSelectMode={async (mode: GameMode) => {
+          const didStart = await startMatch(mode);
+          if (didStart) {
+            setShowModeSheet(false);
+            navigation.replace(mode === 'selection' ? 'SelectionBoard' : 'Question');
+          }
+        }}
+      />
     </SafeAreaView>
   );
 }

@@ -31,6 +31,7 @@ export function QuestionScreen({ navigation }: Props) {
   const { isRTL } = useLanguageStore();
   const {
     phase,
+    gameMode,
     teams,
     activeTeamId,
     questionDeck,
@@ -46,6 +47,7 @@ export function QuestionScreen({ navigation }: Props) {
     skipTimer,
     useLifeline,
     advanceToNextTurn,
+    completeSelectionQuestion,
     endGame,
   } = useGameStore();
   const [showExitModal, setShowExitModal] = useState(false);
@@ -77,8 +79,10 @@ export function QuestionScreen({ navigation }: Props) {
   const showReveal = isPresenter && (phase === 'answer_revealed' || phase === 'result');
   const shouldShowPresenterControls =
     isPresenter && (phase === 'waiting_answer' || phase === 'answer_revealed');
-  const nextLabel =
-    currentQuestionIndex + 1 === totalQuestions
+  const isSelectionMode = gameMode === 'selection';
+  const nextLabel = isSelectionMode
+    ? t('back_to_board')
+    : currentQuestionIndex + 1 === totalQuestions
       ? t('show_result')
       : t('next_question');
   const textAlign = isRTL ? 'right' : 'left';
@@ -212,7 +216,17 @@ export function QuestionScreen({ navigation }: Props) {
                   <Text style={[styles.resultPoints, { textAlign }]}>
                     {t('result_points', { team: activeTeam.name, points: roundFeedback.earnedPoints })}
                   </Text>
-                  <PrimaryButton label={nextLabel} onPress={() => advanceToNextTurn()} />
+                  <PrimaryButton
+                    label={nextLabel}
+                    onPress={() => {
+                      if (isSelectionMode) {
+                        completeSelectionQuestion();
+                        navigation.replace('SelectionBoard');
+                      } else {
+                        advanceToNextTurn();
+                      }
+                    }}
+                  />
                 </View>
               ) : null}
             </View>

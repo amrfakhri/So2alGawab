@@ -42,6 +42,7 @@
     "next_turn": "Next Turn",
     "final_results": "Final Results"
   },
+  "back_to_board": "Back to Board",
   "results": {
     "game_over_eyebrow": "Match Over",
     "ended_early_eyebrow": "Game Ended Early",
@@ -50,5 +51,17 @@
     "subtitle": "Final score after {{count}} questions.",
     "subtitle_early": "Score at end of game.",
     "new_game": "New Game"
+  },
+  "board": {
+    "title": "Question Board",
+    "active_team": "{{name}}'s turn",
+    "answered_label": "Answered",
+    "end_game_btn": "End Game",
+    "exit_dialog": {
+      "title": "End the game?",
+      "body": "Current scores will be saved and you'll go to the results screen.",
+      "cancel": "Cancel",
+      "confirm": "End Game"
+    }
   }
 }

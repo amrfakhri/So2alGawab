@@ -42,6 +42,7 @@
     "next_turn": "الدور التالي",
     "final_results": "عرض النتائج النهائية"
   },
+  "back_to_board": "العودة للوحة",
   "results": {
     "game_over_eyebrow": "انتهت المباراة",
     "ended_early_eyebrow": "انتهت اللعبة مبكراً",
@@ -50,5 +51,17 @@
     "subtitle": "النتيجة النهائية بعد {{count}} سؤال.",
     "subtitle_early": "النتيجة عند إنهاء اللعبة.",
     "new_game": "لعبة جديدة"
+  },
+  "board": {
+    "title": "لوحة الأسئلة",
+    "active_team": "دور {{name}}",
+    "answered_label": "تمت الإجابة",
+    "end_game_btn": "إنهاء اللعبة",
+    "exit_dialog": {
+      "title": "هل تريد إنهاء اللعبة؟",
+      "body": "سيتم حفظ النقاط الحالية والانتقال إلى شاشة النتائج.",
+      "cancel": "إلغاء",
+      "confirm": "إنهاء"
+    }
   }
 }

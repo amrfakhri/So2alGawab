@@ -3,11 +3,13 @@ import { create } from 'zustand';
 import {
   advanceToNextTurn,
   answerQuestion,
+  completeSelectionQuestion,
   createInitialGameState,
   endGame,
   QUESTION_DURATION_MS,
   revealPresenterAnswer,
   resolvePresenterAnswer,
+  selectBoardQuestion,
   setAvailableCategories,
   setTeamName,
   skipTimer,
@@ -18,7 +20,7 @@ import {
 } from '../engine/gameEngine';
 import { buildQuestionDeckForMatch } from '../../../services/supabase/gameService';
 import { updateGameSession } from '../../../services/supabase/sessionService';
-import { Category, GameState, LifelineId, TeamId } from '../types/game';
+import { Category, GameMode, GameState, LifelineId, TeamId } from '../types/game';
 
 interface GameStore extends GameState {
   tvSessionId: string | null;
@@ -26,7 +28,7 @@ interface GameStore extends GameState {
   setAvailableCategories: (categories: Category[]) => void;
   setTeamName: (teamId: TeamId, name: string) => void;
   toggleSubcategory: (subcategoryId: string) => void;
-  startMatch: () => Promise<boolean>;
+  startMatch: (mode: GameMode) => Promise<boolean>;
   answerQuestion: (answerIndex: number) => void;
   revealPresenterAnswer: () => void;
   resolvePresenterAnswer: (correct: boolean) => void;
@@ -34,6 +36,8 @@ interface GameStore extends GameState {
   skipTimer: () => void;
   useLifeline: (lifelineId: LifelineId) => void;
   advanceToNextTurn: () => void;
+  selectBoardQuestion: (questionId: string) => void;
+  completeSelectionQuestion: () => void;
   endGame: () => void;
   resetGame: () => void;
 }
@@ -56,7 +60,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set((state) => setTeamName(state, teamId, name)),
   toggleSubcategory: (subcategoryId) =>
     set((state) => toggleSubcategory(state, subcategoryId)),
-  startMatch: async () => {
+  startMatch: async (mode) => {
     const state = get();
 
     set({
@@ -71,7 +75,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       );
 
       set((currentState) => ({
-        ...startMatch(currentState, questionDeck),
+        ...startMatch(currentState, questionDeck, mode),
         isStartingMatch: false,
         matchError: null,
       }));
@@ -100,6 +104,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set((state) => useLifeline(state, lifelineId)),
   advanceToNextTurn: () =>
     set((state) => advanceToNextTurn(state)),
+  selectBoardQuestion: (questionId) =>
+    set((state) => selectBoardQuestion(state, questionId)),
+  completeSelectionQuestion: () =>
+    set((state) => completeSelectionQuestion(state)),
   endGame: () => set((state) => endGame(state)),
   resetGame: () => set({ ...createInitialGameState(), tvSessionId: null }),
 }));

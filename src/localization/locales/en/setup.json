@@ -28,5 +28,15 @@
   },
   "start_game": "Start Game",
   "loading_questions": "Loading questions...",
-  "cast_to_tv": "📺 Cast to TV"
+  "cast_to_tv": "📺 Cast to TV",
+  "mode_sheet": {
+    "title": "Choose Game Mode",
+    "classic_title": "Classic Mode",
+    "classic_desc": "Random sequential questions — the default way to play",
+    "classic_badge": "Original",
+    "selection_title": "Teams' Selection",
+    "selection_desc": "Teams pick questions from a category board by point value",
+    "selection_badge": "New",
+    "loading": "Loading..."
+  }
 }

@@ -28,5 +28,15 @@
   },
   "start_game": "ابدأ اللعبة",
   "loading_questions": "جاري تحميل الأسئلة...",
-  "cast_to_tv": "📺 عرض على التلفزيون"
+  "cast_to_tv": "📺 عرض على التلفزيون",
+  "mode_sheet": {
+    "title": "اختر نوع اللعبة",
+    "classic_title": "الوضع الكلاسيكي",
+    "classic_desc": "أسئلة عشوائية متتالية — الطريقة الافتراضية",
+    "classic_badge": "الوضع الأصلي",
+    "selection_title": "اختيار الفرق",
+    "selection_desc": "الفرق تختار الأسئلة من لوحة الفئات والنقاط",
+    "selection_badge": "جديد",
+    "loading": "جاري التحميل..."
+  }
 }
