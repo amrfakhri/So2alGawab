@@ -2,6 +2,7 @@ import React from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
 import { colors } from '../../../shared/theme/colors';
+import { useLanguageStore } from '../../../localization/languageStore';
 
 interface AnswerOptionProps {
   label: string;
@@ -18,6 +19,7 @@ export function AnswerOption({
   revealState = 'neutral',
   onPress,
 }: AnswerOptionProps) {
+  const { isRTL } = useLanguageStore();
   const backgroundColor =
     revealState === 'correct'
       ? '#DFF5E6'
@@ -37,7 +39,7 @@ export function AnswerOption({
         isSelected && styles.selected,
       ]}
     >
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{label}</Text>
     </Pressable>
   );
 }
@@ -58,6 +60,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     lineHeight: 22,
-    textAlign: 'right',
   },
 });

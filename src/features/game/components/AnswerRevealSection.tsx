@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { colors } from '../../../shared/theme/colors';
+import { useLanguageStore } from '../../../localization/languageStore';
 
 interface AnswerRevealSectionProps {
   answer: string;
@@ -10,11 +11,13 @@ interface AnswerRevealSectionProps {
 
 export function AnswerRevealSection({ answer }: AnswerRevealSectionProps) {
   const { t } = useTranslation('game');
+  const { isRTL } = useLanguageStore();
+  const textAlign = isRTL ? 'right' : 'left';
 
   return (
     <View style={styles.card}>
-      <Text style={styles.eyebrow}>{t('correct_answer_eyebrow')}</Text>
-      <Text style={styles.answer}>{answer}</Text>
+      <Text style={[styles.eyebrow, { textAlign }]}>{t('correct_answer_eyebrow')}</Text>
+      <Text style={[styles.answer, { textAlign }]}>{answer}</Text>
     </View>
   );
 }
@@ -32,13 +35,11 @@ const styles = StyleSheet.create({
     color: colors.success,
     fontWeight: '800',
     fontSize: 13,
-    textAlign: 'right',
   },
   answer: {
     color: colors.text,
     fontWeight: '800',
     fontSize: 22,
     lineHeight: 28,
-    textAlign: 'right',
   },
 });

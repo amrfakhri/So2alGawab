@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Subcategory } from '../../game/types/game';
 import { colors } from '../../../shared/theme/colors';
 import { AppIcon, type AppIconName } from '../../../shared/components/AppIcon';
+import { useLanguageStore } from '../../../localization/languageStore';
 
 interface SubcategoryCardProps {
   subcategory: Subcategory;
@@ -26,6 +27,8 @@ export function SubcategoryCard({
   onPress,
 }: SubcategoryCardProps) {
   const { t } = useTranslation('setup');
+  const { isRTL } = useLanguageStore();
+  const textAlign = isRTL ? 'right' : 'left';
 
   return (
     <Pressable
@@ -36,7 +39,7 @@ export function SubcategoryCard({
         pressed && styles.pressed,
       ]}
     >
-      <View style={styles.badgeRow}>
+      <View style={[styles.badgeRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <Text style={styles.badge}>
           {t('subcategory_card.remaining', { count: remainingGames })}
         </Text>
@@ -56,8 +59,8 @@ export function SubcategoryCard({
       </View>
 
       <View style={styles.copy}>
-        <Text style={styles.title}>{subcategory.name}</Text>
-        <Text style={styles.description}>{subcategory.description}</Text>
+        <Text style={[styles.title, { textAlign }]}>{subcategory.name}</Text>
+        <Text style={[styles.description, { textAlign }]}>{subcategory.description}</Text>
       </View>
     </Pressable>
   );
@@ -82,7 +85,6 @@ const styles = StyleSheet.create({
     opacity: 0.92,
   },
   badgeRow: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
@@ -117,12 +119,10 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 16,
     fontWeight: '800',
-    textAlign: 'right',
   },
   description: {
     color: colors.mutedText,
     fontSize: 12,
     lineHeight: 18,
-    textAlign: 'right',
   },
 });

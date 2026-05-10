@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Question } from '../types/game';
 import { colors } from '../../../shared/theme/colors';
 import { AudioPlayer } from './AudioPlayer';
+import { useLanguageStore } from '../../../localization/languageStore';
 
 interface QuestionCardProps {
   categoryName: string;
@@ -21,13 +22,15 @@ export function QuestionCard({
   hint,
 }: QuestionCardProps) {
   const { t } = useTranslation('game');
+  const { isRTL } = useLanguageStore();
+  const textAlign = isRTL ? 'right' : 'left';
 
   return (
     <View style={styles.card}>
-      <View style={styles.metaRow}>
+      <View style={[styles.metaRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <View style={styles.metaCopy}>
-          <Text style={styles.category}>{categoryName}</Text>
-          <Text style={styles.subcategory}>{subcategoryName}</Text>
+          <Text style={[styles.category, { textAlign }]}>{categoryName}</Text>
+          <Text style={[styles.subcategory, { textAlign }]}>{subcategoryName}</Text>
         </View>
         <Text style={styles.points}>
           {t('question_card.points', { points: question.points })}
@@ -65,12 +68,12 @@ export function QuestionCard({
         </>
       ) : null}
 
-      <Text style={styles.prompt}>{question.prompt}</Text>
+      <Text style={[styles.prompt, { textAlign }]}>{question.prompt}</Text>
 
       {hint ? (
         <View style={styles.hintBox}>
-          <Text style={styles.hintLabel}>{t('question_card.hint_label')}</Text>
-          <Text style={styles.hintText}>{hint}</Text>
+          <Text style={[styles.hintLabel, { textAlign }]}>{t('question_card.hint_label')}</Text>
+          <Text style={[styles.hintText, { textAlign }]}>{hint}</Text>
         </View>
       ) : null}
     </View>
@@ -100,13 +103,11 @@ const styles = StyleSheet.create({
     color: colors.secondary,
     fontWeight: '800',
     fontSize: 14,
-    textAlign: 'right',
   },
   subcategory: {
     color: colors.mutedText,
     fontWeight: '600',
     fontSize: 13,
-    textAlign: 'right',
   },
   points: {
     color: colors.primary,
@@ -148,7 +149,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     lineHeight: 36,
     fontWeight: '800',
-    textAlign: 'right',
   },
   hintBox: {
     backgroundColor: '#FFF5EA',
@@ -159,11 +159,9 @@ const styles = StyleSheet.create({
   hintLabel: {
     color: colors.primaryDark,
     fontWeight: '800',
-    textAlign: 'right',
   },
   hintText: {
     color: colors.text,
     lineHeight: 22,
-    textAlign: 'right',
   },
 });

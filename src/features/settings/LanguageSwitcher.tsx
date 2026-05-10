@@ -76,7 +76,7 @@ export function LanguageSwitcher({ visible, onClose }: LanguageSwitcherProps) {
                   accessibilityLabel={nativeName}
                 >
                   {/* Left side: flag + names */}
-                  <View style={[styles.optionLeft, { flexDirection: isRTL ? 'row' : 'row' }]}>
+                  <View style={styles.optionLeft}>
                     <View style={[styles.flagBadge, selected && styles.flagBadgeSelected]}>
                       <Text style={styles.flagEmoji}>{meta.flag}</Text>
                       <Text style={[styles.langCode, selected && styles.langCodeSelected]}>
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: 8,
+    marginStart: 8,
   },
   indicatorSelected: {
     backgroundColor: colors.primary,

@@ -108,7 +108,7 @@ export function SubcategoryGrid({
       {filteredCategories.map((category) => (
         <View key={category.id} style={styles.section}>
           <Text style={[styles.sectionTitle, { textAlign }]}>{category.name}</Text>
-          <View style={styles.grid}>
+          <View style={[styles.grid, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             {category.subcategories.map((subcategory) => (
               <SubcategoryCard
                 key={subcategory.id}
@@ -179,7 +179,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   grid: {
-    flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     gap: 12,

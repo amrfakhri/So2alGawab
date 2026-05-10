@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { useTranslation } from 'react-i18next';
+import { useLanguageStore } from '../../localization/languageStore';
 
 import { supabase } from '../../services/supabase/supabaseClient';
 import {
@@ -20,6 +21,8 @@ const POLL_FALLBACK_MS = 5000;
 
 export function TvLobbyScreen() {
   const { t } = useTranslation('tv');
+  const { isRTL } = useLanguageStore();
+  const textAlign = isRTL ? 'right' : 'left';
   const [state, setState] = useState<State>({ phase: 'creating' });
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -134,14 +137,14 @@ export function TvLobbyScreen() {
             </View>
 
             <View style={styles.stepsSection}>
-              <Text style={styles.stepsTitle}>{t('lobby.how_to_connect')}</Text>
+              <Text style={[styles.stepsTitle, { textAlign }]}>{t('lobby.how_to_connect')}</Text>
               <View style={styles.stepsList}>
                 {steps.map((text, i) => (
-                  <View key={i} style={styles.stepRow}>
+                  <View key={i} style={[styles.stepRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
                     <View style={styles.stepBadge}>
                       <Text style={styles.stepBadgeText}>{stepNums[i]}</Text>
                     </View>
-                    <Text style={styles.stepText}>{text}</Text>
+                    <Text style={[styles.stepText, { textAlign }]}>{text}</Text>
                   </View>
                 ))}
               </View>
@@ -216,9 +219,9 @@ const styles = StyleSheet.create({
   codeChar: { color: tv.yellow, fontSize: 44, fontWeight: '900' },
   waitingRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   waitingText: { color: tv.muted, fontSize: 15, fontWeight: '600' },
-  stepsTitle: { color: tv.white, fontSize: 26, fontWeight: '900', textAlign: 'right' },
+  stepsTitle: { color: tv.white, fontSize: 26, fontWeight: '900' },
   stepsList: { gap: 18 },
-  stepRow: { flexDirection: 'row', alignItems: 'center', gap: 18 },
+  stepRow: { alignItems: 'center', gap: 18 },
   stepBadge: {
     width: 44,
     height: 44,
@@ -229,7 +232,7 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   stepBadgeText: { color: '#111111', fontSize: 18, fontWeight: '900' },
-  stepText: { color: tv.white, fontSize: 20, fontWeight: '600', flex: 1, textAlign: 'right', lineHeight: 28 },
+  stepText: { color: tv.white, fontSize: 20, fontWeight: '600', flex: 1, lineHeight: 28 },
   statusText: { color: tv.muted, fontSize: 18, fontWeight: '600' },
   errorText: { color: tv.error, fontSize: 18, fontWeight: '700', textAlign: 'center' },
   footer: {

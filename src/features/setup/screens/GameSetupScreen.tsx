@@ -64,7 +64,7 @@ export function GameSetupScreen({ navigation }: Props) {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <View style={styles.headerRow}>
+          <View style={[styles.headerRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             <Text style={[styles.eyebrow, { textAlign: isRTL ? 'right' : 'left' }]}>
               {t('setup:eyebrow')}
             </Text>
@@ -185,7 +185,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   headerRow: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },

@@ -43,21 +43,23 @@ export function SelectedCategoriesPreview({
         keyboardShouldPersistTaps="handled"
       >
         {subcategories.map((sub) => (
-          <View
-            key={sub.id}
-            style={[styles.chip, isRTL && styles.chipRTL]}
-          >
+          <View key={sub.id} style={styles.chip}>
+            {/* Icon */}
             <View style={styles.iconCircle}>
               <AppIcon
                 name={ICON_BY_TYPE[sub.type] ?? 'mixed-type'}
-                size={18}
+                size={20}
                 color={colors.primary}
                 weight="duotone"
               />
             </View>
-            <Text style={[styles.chipName, isRTL && styles.chipNameRTL]} numberOfLines={2}>
+
+            {/* Name — bounded by the chip's fixed width, always visible */}
+            <Text style={styles.chipName} numberOfLines={2}>
               {sub.name}
             </Text>
+
+            {/* Remove button */}
             <Pressable
               onPress={() => onRemove(sub.id)}
               style={({ pressed }) => [
@@ -76,6 +78,8 @@ export function SelectedCategoriesPreview({
   );
 }
 
+const CHIP_WIDTH = 96;
+
 const styles = StyleSheet.create({
   wrapper: {
     borderTopWidth: 1,
@@ -93,47 +97,45 @@ const styles = StyleSheet.create({
   scrollContentRTL: {
     flexDirection: 'row-reverse',
   },
+
+  // Vertical chip: fixed width so text always has a known constraint
   chip: {
     position: 'relative',
-    flexDirection: 'row',
+    width: CHIP_WIDTH,
     alignItems: 'center',
     backgroundColor: colors.surface,
     borderRadius: 14,
     borderWidth: 1.5,
     borderColor: colors.primary,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    paddingTop: 14,
-    gap: 8,
-    maxWidth: 150,
+    paddingTop: 10,
+    paddingBottom: 10,
+    paddingHorizontal: 6,
+    gap: 6,
     shadowColor: colors.shadow,
     shadowOpacity: 0.1,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
   },
-  chipRTL: {
-    flexDirection: 'row-reverse',
-  },
   iconCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: '#FFF0E8',
     justifyContent: 'center',
     alignItems: 'center',
-    flexShrink: 0,
   },
+
+  // No flex:1 — chip has an explicit width, so the text is fully bounded
   chipName: {
-    flex: 1,
+    alignSelf: 'stretch',
     color: colors.text,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
-    textAlign: 'left',
+    textAlign: 'center',
+    lineHeight: 16,
   },
-  chipNameRTL: {
-    textAlign: 'right',
-  },
+
   removeBtn: {
     position: 'absolute',
     top: -8,

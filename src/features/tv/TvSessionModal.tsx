@@ -16,6 +16,7 @@ import { colors } from '../../shared/theme/colors';
 import { createGameSession, GameSession, TV_BASE_URL } from '../../services/supabase/sessionService';
 import { useGameStore } from '../game/store/useGameStore';
 import { AppIcon } from '../../shared/components/AppIcon';
+import { useLanguageStore } from '../../localization/languageStore';
 
 type State =
   | { phase: 'idle' }
@@ -30,6 +31,8 @@ interface TvSessionModalProps {
 
 export function TvSessionModal({ visible, onClose }: TvSessionModalProps) {
   const { t } = useTranslation(['tv', 'common']);
+  const { isRTL } = useLanguageStore();
+  const textAlign = isRTL ? 'right' : 'left';
   const [state, setState] = useState<State>({ phase: 'idle' });
 
   React.useEffect(() => {
@@ -62,8 +65,8 @@ export function TvSessionModal({ visible, onClose }: TvSessionModalProps) {
     <Modal transparent visible={visible} animationType="slide" onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.card}>
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>{t('tv:session_modal.title')}</Text>
+          <View style={[styles.header, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+            <Text style={[styles.headerTitle, { textAlign }]}>{t('tv:session_modal.title')}</Text>
             <Pressable onPress={onClose} style={styles.closeBtn} hitSlop={12}>
               <AppIcon name="close" size={14} color={colors.mutedText} weight="bold" />
             </Pressable>
@@ -72,7 +75,7 @@ export function TvSessionModal({ visible, onClose }: TvSessionModalProps) {
           {state.phase === 'creating' && (
             <View style={styles.stateCenter}>
               <ActivityIndicator size="large" color={colors.primary} />
-              <Text style={styles.stateText}>{t('tv:session_modal.creating')}</Text>
+              <Text style={[styles.stateText, { textAlign }]}>{t('tv:session_modal.creating')}</Text>
             </View>
           )}
 
@@ -145,7 +148,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
-  headerTitle: { fontSize: 18, fontWeight: '800', color: colors.text, textAlign: 'right' },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: colors.text },
   closeBtn: {
     width: 32,
     height: 32,
@@ -155,7 +158,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   stateCenter: { alignItems: 'center', justifyContent: 'center', paddingVertical: 48, gap: 16 },
-  stateText: { color: colors.mutedText, fontSize: 16, fontWeight: '600', textAlign: 'right' },
+  stateText: { color: colors.mutedText, fontSize: 16, fontWeight: '600' },
   errorText: { color: '#B42318', fontSize: 15, fontWeight: '600', textAlign: 'center', paddingHorizontal: 24 },
   retryBtn: { backgroundColor: colors.primary, borderRadius: 14, paddingHorizontal: 22, paddingVertical: 12 },
   retryBtnText: { color: '#FFFFFF', fontWeight: '700', fontSize: 15 },
