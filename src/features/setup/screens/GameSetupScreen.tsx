@@ -17,6 +17,7 @@ import { CastToTvModal } from '../../tv/CastToTvModal';
 import { LanguageSwitcher } from '../../settings/LanguageSwitcher';
 import { useLanguageStore } from '../../../localization/languageStore';
 import { AppIcon } from '../../../shared/components/AppIcon';
+import { SelectedCategoriesPreview } from '../components/SelectedCategoriesPreview';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameSetup'>;
 
@@ -45,6 +46,10 @@ export function GameSetupScreen({ navigation }: Props) {
   });
 
   const canStart = selectedSubcategoryIds.length >= MIN_SUBCATEGORIES_PER_MATCH;
+
+  const selectedSubcategories = availableCategories
+    .flatMap((cat) => cat.subcategories)
+    .filter((sub) => selectedSubcategoryIds.includes(sub.id));
 
   React.useEffect(() => {
     if (categoriesQuery.data) {
@@ -116,6 +121,11 @@ export function GameSetupScreen({ navigation }: Props) {
           ) : null}
         </View>
       </ScrollView>
+
+      <SelectedCategoriesPreview
+        subcategories={selectedSubcategories}
+        onRemove={toggleSubcategory}
+      />
 
       <View style={styles.footer}>
         <PrimaryButton

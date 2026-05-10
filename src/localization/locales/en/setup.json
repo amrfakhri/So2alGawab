@@ -15,7 +15,10 @@
   },
   "subcategory_grid": {
     "title": "Choose Categories",
-    "hint": "Choose {{min}}–{{max}} categories"
+    "hint": "Choose {{min}}–{{max}} categories",
+    "search_placeholder": "Search categories...",
+    "search_empty_title": "No matching categories found",
+    "search_empty_body": "Try a different word or browse categories manually."
   },
   "subcategory_card": {
     "remaining": "{{count}} left"

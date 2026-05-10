@@ -15,7 +15,10 @@
   },
   "subcategory_grid": {
     "title": "اختر الفئات",
-    "hint": "اختر من {{min}} إلى {{max}} فئات"
+    "hint": "اختر من {{min}} إلى {{max}} فئات",
+    "search_placeholder": "ابحث عن تصنيف...",
+    "search_empty_title": "لم يتم العثور على نتائج",
+    "search_empty_body": "جرّب كلمة مختلفة أو تصفح الفئات يدوياً."
   },
   "subcategory_card": {
     "remaining": "باقي {{count}} لعبة"
