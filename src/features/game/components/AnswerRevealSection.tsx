@@ -2,8 +2,8 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { colors } from '../../../shared/theme/colors';
-import { useLanguageStore } from '../../../localization/languageStore';
+import { alpha, dark, palette, r, textStyle } from '../../../shared/theme/tokens';
+import { useLocale } from '../../../localization/useLocale';
 
 interface AnswerRevealSectionProps {
   answer: string;
@@ -11,35 +11,34 @@ interface AnswerRevealSectionProps {
 
 export function AnswerRevealSection({ answer }: AnswerRevealSectionProps) {
   const { t } = useTranslation('game');
-  const { isRTL } = useLanguageStore();
-  const textAlign = isRTL ? 'right' : 'left';
+  const { textAlign } = useLocale('game');
 
   return (
     <View style={styles.card}>
       <Text style={[styles.eyebrow, { textAlign }]}>{t('correct_answer_eyebrow')}</Text>
-      <Text style={[styles.answer, { textAlign }]}>{answer}</Text>
+      <Text style={[styles.answer,  { textAlign }]}>{answer}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#EAF7EE',
-    borderRadius: 22,
+    backgroundColor: alpha.success[16],
+    borderRadius: r.card,
     padding: 18,
     borderWidth: 1,
-    borderColor: '#B7DEC3',
+    borderColor: palette.success[600],
     gap: 8,
   },
   eyebrow: {
-    color: colors.success,
+    color: dark.textSuccess,
+    ...textStyle.captionMd,
     fontWeight: '800',
-    fontSize: 13,
   },
   answer: {
-    color: colors.text,
+    color: dark.textPrimary,
+    ...textStyle.titleSectionMd,
     fontWeight: '800',
-    fontSize: 22,
     lineHeight: 28,
   },
 });

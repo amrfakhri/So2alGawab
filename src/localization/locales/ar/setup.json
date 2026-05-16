@@ -1,7 +1,7 @@
 {
   "eyebrow": "So2alGawab",
-  "title": "اختر نوع التحدي وابدأ العرض.",
-  "subtitle": "اختَر من فئتين إلى ست فئات من الشبكة التالية، وبعدها يبدأ المقدم إدارة الجولة مباشرة.",
+  "title": "اختار اللي يعجبك",
+  "subtitle": "اختار لحد 6 تصنيفات للسهرة",
   "teams": {
     "section_title": "أسماء الفرق",
     "team_a_placeholder": "اسم الفريق الأول",
@@ -16,9 +16,15 @@
   "subcategory_grid": {
     "title": "اختر الفئات",
     "hint": "اختر من {{min}} إلى {{max}} فئات",
-    "search_placeholder": "ابحث عن تصنيف...",
+    "search_placeholder": "دور على تصنيف...",
     "search_empty_title": "لم يتم العثور على نتائج",
-    "search_empty_body": "جرّب كلمة مختلفة أو تصفح الفئات يدوياً."
+    "search_empty_body": "جرّب كلمة مختلفة أو تصفح الفئات يدوياً.",
+    "filters": {
+      "all": "الكل",
+      "mixed": "متنوع",
+      "text": "نصوص",
+      "image": "صور"
+    }
   },
   "subcategory_card": {
     "remaining": "باقي {{count}} لعبة"
@@ -26,17 +32,36 @@
   "category_picker": {
     "header": "اختر فئتين فرعيتين"
   },
+  "choose_teams": "اختار الفرق",
   "start_game": "ابدأ اللعبة",
+  "start_game_with_count": "كمّل • {{count}} تصنيفات",
+  "team_setup": {
+    "title": "جهز الفريقين",
+    "subtitle": "اختار اسامي حلوة و شكل لكل فريق",
+    "team_a_label": "الفريق الاول",
+    "team_b_label": "الفريق الثاني",
+    "name_placeholder": "اكتب اسم الفريق",
+    "start_btn": "ابدا اللعبة",
+    "avatar_sheet_title": "اختار شكل الفريق",
+    "avatar_sheet_subtitle": "اختار إيموجي يمثل فريقك"
+  },
+  "selected_categories": {
+    "title": "اللي اخترتها ({{count}})",
+    "clear": "امسح الكل"
+  },
   "loading_questions": "جاري تحميل الأسئلة...",
-  "cast_to_tv": "📺 عرض على التلفزيون",
+  "cast_to_tv": "عرض على التلفزيون",
   "mode_sheet": {
-    "title": "اختر نوع اللعبة",
-    "classic_title": "الوضع الكلاسيكي",
-    "classic_desc": "أسئلة عشوائية متتالية — الطريقة الافتراضية",
-    "classic_badge": "الوضع الأصلي",
-    "selection_title": "اختيار الفرق",
-    "selection_desc": "الفرق تختار الأسئلة من لوحة الفئات والنقاط",
+    "title": "هتلعبوا إزاي؟",
+    "subtitle": "اختار الطريقة اللي تناسب الشلة",
+    "classic_title": "كلاسيك",
+    "classic_desc": "سؤال ورا سؤال والوقت بيجري",
+    "classic_badge": "سريع",
+    "selection_title": "فرق وتحدي",
+    "selection_desc": "لوحة نقط زي برامج المسابقات • اختار التصنيف والنقطة",
     "selection_badge": "جديد",
+    "confirm": "تمام، كمّل",
+    "back": "رجوع",
     "loading": "جاري التحميل..."
   }
 }

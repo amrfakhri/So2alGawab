@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
+  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -7,36 +8,53 @@ import {
   Text,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useTranslation } from 'react-i18next';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 
 import { RootStackParamList } from '../../../navigation/RootNavigator';
-import { colors } from '../../../shared/theme/colors';
+import {
+  alpha,
+  dark,
+  glow,
+  gradients,
+  radius,
+  spacing,
+  textStyle,
+} from '../../../shared/theme/tokens';
 import { useGameStore } from '../store/useGameStore';
 import { useLocale } from '../../../localization/useLocale';
 import { Question } from '../types/game';
-import { AppIcon } from '../../../shared/components/AppIcon';
+import { GameBackdrop } from '../components/GameBackdrop';
+import { FixedBottomBar } from '../components/FixedBottomBar';
 import { PrimaryButton } from '../../../shared/components/PrimaryButton';
+import { AppIcon } from '../../../shared/components/AppIcon';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SelectionBoard'>;
 
 const BOARD_QUESTIONS_PER_SUBCATEGORY = 6;
+const HEADER_H = 112;
+const CHIP_W = 68;
+const CHIP_H = 72;
+const CAT_CARD_PAD = spacing.md;
 
 interface BoardColumn {
   subId: string;
   name: string;
+  imageUrl?: string;
   questions: Question[];
 }
 
 export function SelectionBoardScreen({ navigation }: Props) {
-  const { t } = useTranslation('game');
-  const { isRTL, textAlign, rowLTR } = useLocale('game');
+  const { t, textAlign, rowLTR } = useLocale('game');
+  const insets = useSafeAreaInsets();
   const [showExitModal, setShowExitModal] = useState(false);
 
   const {
     questionDeck,
     selectedSubcategoryIds,
+    availableCategories,
     teams,
     activeTeamId,
     answeredQuestionIds,
@@ -44,7 +62,16 @@ export function SelectionBoardScreen({ navigation }: Props) {
     endGame,
   } = useGameStore();
 
-  // ── Board data ────────────────────────────────────────────────────────────
+  const subcategoryImageMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const cat of availableCategories) {
+      for (const sub of cat.subcategories) {
+        if (sub.image) map[sub.id] = sub.image;
+      }
+    }
+    return map;
+  }, [availableCategories]);
+
   const boardData = useMemo<BoardColumn[]>(() => {
     return selectedSubcategoryIds.map((subId) => {
       const questions = questionDeck
@@ -55,10 +82,11 @@ export function SelectionBoardScreen({ navigation }: Props) {
       return {
         subId,
         name: questions[0]?.subcategoryName ?? subId,
+        imageUrl: subcategoryImageMap[subId],
         questions,
       };
     });
-  }, [questionDeck, selectedSubcategoryIds]);
+  }, [questionDeck, selectedSubcategoryIds, subcategoryImageMap]);
 
   const boardQuestionIds = useMemo(
     () => new Set(boardData.flatMap((col) => col.questions.map((q) => q.id))),
@@ -70,146 +98,304 @@ export function SelectionBoardScreen({ navigation }: Props) {
     [answeredQuestionIds, boardQuestionIds],
   );
 
-  const allAnswered =
-    boardQuestionIds.size > 0 && boardAnsweredCount >= boardQuestionIds.size;
+  const allAnswered = boardQuestionIds.size > 0 && boardAnsweredCount >= boardQuestionIds.size;
 
-  // ── Navigate to Results when board is complete ────────────────────────────
   useEffect(() => {
-    if (allAnswered) {
-      navigation.replace('Results');
-    }
+    if (allAnswered) navigation.replace('Results');
   }, [allAnswered, navigation]);
 
-  // ── Active team info ──────────────────────────────────────────────────────
   const activeTeam = teams[activeTeamId];
-  const activeTeamAccent = activeTeamId === 'A' ? colors.teamA : colors.teamB;
+  const isTeamAActive = activeTeamId === 'A';
+  const remainingCount = boardQuestionIds.size - boardAnsweredCount;
+  const isAnswered = (id: string) => answeredQuestionIds.includes(id);
 
   const handleCellPress = (questionId: string) => {
     selectBoardQuestion(questionId);
     navigation.replace('Question');
   };
 
-  const isAnswered = (questionId: string) => answeredQuestionIds.includes(questionId);
+  // Team-specific color helpers
+  function teamBg(id: 'A' | 'B', isActive: boolean) {
+    if (!isActive) return id === 'A' ? [alpha.white[8], alpha.white[8]] as const : gradients.cardGlass;
+    return id === 'A' ? gradients.teamGold : gradients.teamBlue;
+  }
+  function teamBorderColor(id: 'A' | 'B', isActive: boolean) {
+    if (!isActive) return dark.borderDefault;
+    return id === 'A' ? dark.borderActiveMuted : dark.borderFocusRing;
+  }
+  function teamAvatarBg(id: 'A' | 'B', isActive: boolean) {
+    if (!isActive) return alpha.white[16];
+    return id === 'A' ? dark.bgAccent : dark.bgHighlight;
+  }
+  function teamStatusColor(id: 'A' | 'B', isActive: boolean) {
+    if (!isActive) return dark.textSecondary;
+    return id === 'A' ? dark.textAccent : dark.textHighlight;
+  }
+  function teamDividerColor(id: 'A' | 'B', isActive: boolean) {
+    if (!isActive) return alpha.white[40];
+    return id === 'A' ? alpha.gold[40] : alpha.blue[40];
+  }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      {/* ── Top bar ────────────────────────────────────────────────────── */}
-      <View style={[styles.topBar, { flexDirection: rowLTR }]}>
-        <Pressable
-          onPress={() => setShowExitModal(true)}
-          style={({ pressed }) => [styles.endBtn, pressed && styles.endBtnPressed]}
-          hitSlop={8}
-        >
-          <Text style={styles.endBtnText}>{t('board.end_game_btn')}</Text>
-        </Pressable>
-
-        {/* Active team turn indicator */}
-        <View style={[styles.turnBadge, { borderColor: activeTeamAccent }]}>
-          <View style={[styles.turnDot, { backgroundColor: activeTeamAccent }]} />
-          <Text style={styles.turnText} numberOfLines={1}>
-            {t('board.active_team', { name: activeTeam.name })}
-          </Text>
-        </View>
-      </View>
-
-      {/* ── Score cards ────────────────────────────────────────────────── */}
-      <View style={[styles.scoreRow, { flexDirection: rowLTR }]}>
-        {[teams.A, teams.B].map((team) => {
-          const accent = team.id === 'A' ? colors.teamA : colors.teamB;
-          const isActive = team.id === activeTeamId;
-          return (
-            <View
-              key={team.id}
-              style={[
-                styles.scoreCard,
-                isActive && { borderColor: accent, borderWidth: 2 },
-              ]}
-            >
-              <Text style={[styles.scoreTeamName, { textAlign, color: isActive ? accent : colors.mutedText }]} numberOfLines={1}>
-                {team.name}
-              </Text>
-              <Text style={[styles.scoreValue, { color: accent }]}>{team.score}</Text>
-            </View>
-          );
-        })}
-      </View>
-
-      {/* ── Progress bar ───────────────────────────────────────────────── */}
-      <View style={styles.progressTrack}>
-        <View
-          style={[
-            styles.progressFill,
+    <>
+      <GameBackdrop>
+        {/* ── Scrollable body ─────────────────────────────────────── */}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[
+            styles.scroll,
             {
-              width: boardQuestionIds.size > 0
-                ? `${(boardAnsweredCount / boardQuestionIds.size) * 100}%`
-                : '0%',
+              paddingTop: insets.top + HEADER_H,
+              paddingBottom: insets.bottom + 128,
             },
           ]}
-        />
-      </View>
+        >
+          {/* ── Team score cards ─────────────────────────────────── */}
+          <View style={[styles.scoreRow, { flexDirection: rowLTR }]}>
+            {[teams.A, teams.B].map((team) => {
+              const isActive = team.id === activeTeamId;
+              const id = team.id as 'A' | 'B';
+              return (
+                <View key={team.id} style={styles.scoreCard}>
+                  <LinearGradient
+                    colors={teamBg(id, isActive)}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={StyleSheet.absoluteFill}
+                  />
+                  <View
+                    style={[
+                      styles.scoreCardBorder,
+                      { borderColor: teamBorderColor(id, isActive) },
+                    ]}
+                  />
 
-      {/* ── Category sections ──────────────────────────────────────────── */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {boardData.map((col) => {
-          const colAnsweredCount = col.questions.filter((q) => isAnswered(q.id)).length;
-          const colTotal = col.questions.length;
+                  {/* Card content — column */}
+                  <View style={styles.scoreCardContent}>
+                    {/* Team details row: avatar (right) + text (left) */}
+                    <View style={[styles.scoreTeamRow, { flexDirection: rowLTR }]}>
+                      {/* Avatar — first = rightmost in RTL */}
+                      <View
+                        style={[
+                          styles.scoreAvatar,
+                          { backgroundColor: teamAvatarBg(id, isActive) },
+                        ]}
+                      >
+                        <Text style={styles.scoreAvatarEmoji}>{team.avatar}</Text>
+                      </View>
+                      {/* Name + status */}
+                      <View style={styles.scoreTeamText}>
+                        <Text
+                          style={[styles.scoreName, { color: dark.textPrimary, textAlign }]}
+                          numberOfLines={1}
+                        >
+                          {team.name}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.scoreStatus,
+                            { color: teamStatusColor(id, isActive) },
+                          ]}
+                        >
+                          {isActive ? t('team_status.active') : t('team_status.waiting')}
+                        </Text>
+                      </View>
+                    </View>
 
-          return (
-            <View key={col.subId} style={styles.categorySection}>
-              {/* Category header */}
-              <View style={[styles.categoryHeader, { flexDirection: rowLTR }]}>
-                <View style={styles.categoryIconBubble}>
-                  <AppIcon name="crown" size={18} color={colors.primary} weight="duotone" />
+                    {/* Team-coloured gradient divider */}
+                    <LinearGradient
+                      colors={[teamDividerColor(id, isActive), 'transparent']}
+                      start={{ x: 1, y: 0 }}
+                      end={{ x: 0, y: 0 }}
+                      style={styles.scoreDividerLine}
+                    />
+
+                    {/* Score */}
+                    <Text style={[styles.scoreValue, { color: dark.textPrimary, textAlign }]}>
+                      {team.score}
+                    </Text>
+                  </View>
                 </View>
-                <Text style={[styles.categoryName, { textAlign, flex: 1 }]} numberOfLines={1}>
-                  {col.name}
-                </Text>
-                <View style={styles.categoryBadge}>
-                  <Text style={styles.categoryBadgeText}>
-                    {colAnsweredCount}/{colTotal}
+              );
+            })}
+          </View>
+
+          {/* ── Category question cards ───────────────────────────── */}
+          {boardData.map((col) => {
+            const colAnswered = col.questions.filter((q) => isAnswered(q.id)).length;
+            return (
+              <View key={col.subId} style={styles.categoryCard}>
+                <View style={styles.categoryCardBg} />
+                <View style={styles.categoryCardBorder} />
+
+                {/* Header row */}
+                <View style={[styles.catHeaderRow, { flexDirection: rowLTR }]}>
+                  {col.imageUrl ? (
+                    <Image
+                      source={{ uri: col.imageUrl }}
+                      style={styles.catThumb}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={[styles.catThumb, styles.catThumbFallback]}>
+                      <AppIcon name="crown" size={18} color={dark.iconAccent} weight="duotone" />
+                    </View>
+                  )}
+                  <Text style={[styles.catName, { textAlign, flex: 1 }]} numberOfLines={1}>
+                    {col.name}
+                  </Text>
+                  <Text style={styles.catCount}>
+                    {colAnswered}/{col.questions.length}
                   </Text>
                 </View>
-              </View>
 
-              {/* Point chips — wrapping, right-aligned */}
-              <View style={styles.chipsRow}>
-                {col.questions.map((q) => {
-                  const answered = isAnswered(q.id);
-                  return (
-                    <Pressable
-                      key={q.id}
-                      onPress={() => !answered && handleCellPress(q.id)}
-                      disabled={answered}
-                      style={({ pressed }) => [
-                        styles.chip,
-                        answered ? styles.chipAnswered : styles.chipActive,
-                        pressed && !answered && styles.chipPressed,
-                      ]}
-                    >
-                      {answered ? (
-                        <>
-                          <AppIcon name="check" size={20} color={colors.mutedText} weight="bold" />
-                          <Text style={styles.chipAnsweredLabel}>{t('board.answered_label')}</Text>
-                        </>
-                      ) : (
-                        <Text style={styles.chipPoints}>{q.points}</Text>
-                      )}
-                    </Pressable>
-                  );
+                {/* Neutral gradient divider */}
+                <LinearGradient
+                  colors={['transparent', alpha.white[40], 'transparent']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.catDivider}
+                />
+
+                {/* ── Chips — horizontal scroll ─────────────────── */}
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.chipsScroll}
+                  contentContainerStyle={[
+                    styles.chipsScrollContent,
+                    { flexDirection: rowLTR },
+                  ]}
+                >
+                  {col.questions.map((q) => {
+                    const answered = isAnswered(q.id);
+                    return (
+                      <Pressable
+                        key={q.id}
+                        onPress={() => !answered && handleCellPress(q.id)}
+                        disabled={answered}
+                        style={({ pressed }) => [
+                          styles.chip,
+                          answered ? styles.chipAnswered : styles.chipAvailable,
+                          pressed && !answered && styles.chipPressed,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.chipPoints,
+                            { color: answered ? dark.textDisabled : dark.textInverse },
+                          ]}
+                        >
+                          {q.points}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.chipUnit,
+                            { color: answered ? dark.textDisabled : dark.textInverse },
+                          ]}
+                        >
+                          {t('board.points_unit')}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            );
+          })}
+        </ScrollView>
+
+        {/* ── Fixed header ────────────────────────────────────────── */}
+        <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+          <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+          <View style={styles.headerBorder} />
+          <View style={[styles.headerRow, { flexDirection: rowLTR }]}>
+            <Pressable
+              onPress={() => setShowExitModal(true)}
+              style={({ pressed }) => [styles.closeBtn, pressed && { opacity: 0.75 }]}
+              hitSlop={8}
+            >
+              <LinearGradient
+                colors={[alpha.white[8], alpha.white[4]]}
+                style={StyleSheet.absoluteFill}
+              />
+              <View style={styles.closeBtnBorder} />
+              <AppIcon name="close" size={18} color={dark.textSecondary} weight="bold" />
+            </Pressable>
+
+            <View style={styles.headerCenter}>
+              <Text style={styles.headerEyebrow}>
+                {t('board.turn', {
+                  current: Math.min(boardAnsweredCount + 1, boardQuestionIds.size),
+                  total: boardQuestionIds.size,
                 })}
-              </View>
+              </Text>
+              <Text style={styles.headerTitle}>{t('board.choose_question')}</Text>
             </View>
-          );
-        })}
 
-        {/* Bottom spacing */}
-        <View style={styles.scrollPad} />
-      </ScrollView>
+            {/* Balance spacer matches close button width */}
+            <View style={styles.closeBtn} />
+          </View>
+        </View>
+      </GameBackdrop>
 
-      {/* ── Exit dialog ────────────────────────────────────────────────── */}
+      {/* ── Fixed bottom bar ──────────────────────────────────────── */}
+      <FixedBottomBar>
+        {/* Active team pill — team-coloured gradient, pill shape */}
+        <View style={[styles.activeTeamPill, { flexDirection: rowLTR }]}>
+          <LinearGradient
+            colors={isTeamAActive ? gradients.teamGold : gradients.teamBlue}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={StyleSheet.absoluteFill}
+          />
+          <View
+            style={[
+              styles.activeTeamPillBorder,
+              {
+                borderColor: isTeamAActive
+                  ? dark.borderActiveMuted
+                  : dark.borderFocusRing,
+              },
+            ]}
+          />
+
+          {/* Avatar — first = rightmost in RTL */}
+          <View
+            style={[
+              styles.pillAvatar,
+              {
+                backgroundColor: isTeamAActive ? dark.bgAccent : dark.bgHighlight,
+              },
+            ]}
+          >
+            <Text style={styles.pillAvatarEmoji}>{activeTeam.avatar}</Text>
+          </View>
+
+          {/* Name + subtitle — flex 1, fills middle */}
+          <View style={styles.pillMeta}>
+            <Text style={[styles.pillName, { textAlign }]} numberOfLines={1}>
+              {t('board.active_team', { name: activeTeam.name })}
+            </Text>
+            <Text style={[styles.pillSub, { textAlign }]} numberOfLines={1}>
+              {t('board.choose_subtitle')}
+            </Text>
+          </View>
+
+          {/* Remaining count — last = leftmost in RTL */}
+          <Text
+            style={[
+              styles.pillRemaining,
+              { color: isTeamAActive ? dark.textAccent : dark.textHighlight },
+            ]}
+            numberOfLines={1}
+          >
+            {t('board.remaining', { count: remainingCount })}
+          </Text>
+        </View>
+      </FixedBottomBar>
+
+      {/* ── Exit modal ────────────────────────────────────────────── */}
       <Modal
         transparent
         visible={showExitModal}
@@ -218,9 +404,13 @@ export function SelectionBoardScreen({ navigation }: Props) {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={[styles.modalTitle, { textAlign }]}>{t('board.exit_dialog.title')}</Text>
-            <Text style={[styles.modalBody, { textAlign }]}>{t('board.exit_dialog.body')}</Text>
-            <View style={[styles.modalActions, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+            <Text style={[styles.modalTitle, { textAlign }]}>
+              {t('board.exit_dialog.title')}
+            </Text>
+            <Text style={[styles.modalBody, { textAlign }]}>
+              {t('board.exit_dialog.body')}
+            </Text>
+            <View style={[styles.modalActions, { flexDirection: rowLTR }]}>
               <PrimaryButton
                 label={t('board.exit_dialog.cancel')}
                 onPress={() => setShowExitModal(false)}
@@ -238,241 +428,295 @@ export function SelectionBoardScreen({ navigation }: Props) {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </>
   );
 }
 
-const CHIP_SIZE = 86;
-
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
+  scroll: {
+    paddingHorizontal: spacing.md,
+    gap: spacing.sm,
   },
 
-  // ── Top bar ──────────────────────────────────────────────────────────────
-  topBar: {
-    paddingHorizontal: 20,
-    paddingTop: 14,
-    paddingBottom: 10,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  endBtn: {
-    backgroundColor: '#FFF1E9',
-    borderColor: '#F0C7B5',
-    borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  endBtnPressed: { opacity: 0.8 },
-  endBtnText: {
-    color: colors.danger,
-    fontWeight: '800',
-    fontSize: 14,
-  },
-  turnBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 7,
-    borderWidth: 1.5,
-    borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    backgroundColor: colors.card,
-    maxWidth: 200,
-  },
-  turnDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    flexShrink: 0,
-  },
-  turnText: {
-    color: colors.text,
-    fontWeight: '700',
-    fontSize: 14,
-    flexShrink: 1,
-  },
-
-  // ── Score cards ──────────────────────────────────────────────────────────
+  // ── Score cards — COLUMN layout (avatar top-right, divider, score) ────────
   scoreRow: {
-    paddingHorizontal: 20,
-    paddingBottom: 10,
-    gap: 10,
+    gap: spacing.xs,
   },
   scoreCard: {
     flex: 1,
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 8,
-  },
-  scoreTeamName: {
-    fontWeight: '700',
-    fontSize: 13,
-    flexShrink: 1,
-  },
-  scoreValue: {
-    fontSize: 22,
-    fontWeight: '900',
-  },
-
-  // ── Progress ─────────────────────────────────────────────────────────────
-  progressTrack: {
-    height: 3,
-    backgroundColor: colors.border,
-    marginHorizontal: 20,
-    marginBottom: 14,
-    borderRadius: 2,
+    borderRadius: radius.md,
     overflow: 'hidden',
   },
-  progressFill: {
-    height: '100%',
-    backgroundColor: colors.primary,
-    borderRadius: 2,
+  scoreCardBorder: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: radius.md,
+    borderWidth: 0.5,
   },
-
-  // ── Category sections ────────────────────────────────────────────────────
-  scrollContent: {
-    paddingHorizontal: 20,
-    gap: 20,
+  scoreCardContent: {
+    padding: spacing.sm,
+    gap: spacing['2xs'],
   },
-  categorySection: {
-    gap: 12,
-  },
-  categoryHeader: {
-    backgroundColor: colors.card,
-    borderRadius: 18,
-    paddingVertical: 13,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
+  scoreTeamRow: {
     alignItems: 'center',
-    gap: 10,
-    shadowColor: colors.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
+    gap: spacing['3xs'],
   },
-  categoryIconBubble: {
+  // Avatar is first child → appears on the RIGHT in RTL via I18nManager
+  scoreAvatar: {
     width: 36,
     height: 36,
-    borderRadius: 18,
-    backgroundColor: '#FFF0E8',
-    justifyContent: 'center',
+    borderRadius: radius.pill,
     alignItems: 'center',
+    justifyContent: 'center',
     flexShrink: 0,
+    overflow: 'hidden',
   },
-  categoryName: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: '800',
+  scoreAvatarEmoji: {
+    fontSize: 18,
   },
-  categoryBadge: {
-    backgroundColor: colors.background,
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderWidth: 1,
-    borderColor: colors.border,
-    flexShrink: 0,
+  scoreTeamText: {
+    flex: 1,
+    gap: 2,
   },
-  categoryBadgeText: {
-    color: colors.mutedText,
-    fontWeight: '800',
-    fontSize: 12,
+  scoreName: {
+    ...textStyle.buttonSm,
+    fontWeight: '700',
+  },
+  scoreStatus: {
+    ...textStyle.labelSm,
+  },
+  // Gradient fades from team colour (right) to transparent (left)
+  scoreDividerLine: {
+    height: 1,
+  },
+  scoreValue: {
+    ...textStyle.titleSectionMd,
+    fontWeight: '700',
   },
 
-  // ── Point chips ──────────────────────────────────────────────────────────
-  chipsRow: {
-    flexDirection: 'row-reverse',
-    flexWrap: 'wrap',
-    gap: 10,
+  // ── Category cards ───────────────────────────────────────────────────────
+  categoryCard: {
+    borderRadius: radius.lg,
+    padding: CAT_CARD_PAD,
+    gap: spacing.sm,
+  },
+  categoryCardBg: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderRadius: radius.lg,
+  },
+  categoryCardBorder: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: alpha.white[8],
+  },
+  catHeaderRow: {
+    alignItems: 'center',
+    gap: spacing['2xs'],
+  },
+  catThumb: {
+    width: 45,
+    height: 36,
+    borderRadius: radius.md,
+    flexShrink: 0,
+    overflow: 'hidden',
+  },
+  catThumbFallback: {
+    backgroundColor: alpha.gold[16],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  catName: {
+    color: dark.textPrimary,
+    ...textStyle.buttonMd,
+  },
+  catCount: {
+    color: dark.textTertiary,
+    ...textStyle.labelSm,
+    flexShrink: 0,
+  },
+  catDivider: {
+    height: 1,
+    marginHorizontal: -CAT_CARD_PAD,
+  },
+
+  // ── Chips — horizontal scroll ─────────────────────────────────────────────
+  chipsScroll: {
+    // Bleed the scroll to card edges so chips can slide in from the padding area
+    marginHorizontal: -CAT_CARD_PAD,
+  },
+  chipsScrollContent: {
+    paddingHorizontal: CAT_CARD_PAD,
+    gap: spacing['2xs'],
+    alignItems: 'center',
   },
   chip: {
-    width: CHIP_SIZE,
-    height: CHIP_SIZE,
-    borderRadius: 20,
-    justifyContent: 'center',
+    width: CHIP_W,
+    height: CHIP_H,
+    borderRadius: radius.lg,
     alignItems: 'center',
-    borderWidth: 1.5,
-    gap: 4,
-    shadowColor: colors.shadow,
-    shadowOpacity: 0.14,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 2,
+    justifyContent: 'center',
+    gap: 2,
+    flexShrink: 0,
   },
-  chipActive: {
-    backgroundColor: colors.secondary,
-    borderColor: '#2E6B8A',
+  chipAvailable: {
+    backgroundColor: dark.bgAccent,
+    ...glow.gold.xs,
   },
   chipAnswered: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    shadowOpacity: 0,
-    elevation: 0,
+    backgroundColor: alpha.white[8],
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: alpha.white[16],
   },
   chipPressed: {
     opacity: 0.75,
-    transform: [{ scale: 0.94 }],
+    transform: [{ scale: 0.95 }],
   },
   chipPoints: {
-    color: '#F5C842',
-    fontSize: 24,
-    fontWeight: '900',
-    letterSpacing: -0.5,
+    ...textStyle.titleSectionMd,
+    fontWeight: '800',
   },
-  chipAnsweredLabel: {
-    color: colors.mutedText,
-    fontSize: 9,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
+  chipUnit: {
+    ...textStyle.labelSm,
+    fontWeight: '500',
   },
 
-  // ── Scroll padding ───────────────────────────────────────────────────────
-  scrollPad: {
-    height: 20,
+  // ── Fixed header ─────────────────────────────────────────────────────────
+  header: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    paddingBottom: 16,
+    paddingHorizontal: spacing.md,
+    overflow: 'hidden',
+  },
+  headerBorder: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: alpha.white[8],
+  },
+  headerRow: {
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 44,
+  },
+  headerCenter: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 2,
+  },
+  headerEyebrow: {
+    color: dark.textAccent,
+    ...textStyle.labelSm,
+    textAlign: 'center',
+  },
+  headerTitle: {
+    color: dark.textPrimary,
+    ...textStyle.titleSectionSm,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  closeBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    flexShrink: 0,
+  },
+  closeBtnBorder: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: alpha.white[8],
+  },
+
+  // ── Active team pill (bottom bar) ─────────────────────────────────────────
+  // Layout in RTL: [avatar RIGHT] [meta MIDDLE flex:1] [count LEFT]
+  activeTeamPill: {
+    borderRadius: radius.pill,
+    overflow: 'hidden',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    alignItems: 'center',
+    gap: spacing['2xs'],
+  },
+  activeTeamPillBorder: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+  },
+  // Avatar — first child = rightmost in RTL
+  pillAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    overflow: 'hidden',
+  },
+  pillAvatarEmoji: {
+    fontSize: 18,
+  },
+  // Name + subtitle — flex 1, fills middle space
+  pillMeta: {
+    flex: 1,
+    gap: 2,
+  },
+  pillName: {
+    color: dark.textPrimary,
+    ...textStyle.titleCard,
+    fontWeight: '700',
+  },
+  pillSub: {
+    color: dark.textSecondary,
+    ...textStyle.labelSm,
+  },
+  // Remaining count — last child = leftmost in RTL
+  pillRemaining: {
+    ...textStyle.bodyXs,
+    flexShrink: 0,
   },
 
   // ── Exit modal ───────────────────────────────────────────────────────────
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
-    padding: 24,
-    backgroundColor: 'rgba(31, 41, 55, 0.45)',
+    padding: spacing.md,
+    backgroundColor: dark.bgOverlay,
   },
   modalCard: {
-    backgroundColor: colors.card,
-    borderRadius: 24,
+    backgroundColor: dark.bgCard,
+    borderRadius: radius['2xl'],
     padding: 22,
-    gap: 16,
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: dark.borderSubtle,
   },
   modalTitle: {
-    color: colors.text,
-    fontSize: 24,
+    color: dark.textPrimary,
+    ...textStyle.titleSectionLg,
     fontWeight: '800',
   },
   modalBody: {
-    color: colors.mutedText,
+    color: dark.textSecondary,
+    ...textStyle.bodyPrimary,
     lineHeight: 22,
   },
   modalActions: {
-    gap: 12,
+    gap: spacing.xs,
   },
   cancelBtn: {
     flex: 1,
-    backgroundColor: colors.secondary,
+    backgroundColor: dark.bgGlassStrong,
+    borderWidth: 1,
+    borderColor: dark.borderDefault,
   },
 });

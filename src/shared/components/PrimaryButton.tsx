@@ -1,12 +1,7 @@
 import React from 'react';
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  ViewStyle,
-} from 'react-native';
+import { Pressable, StyleSheet, Text, ViewStyle } from 'react-native';
 
-import { colors } from '../theme/colors';
+import { light, radius, textStyle } from '../theme/tokens';
 
 interface PrimaryButtonProps {
   label: string;
@@ -15,12 +10,7 @@ interface PrimaryButtonProps {
   style?: ViewStyle;
 }
 
-export function PrimaryButton({
-  label,
-  onPress,
-  disabled,
-  style,
-}: PrimaryButtonProps) {
+export function PrimaryButton({ label, onPress, disabled, style }: PrimaryButtonProps) {
   return (
     <Pressable
       disabled={disabled}
@@ -39,10 +29,10 @@ export function PrimaryButton({
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: colors.primary,
+    backgroundColor: light.btnPrimary,
     paddingHorizontal: 18,
     paddingVertical: 14,
-    borderRadius: 16,
+    borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -50,11 +40,10 @@ const styles = StyleSheet.create({
     opacity: 0.45,
   },
   pressed: {
-    backgroundColor: colors.primaryDark,
+    backgroundColor: light.btnPrimaryPressed,
   },
   label: {
     color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 16,
+    ...textStyle.buttonMd,
   },
 });

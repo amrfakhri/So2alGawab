@@ -1,25 +1,36 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import {
+  ActivityIndicator,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 
-import { colors } from '../../shared/theme/colors';
 import { SUPPORTED_LANGUAGES, AppLanguage } from '../../localization/i18n';
 import { useLanguageStore } from '../../localization/languageStore';
+import { useLocale } from '../../localization/useLocale';
 import { AppIcon } from '../../shared/components/AppIcon';
+import { alpha, dark, radius, spacing, textStyle } from '../../shared/theme/tokens';
 
 interface LanguageSwitcherProps {
   visible: boolean;
   onClose: () => void;
 }
 
-const LANGUAGE_META: Record<AppLanguage, { flag: string; code: string }> = {
-  ar: { flag: '🇸🇦', code: 'AR' },
-  en: { flag: '🇺🇸', code: 'EN' },
+const LANGUAGE_META: Record<AppLanguage, { flag: string; label: string }> = {
+  ar: { flag: '🇸🇦', label: 'العربية' },
+  en: { flag: '🇬🇧', label: 'English' },
 };
 
 export function LanguageSwitcher({ visible, onClose }: LanguageSwitcherProps) {
-  const { t } = useTranslation('settings');
-  const { language, setLanguage, isRTL } = useLanguageStore();
+  const { t, textAlign, rowLTR } = useLocale('settings');
+  const { language, setLanguage } = useLanguageStore();
+  const insets = useSafeAreaInsets();
   const [isApplying, setIsApplying] = useState(false);
 
   async function handleSelect(lang: AppLanguage) {
@@ -29,13 +40,9 @@ export function LanguageSwitcher({ visible, onClose }: LanguageSwitcherProps) {
     }
     setIsApplying(true);
     await setLanguage(lang);
-    // If direction changed on native, Updates.reloadAsync() was called above and
-    // the app restarts — the lines below only run on web or same-direction switches.
     setIsApplying(false);
     onClose();
   }
-
-  const showDirectionNote = Platform.OS !== 'web';
 
   return (
     <Modal
@@ -45,81 +52,88 @@ export function LanguageSwitcher({ visible, onClose }: LanguageSwitcherProps) {
       onRequestClose={isApplying ? undefined : onClose}
     >
       <Pressable style={styles.overlay} onPress={isApplying ? undefined : onClose}>
-        <Pressable style={styles.sheet} onPress={() => {}}>
-          <View style={styles.handle} />
+        <Pressable
+          style={[styles.sheet, { paddingBottom: insets.bottom + spacing.sm }]}
+          onPress={() => {}}
+        >
+          {/* Glass background */}
+          <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+          <View style={styles.sheetBg} />
+
+          {/* Dragger */}
+          <View style={styles.dragger} />
 
           {/* Header */}
-          <View style={styles.sheetHeader}>
-            <Text style={styles.sheetTitle}>{t('language_label')}</Text>
-            <Text style={styles.sheetSubtitle}>{t('language_subtitle')}</Text>
+          <View style={styles.headerBlock}>
+            <Text style={styles.headerTitle}>
+              {t('language_label')}
+            </Text>
+            <Text style={styles.headerSubtitle}>
+              {t('language_subtitle')}
+            </Text>
           </View>
 
-          {/* Options */}
-          <View style={styles.options}>
+          {/* Language cards */}
+          <View style={styles.cards}>
             {SUPPORTED_LANGUAGES.map((lang) => {
               const selected = lang === language;
               const meta = LANGUAGE_META[lang];
-              const nativeName = t(`languages.${lang}_native`);
-              const translatedName = t(`languages.${lang}`);
-
               return (
                 <Pressable
                   key={lang}
-                  style={({ pressed }) => [
-                    styles.option,
-                    selected && styles.optionSelected,
-                    pressed && styles.optionPressed,
-                  ]}
                   onPress={() => handleSelect(lang)}
+                  style={({ pressed }) => [
+                    styles.card,
+                    { flexDirection: rowLTR },
+                    selected ? styles.cardActive : styles.cardInactive,
+                    pressed && styles.cardPressed,
+                  ]}
                   accessibilityRole="radio"
                   accessibilityState={{ checked: selected }}
-                  accessibilityLabel={nativeName}
+                  accessibilityLabel={meta.label}
                 >
-                  {/* Left side: flag + names */}
-                  <View style={styles.optionLeft}>
-                    <View style={[styles.flagBadge, selected && styles.flagBadgeSelected]}>
-                      <Text style={styles.flagEmoji}>{meta.flag}</Text>
-                      <Text style={[styles.langCode, selected && styles.langCodeSelected]}>
-                        {meta.code}
-                      </Text>
-                    </View>
-                    <View style={styles.nameBlock}>
-                      <Text style={[styles.nativeName, selected && styles.nativeNameSelected]}>
-                        {nativeName}
-                      </Text>
-                      {nativeName !== translatedName ? (
-                        <Text style={styles.translatedName}>{translatedName}</Text>
-                      ) : null}
-                    </View>
+                  {/* Flag icon — first child = rightmost in RTL via row-reverse */}
+                  <View style={styles.flagBox}>
+                    <Text style={styles.flagEmoji}>{meta.flag}</Text>
                   </View>
 
-                  {/* Right side: selection indicator */}
-                  <View style={[styles.indicator, selected && styles.indicatorSelected]}>
-                    {selected ? (
-                      <AppIcon name="check" size={13} color="#FFFFFF" weight="bold" />
-                    ) : null}
+                  {/* Language label — fills middle */}
+                  <Text style={[styles.langLabel, { textAlign, flex: 1 }]} numberOfLines={1}>
+                    {meta.label}
+                  </Text>
+
+                  {/* Radio indicator — last child = leftmost in RTL */}
+                  <View style={[styles.radio, selected && styles.radioActive]}>
+                    {selected && (
+                      <AppIcon name="check" size={14} color={dark.textInverse} weight="bold" />
+                    )}
                   </View>
                 </Pressable>
               );
             })}
           </View>
 
-          {/* Native direction note */}
-          {showDirectionNote && (
-            <View style={styles.noteRow}>
-              <View style={styles.noteContent}>
-                <AppIcon name="info" size={14} color={colors.mutedText} />
-                <Text style={styles.noteText}>{t('direction_note')}</Text>
-              </View>
-            </View>
-          )}
+          {/* Close button */}
+          <Pressable
+            onPress={onClose}
+            style={({ pressed }) => [styles.closeBtn, pressed && { opacity: dark.opPressed }]}
+          >
+            <LinearGradient
+              colors={[alpha.white[8], alpha.white[4]]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={StyleSheet.absoluteFill}
+            />
+            <View style={styles.closeBtnBorder} />
+            <Text style={styles.closeBtnText}>{t('close_btn')}</Text>
+          </Pressable>
         </Pressable>
       </Pressable>
 
       {isApplying && (
         <View style={styles.applyingOverlay}>
           <View style={styles.applyingCard}>
-            <ActivityIndicator size="large" color={colors.primary} />
+            <ActivityIndicator size="large" color={dark.textAccent} />
             <Text style={styles.applyingText}>{t('applying_language')}</Text>
           </View>
         </View>
@@ -132,176 +146,152 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: alpha.black[60],
   },
+
+  // ── Bottom sheet ─────────────────────────────────────────────────────────────
   sheet: {
-    backgroundColor: colors.card,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingBottom: 48,
-    paddingTop: 14,
-    paddingHorizontal: 20,
+    borderTopLeftRadius: radius['2xl'],
+    borderTopRightRadius: radius['2xl'],
+    paddingTop: spacing.md,
+    paddingHorizontal: spacing.md,
+    gap: spacing.lg,
+    overflow: 'hidden',
   },
-  handle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.border,
+  sheetBg: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: alpha.black[80],
+  },
+
+  // ── Dragger ──────────────────────────────────────────────────────────────────
+  dragger: {
+    width: 60,
+    height: 8,
+    borderRadius: radius.pill,
+    backgroundColor: dark.bgCardAlt,
     alignSelf: 'center',
-    marginBottom: 24,
   },
 
-  // Header
-  sheetHeader: {
-    alignItems: 'center',
-    marginBottom: 22,
-    gap: 6,
+  // ── Header ───────────────────────────────────────────────────────────────────
+  headerBlock: {
+    gap: spacing['3xs'],
   },
-  sheetTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: colors.text,
-  },
-  sheetSubtitle: {
-    fontSize: 13,
-    color: colors.mutedText,
-    fontWeight: '500',
-  },
-
-  // Options
-  options: {
-    gap: 10,
-  },
-  option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  optionSelected: {
-    borderColor: colors.primary,
-    backgroundColor: '#FFF8F5',
-  },
-  optionPressed: {
-    opacity: 0.8,
-  },
-  optionLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    flex: 1,
-  },
-
-  // Flag badge
-  flagBadge: {
-    width: 52,
-    height: 52,
-    borderRadius: 14,
-    backgroundColor: colors.background,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 2,
-  },
-  flagBadgeSelected: {
-    backgroundColor: '#FFF3EC',
-    borderColor: colors.primary,
-  },
-  flagEmoji: {
-    fontSize: 20,
-  },
-  langCode: {
-    fontSize: 10,
-    fontWeight: '800',
-    color: colors.mutedText,
-    letterSpacing: 0.5,
-  },
-  langCodeSelected: {
-    color: colors.primary,
-  },
-
-  // Language names
-  nameBlock: {
-    gap: 2,
-  },
-  nativeName: {
-    fontSize: 17,
+  headerTitle: {
+    color: dark.textPrimary,
+    ...textStyle.numericScoreSm,
     fontWeight: '700',
-    color: colors.mutedText,
+    textAlign: 'center',
   },
-  nativeNameSelected: {
-    color: colors.text,
-  },
-  translatedName: {
-    fontSize: 13,
-    color: colors.mutedText,
-    fontWeight: '500',
-  },
-
-  // Note row
-  noteContent: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
-  },
-
-  // Selection indicator
-  indicator: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: 'transparent',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginStart: 8,
-  },
-  indicatorSelected: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  // Note
-  noteRow: {
-    marginTop: 16,
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  noteText: {
-    color: colors.mutedText,
-    fontSize: 12,
-    lineHeight: 18,
+  headerSubtitle: {
+    color: dark.textSecondary,
+    ...textStyle.labelMd,
     textAlign: 'center',
   },
 
-  // Applying overlay
+  // ── Language cards ───────────────────────────────────────────────────────────
+  cards: {
+    gap: spacing.sm,
+  },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.lg,
+    overflow: 'hidden',
+  },
+  cardActive: {
+    backgroundColor: dark.bgGlass,
+    borderWidth: 1.5,
+    borderColor: dark.textAccent,
+  },
+  cardInactive: {
+    backgroundColor: dark.bgGlass,
+    borderWidth: 1,
+    borderColor: dark.borderDefault,
+  },
+  cardPressed: {
+    opacity: 0.75,
+  },
+
+  // ── Flag icon ────────────────────────────────────────────────────────────────
+  flagBox: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.md,
+    backgroundColor: dark.bgGlass,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    flexShrink: 0,
+  },
+  flagEmoji: {
+    fontSize: 22,
+  },
+
+  // ── Language label ───────────────────────────────────────────────────────────
+  langLabel: {
+    color: dark.textPrimary,
+    ...textStyle.labelLg,
+  },
+
+  // ── Radio button ─────────────────────────────────────────────────────────────
+  radio: {
+    width: 24,
+    height: 24,
+    borderRadius: radius.pill,
+    backgroundColor: dark.bgGlass,
+    borderWidth: 1,
+    borderColor: dark.borderDefault,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  radioActive: {
+    backgroundColor: dark.bgAccent,
+    borderColor: dark.bgAccent,
+  },
+
+  // ── Close button ──────────────────────────────────────────────────────────────
+  closeBtn: {
+    height: 56,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  closeBtnBorder: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: radius.pill,
+    borderWidth: 1.5,
+    borderColor: dark.borderSubtle,
+  },
+  closeBtnText: {
+    color: dark.textPrimary,
+    ...textStyle.buttonMd,
+  },
+
+  // ── Applying overlay ─────────────────────────────────────────────────────────
   applyingOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: alpha.black[60],
     justifyContent: 'center',
     alignItems: 'center',
   },
   applyingCard: {
-    backgroundColor: colors.card,
-    borderRadius: 24,
-    paddingVertical: 32,
-    paddingHorizontal: 40,
+    backgroundColor: dark.bgCard,
+    borderRadius: radius['2xl'],
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.xl,
     alignItems: 'center',
-    gap: 16,
+    gap: spacing.sm,
     minWidth: 200,
+    borderWidth: 1,
+    borderColor: dark.borderSubtle,
   },
   applyingText: {
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: '700',
+    color: dark.textPrimary,
+    ...textStyle.buttonMd,
   },
 });

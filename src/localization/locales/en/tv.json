@@ -14,16 +14,20 @@
     "step_nums": ["1", "2", "3", "4"]
   },
   "cast": {
-    "modal_title": "Cast to TV 📺",
+    "modal_title": "Connect your phone to the TV",
+    "modal_subtitle": "Open the game on TV and scan the code",
     "step_1": "Open game.amrfakhri.com/tv on your TV screen",
     "step_2": "A pairing screen will show a 4-character code",
     "step_3": "Enter the code below to link your phone to the TV",
     "connect_btn": "Connect Screen",
     "connected_btn": "✓ Connected",
+    "close_btn": "Close",
     "success_msg": "✓ Connected successfully",
     "creating_session": "Creating session…",
-    "alt_qr_collapsed": "Alternative: QR / Link  ▾",
-    "alt_qr_expanded": "Alternative: QR / Link",
+    "scan_qr_btn": "Scan TV Screen",
+    "scan_title": "Point at the TV QR code",
+    "scan_subtitle": "Hold steady over the QR on your TV to pair automatically",
+    "scan_permission_denied": "Camera access is needed to scan the TV QR code. Enable it in Settings.",
     "or": "or",
     "errors": {
       "device_not_found": "No device found with this code. Check the code on your screen.",
@@ -32,7 +36,7 @@
     }
   },
   "session_modal": {
-    "title": "Live TV Session 📺",
+    "title": "Live TV Session",
     "creating": "Creating session…",
     "code_label": "Session Code",
     "unknown_error": "Unknown error"

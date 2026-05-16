@@ -7,19 +7,22 @@ import {
   createInitialGameState,
   endGame,
   QUESTION_DURATION_MS,
+  revealAnswer,
   revealPresenterAnswer,
   resolvePresenterAnswer,
   selectBoardQuestion,
   setAvailableCategories,
+  setTeamAvatar,
   setTeamName,
   skipTimer,
+  skipTimerAndReveal,
   startMatch,
   tickQuestionTimer,
   toggleSubcategory,
   useLifeline,
 } from '../engine/gameEngine';
 import { buildQuestionDeckForMatch } from '../../../services/supabase/gameService';
-import { updateGameSession } from '../../../services/supabase/sessionService';
+import { deleteGameSession, updateGameSession } from '../../../services/supabase/sessionService';
 import { Category, GameMode, GameState, LifelineId, TeamId } from '../types/game';
 
 interface GameStore extends GameState {
@@ -27,13 +30,16 @@ interface GameStore extends GameState {
   setTvSessionId: (id: string | null) => void;
   setAvailableCategories: (categories: Category[]) => void;
   setTeamName: (teamId: TeamId, name: string) => void;
+  setTeamAvatar: (teamId: TeamId, avatar: string) => void;
   toggleSubcategory: (subcategoryId: string) => void;
   startMatch: (mode: GameMode) => Promise<boolean>;
   answerQuestion: (answerIndex: number) => void;
+  revealAnswer: () => void;
   revealPresenterAnswer: () => void;
   resolvePresenterAnswer: (correct: boolean) => void;
   tickQuestionTimer: (elapsedMs: number) => void;
   skipTimer: () => void;
+  skipTimerAndReveal: () => void;
   useLifeline: (lifelineId: LifelineId) => void;
   advanceToNextTurn: () => void;
   selectBoardQuestion: (questionId: string) => void;
@@ -58,6 +64,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set((state) => setAvailableCategories(state, categories)),
   setTeamName: (teamId, name) =>
     set((state) => setTeamName(state, teamId, name)),
+  setTeamAvatar: (teamId, avatar) =>
+    set((state) => setTeamAvatar(state, teamId, avatar)),
   toggleSubcategory: (subcategoryId) =>
     set((state) => toggleSubcategory(state, subcategoryId)),
   startMatch: async (mode) => {
@@ -92,6 +100,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
   answerQuestion: (answerIndex) =>
     set((state) => answerQuestion(state, answerIndex)),
+  revealAnswer: () =>
+    set((state) => revealAnswer(state)),
   revealPresenterAnswer: () =>
     set((state) => revealPresenterAnswer(state)),
   resolvePresenterAnswer: (correct) =>
@@ -100,6 +110,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set((state) => tickQuestionTimer(state, elapsedMs)),
   skipTimer: () =>
     set((state) => skipTimer(state)),
+  skipTimerAndReveal: () =>
+    set((state) => skipTimerAndReveal(state)),
   useLifeline: (lifelineId) =>
     set((state) => useLifeline(state, lifelineId)),
   advanceToNextTurn: () =>
@@ -116,9 +128,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
 // Fires whenever phase, question index, or scores change. Ignores timer ticks
 // (they only change remainingMs, which is not in the sync key).
 let _lastSyncKey = '';
+let _lastSyncedQuestionIndex = -1;
 useGameStore.subscribe((state) => {
   const { tvSessionId, phase, currentQuestionIndex, teams, questionDeck } = state;
   if (!tvSessionId || phase === 'setup') return;
+
+  // Game ended — delete the session row so the TV screen shows "not found"
+  if (phase === 'finished') {
+    const syncKey = `${tvSessionId}|finished`;
+    if (syncKey === _lastSyncKey) return;
+    _lastSyncKey = syncKey;
+    deleteGameSession(tvSessionId).catch(() => {});
+    return;
+  }
 
   const la = teams.A.lifelines;
   const lb = teams.B.lifelines;
@@ -126,6 +148,11 @@ useGameStore.subscribe((state) => {
   const syncKey = `${tvSessionId}|${phase}|${currentQuestionIndex}|${teams.A.score}|${teams.B.score}|${lifelineKey}`;
   if (syncKey === _lastSyncKey) return;
   _lastSyncKey = syncKey;
+
+  // Reset media_playing atomically with the new question so TV never sees stale playback state.
+  // Only reset on question change, not on lifeline use (which also mutates the sync key).
+  const questionChanged = currentQuestionIndex !== _lastSyncedQuestionIndex;
+  _lastSyncedQuestionIndex = currentQuestionIndex;
 
   const question = questionDeck[currentQuestionIndex] ?? null;
   const revealAnswer = phase === 'answer_revealed' || phase === 'result';
@@ -143,6 +170,7 @@ useGameStore.subscribe((state) => {
     timer_duration_ms: isQuestion ? QUESTION_DURATION_MS : null,
     timer_started_at: isQuestion ? new Date().toISOString() : null,
     timer_running: isQuestion,
+    ...(questionChanged ? { media_playing: false } : {}),
     team1_score: teams.A.score,
     team2_score: teams.B.score,
     team1_lifelines: la,

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ActivityIndicator,
   Modal,
@@ -7,12 +7,129 @@ import {
   Text,
   View,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { useTranslation } from 'react-i18next';
+import { Check, ChessQueen, ChessKnight } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GameMode } from '../types/game';
-import { colors } from '../../../shared/theme/colors';
 import { useLocale } from '../../../localization/useLocale';
-import { AppIcon } from '../../../shared/components/AppIcon';
+import { alpha, dark, gradients, r, radius, spacing, textStyle } from '../../../shared/theme/tokens';
+import { GoldPrimaryButton } from '../../setup/components/CategorySelectionUI';
+import { SecondaryButton } from '../../../shared/components/SecondaryButton';
+
+// ── RadioButton ───────────────────────────────────────────────────────────────
+
+function RadioButton({ active }: { active: boolean }) {
+  if (active) {
+    return (
+      <View style={styles.radioActive}>
+        <Check size={14} color={dark.bgBase} strokeWidth={3} />
+      </View>
+    );
+  }
+  return <View style={styles.radioInactive} />;
+}
+
+// ── Per-mode selected styles ──────────────────────────────────────────────────
+
+const CARD_STYLES = {
+  classic: {
+    unselectedColors: gradients.cardGlass,
+    selectedColors:   gradients.cardSurface,
+    selectedBorder:   dark.borderFocus,
+  },
+  selection: {
+    unselectedColors: gradients.cardGlass,
+    selectedColors:   gradients.cardGoldSoft,
+    selectedBorder:   dark.borderActive,
+  },
+} as const;
+
+// ── GameTypeCard ──────────────────────────────────────────────────────────────
+
+interface GameTypeCardProps {
+  mode: GameMode;
+  title: string;
+  description: string;
+  badge?: string;
+  iconGradient: readonly [string, string];
+  icon: React.ReactNode;
+  selected: boolean;
+  disabled: boolean;
+  onPress: () => void;
+  isRTL: boolean;
+}
+
+function GameTypeCard({
+  mode,
+  title,
+  description,
+  badge,
+  iconGradient,
+  icon,
+  selected,
+  disabled,
+  onPress,
+  isRTL,
+}: GameTypeCardProps) {
+  const textAlign = isRTL ? 'right' : 'left';
+  const { unselectedColors, selectedColors, selectedBorder } = CARD_STYLES[mode];
+
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      style={({ pressed }) => pressed && !disabled && styles.cardPressed}
+    >
+      <LinearGradient
+        colors={selected ? selectedColors : unselectedColors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={[
+          styles.card,
+          selected
+            ? { borderColor: selectedBorder }
+            : { borderColor: dark.borderSubtle },
+        ]}
+      >
+        {/* Trailing: radio */}
+        <RadioButton active={selected} />
+
+        {/* Center: text */}
+        <View style={styles.cardBody}>
+          <View style={styles.cardTextGroup}>
+            <Text style={[styles.cardTitle, { textAlign }]} numberOfLines={2}>
+              {title}
+            </Text>
+            <Text style={[styles.cardDesc, { textAlign }]} numberOfLines={3}>
+              {description}
+            </Text>
+          </View>
+          {badge ? (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{badge}</Text>
+            </View>
+          ) : null}
+        </View>
+
+        {/* Leading: icon box */}
+        <LinearGradient
+          colors={iconGradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.iconBox}
+        >
+          {icon}
+          <View style={styles.iconHighlight} />
+        </LinearGradient>
+      </LinearGradient>
+    </Pressable>
+  );
+}
+
+// ── GameModeSheet ─────────────────────────────────────────────────────────────
 
 interface GameModeSheetProps {
   visible: boolean;
@@ -20,60 +137,6 @@ interface GameModeSheetProps {
   error: string | null;
   onClose: () => void;
   onSelectMode: (mode: GameMode) => void;
-}
-
-interface ModeCardProps {
-  title: string;
-  description: string;
-  badge: string;
-  badgeAccent: string;
-  icon: React.ReactNode;
-  disabled: boolean;
-  onPress: () => void;
-  isRTL: boolean;
-}
-
-function ModeCard({
-  title,
-  description,
-  badge,
-  badgeAccent,
-  icon,
-  disabled,
-  onPress,
-  isRTL,
-}: ModeCardProps) {
-  const textAlign = isRTL ? 'right' : 'left';
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      style={({ pressed }) => [
-        styles.modeCard,
-        pressed && !disabled && styles.modeCardPressed,
-        disabled && styles.modeCardDisabled,
-      ]}
-    >
-      <View style={[styles.modeCardRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-        <View style={styles.modeIconCircle}>{icon}</View>
-        <View style={styles.modeCardText}>
-          <View style={[styles.modeTitleRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-            <Text style={[styles.modeTitle, { textAlign }]}>{title}</Text>
-            <View style={[styles.modeBadge, { backgroundColor: badgeAccent }]}>
-              <Text style={styles.modeBadgeText}>{badge}</Text>
-            </View>
-          </View>
-          <Text style={[styles.modeDesc, { textAlign }]}>{description}</Text>
-        </View>
-        <AppIcon
-          name="circle"
-          size={20}
-          color={colors.border}
-          weight="regular"
-        />
-      </View>
-    </Pressable>
-  );
 }
 
 export function GameModeSheet({
@@ -84,7 +147,11 @@ export function GameModeSheet({
   onSelectMode,
 }: GameModeSheetProps) {
   const { t } = useTranslation('setup');
-  const { isRTL, textAlign } = useLocale('setup');
+  const { isRTL, textAlign, rowLTR } = useLocale('setup');
+  const insets = useSafeAreaInsets();
+  const [selectedMode, setSelectedMode] = useState<GameMode>('classic');
+
+  const handleConfirm = () => onSelectMode(selectedMode);
 
   return (
     <Modal
@@ -95,40 +162,52 @@ export function GameModeSheet({
     >
       <Pressable style={styles.backdrop} onPress={isLoading ? undefined : onClose} />
 
-      <View style={styles.sheet}>
-        {/* Handle */}
-        <View style={styles.handle} />
+      <View style={[styles.sheet, { paddingBottom: insets.bottom + 24 }]}>
+        <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
 
-        <Text style={[styles.sheetTitle, { textAlign }]}>{t('mode_sheet.title')}</Text>
+        {/* Dragger */}
+        <View style={styles.dragger} />
 
-        {/* Classic mode */}
-        <ModeCard
-          title={t('mode_sheet.classic_title')}
-          description={t('mode_sheet.classic_desc')}
-          badge={t('mode_sheet.classic_badge')}
-          badgeAccent={colors.secondary}
-          icon={<AppIcon name="trophy" size={22} color={colors.primary} weight="duotone" />}
-          disabled={isLoading}
-          onPress={() => onSelectMode('classic')}
-          isRTL={isRTL}
-        />
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={[styles.sheetTitle, { textAlign }]}>
+            {t('mode_sheet.title')}
+          </Text>
+          <Text style={[styles.sheetSubtitle, { textAlign }]}>
+            {t('mode_sheet.subtitle')}
+          </Text>
+        </View>
 
-        {/* Teams Selection mode */}
-        <ModeCard
-          title={t('mode_sheet.selection_title')}
-          description={t('mode_sheet.selection_desc')}
-          badge={t('mode_sheet.selection_badge')}
-          badgeAccent={colors.primary}
-          icon={<AppIcon name="crown" size={22} color={colors.primary} weight="duotone" />}
-          disabled={isLoading}
-          onPress={() => onSelectMode('selection')}
-          isRTL={isRTL}
-        />
+        {/* Mode cards */}
+        <View style={styles.cardList}>
+          <GameTypeCard
+            mode="classic"
+            title={t('mode_sheet.classic_title')}
+            description={t('mode_sheet.classic_desc')}
+            badge={t('mode_sheet.classic_badge')}
+            iconGradient={['#5B8DEF', '#1F4393'] as const}
+            icon={<ChessQueen size={24} color="#FFFFFF" />}
+            selected={selectedMode === 'classic'}
+            disabled={isLoading}
+            onPress={() => setSelectedMode('classic')}
+            isRTL={isRTL}
+          />
+          <GameTypeCard
+            mode="selection"
+            title={t('mode_sheet.selection_title')}
+            description={t('mode_sheet.selection_desc')}
+            iconGradient={['#F6D366', '#D9A92E'] as const}
+            icon={<ChessKnight size={24} color="#0A0D1F" />}
+            selected={selectedMode === 'selection'}
+            disabled={isLoading}
+            onPress={() => setSelectedMode('selection')}
+            isRTL={isRTL}
+          />
+        </View>
 
-        {/* Loading / error feedback */}
         {isLoading ? (
           <View style={styles.loadingRow}>
-            <ActivityIndicator color={colors.primary} />
+            <ActivityIndicator color={dark.textAccent} />
             <Text style={styles.loadingText}>{t('mode_sheet.loading')}</Text>
           </View>
         ) : null}
@@ -136,108 +215,177 @@ export function GameModeSheet({
         {error && !isLoading ? (
           <Text style={[styles.errorText, { textAlign }]}>{error}</Text>
         ) : null}
+
+        {/* Footer */}
+        <View style={[styles.footer, { flexDirection: rowLTR }]}>
+          <GoldPrimaryButton
+            label={t('mode_sheet.confirm')}
+            onPress={handleConfirm}
+            disabled={isLoading}
+            style={styles.confirmBtn}
+          />
+          <SecondaryButton
+            label={t('mode_sheet.back')}
+            onPress={onClose}
+            disabled={isLoading}
+          />
+        </View>
       </View>
     </Modal>
   );
 }
 
+// ── Styles ────────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    backgroundColor: dark.bgOverlay,
   },
   sheet: {
-    backgroundColor: colors.card,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingHorizontal: 20,
-    paddingBottom: 36,
-    paddingTop: 12,
-    gap: 14,
+    borderTopLeftRadius: r.card,
+    borderTopRightRadius: r.card,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    gap: spacing.lg,
+    overflow: 'hidden',
+    backgroundColor: alpha.black[92],
   },
-  handle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.border,
+  dragger: {
+    width: 60,
+    height: 8,
+    borderRadius: r.button,
     alignSelf: 'center',
-    marginBottom: 4,
+    backgroundColor: dark.bgCardAlt,
+  },
+  header: {
+    gap: spacing['3xs'],
   },
   sheetTitle: {
-    fontSize: 20,
+    color: dark.textPrimary,
+    ...textStyle.titleSectionMd,
     fontWeight: '800',
-    color: colors.text,
-    marginBottom: 4,
   },
-  modeCard: {
-    borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    padding: 16,
+  sheetSubtitle: {
+    color: dark.textTertiary,
+    ...textStyle.bodySm,
   },
-  modeCardPressed: {
-    backgroundColor: '#FFF0E8',
-    borderColor: colors.primary,
+
+  // Cards
+  cardList: {
+    gap: spacing.sm,
   },
-  modeCardDisabled: {
-    opacity: 0.5,
+  card: {
+    flexDirection: 'row-reverse',
+    borderRadius: r.card,
+    borderWidth: 1,
+    borderColor: dark.borderSubtle,
+    padding: spacing.md,
+    gap: spacing.sm,
+    alignItems: 'flex-start',
+    overflow: 'hidden',
   },
-  modeCardRow: {
+  cardPressed: {
+    opacity: 0.8,
+  },
+
+  // Radio
+  radioActive: {
+    width: 24,
+    height: 24,
+    borderRadius: r.button,
+    backgroundColor: dark.textAccent,
     alignItems: 'center',
-    gap: 14,
-  },
-  modeIconCircle: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    backgroundColor: '#FFF0E8',
     justifyContent: 'center',
-    alignItems: 'center',
     flexShrink: 0,
   },
-  modeCardText: {
+  radioInactive: {
+    width: 24,
+    height: 24,
+    borderRadius: r.button,
+    backgroundColor: dark.bgGlass,
+    borderWidth: 1,
+    borderColor: dark.borderDefault,
+    flexShrink: 0,
+  },
+
+  // Card body
+  cardBody: {
     flex: 1,
-    gap: 4,
+    gap: spacing.xs,
   },
-  modeTitleRow: {
+  cardTextGroup: {
+    gap: spacing['3xs'],
+  },
+  cardTitle: {
+    color: dark.textPrimary,
+    ...textStyle.titleCard,
+    fontWeight: '700',
+  },
+  cardDesc: {
+    color: dark.textTertiary,
+    ...textStyle.bodyXs,
+    lineHeight: 18,
+  },
+
+  // Badge
+  badge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: r.badge,
+    borderWidth: 1,
+    borderColor: dark.textAccent,
+    backgroundColor: dark.bgGlass,
+  },
+  badgeText: {
+    color: dark.textAccent,
+    ...textStyle.captionSm,
+    fontWeight: '600',
+  },
+
+  // Icon box
+  iconBox: {
+    width: 56,
+    height: 56,
+    borderRadius: radius['2xl'],
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'center',
+    flexShrink: 0,
   },
-  modeTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: colors.text,
+  iconHighlight: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: radius['2xl'],
+    shadowColor: '#FFFFFF',
+    shadowOpacity: 0.3,
+    shadowRadius: 0,
+    shadowOffset: { width: 0, height: 1 },
   },
-  modeBadge: {
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+
+  // Footer
+  footer: {
+    gap: spacing.sm,
+    alignItems: 'center',
   },
-  modeBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '800',
+  confirmBtn: {
+    flex: 1,
   },
-  modeDesc: {
-    fontSize: 13,
-    color: colors.mutedText,
-    lineHeight: 19,
-  },
+
+  // Loading / error
   loadingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
-    paddingVertical: 4,
   },
   loadingText: {
-    color: colors.mutedText,
+    color: dark.textTertiary,
+    ...textStyle.bodySm,
     fontWeight: '600',
   },
   errorText: {
-    color: colors.danger,
-    fontSize: 13,
+    color: dark.statusError,
+    ...textStyle.captionMd,
     fontWeight: '600',
   },
 });

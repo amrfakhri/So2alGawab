@@ -46,9 +46,43 @@ A real-time two-team trivia game built with React Native, Expo, and Supabase. Qu
 
 ## Prerequisites
 
-- Node.js 18+
-- Expo CLI: `npm install -g expo-cli` (or use `npx expo`)
-- A Supabase project with the required schema (see Environment Variables)
+### Required for all platforms
+
+| Tool | Version | Notes |
+|------|---------|-------|
+| [Node.js](https://nodejs.org) | 18 LTS or 20 LTS | 18+ required by Expo SDK 54 |
+| [Git](https://git-scm.com) | any | for cloning |
+| [Expo Go](https://expo.dev/go) | latest | install on your physical iOS/Android device for quick testing |
+
+> No global Expo CLI install needed — all commands use `npx expo`.
+
+### For iOS (macOS only)
+
+| Tool | Notes |
+|------|-------|
+| [Xcode](https://developer.apple.com/xcode/) 16+ | Install from the Mac App Store |
+| Xcode Command Line Tools | Run `xcode-select --install` |
+| [CocoaPods](https://cocoapods.org) | Run `sudo gem install cocoapods` |
+| iOS Simulator | Included with Xcode |
+
+### For Android
+
+| Tool | Notes |
+|------|-------|
+| [Android Studio](https://developer.android.com/studio) | Includes the Android SDK and emulator |
+| Android SDK (API 34+) | Configure via Android Studio → SDK Manager |
+| `ANDROID_HOME` env var | Set in your shell profile to point to the SDK |
+
+### For EAS (cloud) builds
+
+```bash
+npm install -g eas-cli
+eas login
+```
+
+### Supabase
+
+A Supabase project with the required schema — see [Environment Variables](#environment-variables) below.
 
 ---
 

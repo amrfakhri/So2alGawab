@@ -14,10 +14,13 @@ import { MAX_SUBCATEGORIES_PER_MATCH } from '../../../services/supabase/gameServ
 
 export const QUESTION_DURATION_MS = 20_000;
 
-function createTeam(id: TeamId, name: string): TeamState {
+const DEFAULT_AVATARS: Record<TeamId, string> = { A: '🦁', B: '🦅' };
+
+function createTeam(id: TeamId, name: string, avatar?: string): TeamState {
   return {
     id,
     name,
+    avatar: avatar ?? DEFAULT_AVATARS[id],
     score: 0,
     lifelines: {
       callFriend: true,
@@ -108,6 +111,23 @@ export function setTeamName(
   };
 }
 
+export function setTeamAvatar(
+  state: GameState,
+  teamId: TeamId,
+  avatar: string,
+): GameState {
+  return {
+    ...state,
+    teams: {
+      ...state.teams,
+      [teamId]: {
+        ...state.teams[teamId],
+        avatar,
+      },
+    },
+  };
+}
+
 export function startMatch(
   state: GameState,
   questionDeck: Question[],
@@ -120,8 +140,8 @@ export function startMatch(
     ...createInitialGameState(),
     availableCategories: state.availableCategories,
     teams: {
-      A: createTeam('A', teamAName),
-      B: createTeam('B', teamBName),
+      A: createTeam('A', teamAName, state.teams.A.avatar),
+      B: createTeam('B', teamBName, state.teams.B.avatar),
     },
     selectedSubcategoryIds: [...state.selectedSubcategoryIds],
     questionDeck,
@@ -312,34 +332,11 @@ export function tickQuestionTimer(state: GameState, elapsedMs: number): GameStat
 
   const remainingMs = Math.max(0, state.remainingMs - elapsedMs);
   if (remainingMs > 0) {
-    return {
-      ...state,
-      remainingMs,
-    };
+    return { ...state, remainingMs };
   }
 
-  if (question.answerMode === 'presenter') {
-    return {
-      ...state,
-      phase: 'waiting_answer',
-      remainingMs: 0,
-    };
-  }
-
-  const activeTeam = state.teams[state.activeTeamId];
-  return {
-    ...state,
-    phase: 'result',
-    remainingMs: 0,
-    roundFeedback: buildFeedback('timeout', question, null, 0, false),
-    teams: {
-      ...state.teams,
-      [state.activeTeamId]: {
-        ...activeTeam,
-        answerRewardArmed: false,
-      },
-    },
-  };
+  // Always pause at waiting_answer — presenter manually reveals the answer
+  return { ...state, phase: 'waiting_answer', remainingMs: 0 };
 }
 
 export function useLifeline(
@@ -415,18 +412,23 @@ export function skipTimer(state: GameState): GameState {
   if (state.phase !== 'question') {
     return state;
   }
-
   const question = getCurrentQuestion(state);
   if (!question) {
     return state;
   }
+  // Same as timer expiry — always pause at waiting_answer for manual reveal
+  return { ...state, phase: 'waiting_answer', remainingMs: 0 };
+}
+
+// Called when the presenter taps "Reveal Answer" while the timer is still running.
+// Stops the timer AND reveals the answer in one atomic step (no waiting_answer detour).
+export function skipTimerAndReveal(state: GameState): GameState {
+  if (state.phase !== 'question') return state;
+  const question = getCurrentQuestion(state);
+  if (!question) return state;
 
   if (question.answerMode === 'presenter') {
-    return {
-      ...state,
-      phase: 'waiting_answer',
-      remainingMs: 0,
-    };
+    return { ...state, phase: 'answer_revealed', remainingMs: 0 };
   }
 
   const activeTeam = state.teams[state.activeTeamId];
@@ -434,13 +436,35 @@ export function skipTimer(state: GameState): GameState {
     ...state,
     phase: 'result',
     remainingMs: 0,
-    roundFeedback: buildFeedback('timeout', question, null, 0, false),
+    roundFeedback: buildFeedback('timeout', question, state.selectedAnswerIndex, 0, false),
     teams: {
       ...state.teams,
-      [state.activeTeamId]: {
-        ...activeTeam,
-        answerRewardArmed: false,
-      },
+      [state.activeTeamId]: { ...activeTeam, answerRewardArmed: false },
+    },
+  };
+}
+
+// Called when the presenter taps "Reveal Answer" from waiting_answer.
+// Presenter questions: advance to answer_revealed so the judge can score.
+// MCQ questions: score as timeout and jump straight to result.
+export function revealAnswer(state: GameState): GameState {
+  const question = getCurrentQuestion(state);
+  if (!question || state.phase !== 'waiting_answer') {
+    return state;
+  }
+
+  if (question.answerMode === 'presenter') {
+    return { ...state, phase: 'answer_revealed' };
+  }
+
+  const activeTeam = state.teams[state.activeTeamId];
+  return {
+    ...state,
+    phase: 'result',
+    roundFeedback: buildFeedback('timeout', question, state.selectedAnswerIndex, 0, false),
+    teams: {
+      ...state.teams,
+      [state.activeTeamId]: { ...activeTeam, answerRewardArmed: false },
     },
   };
 }

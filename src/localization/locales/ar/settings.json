@@ -4,6 +4,7 @@
   "language_subtitle": "اختر لغة واجهة التطبيق",
   "applying_language": "جاري تطبيق اللغة...",
   "direction_note": "سيُعيد التطبيق تشغيله تلقائياً عند تغيير اتجاه التخطيط",
+  "close_btn": "غلق",
   "languages": {
     "ar": "العربية",
     "en": "English",

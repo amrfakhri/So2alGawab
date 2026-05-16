@@ -1,5 +1,15 @@
 {
   "timer_label": "Time",
+  "timer_unit": "sec",
+  "question_eyebrow": "Question {{current}}",
+  "team_status": {
+    "active": "Their Turn",
+    "waiting": "Waiting"
+  },
+  "cast_status": {
+    "active": "On TV",
+    "inactive": "Cast to TV"
+  },
   "round": "Round {{current}}/{{total}}",
   "lifelines_title": "Lifelines",
   "current_category": "Current Category",
@@ -42,6 +52,12 @@
     "next_turn": "Next Turn",
     "final_results": "Final Results"
   },
+  "countdown": {
+    "header": "Match is starting",
+    "ready": "Get Ready...",
+    "ready_sub": "First question is coming",
+    "start": "Start!"
+  },
   "back_to_board": "Back to Board",
   "results": {
     "game_over_eyebrow": "Match Over",
@@ -50,10 +66,22 @@
     "draw_title": "It's a tie!",
     "subtitle": "Final score after {{count}} questions.",
     "subtitle_early": "Score at end of game.",
-    "new_game": "New Game"
+    "new_game": "New Game",
+    "screen_title": "Game Over",
+    "winner_badge": "Winners",
+    "winner_congrats": "Congratulations champions! 🏆",
+    "draw_badge": "It's a Tie!",
+    "draw_congrats": "Great game from both teams 🤝",
+    "total_points_label": "Total Points",
+    "back_to_home": "Back to Home"
   },
   "board": {
     "title": "Question Board",
+    "choose_question": "Choose Your Question",
+    "turn": "Turn {{current}} of {{total}}",
+    "points_unit": "pts",
+    "choose_subtitle": "Pick a category and points, let's go!",
+    "remaining": "{{count}} left",
     "active_team": "{{name}}'s turn",
     "answered_label": "Answered",
     "end_game_btn": "End Game",

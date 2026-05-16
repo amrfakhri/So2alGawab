@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -11,6 +10,7 @@ import { TvLobbyScreen } from './src/features/tv/TvLobbyScreen';
 import './src/localization/i18n';
 import { loadStoredLanguage } from './src/localization/i18n';
 import { initializeLanguage } from './src/localization/languageStore';
+import { useAuthStore } from './src/features/auth/store/useAuthStore';
 
 const queryClient = new QueryClient();
 
@@ -30,12 +30,17 @@ function getTvRoute(): TvRoute {
 
 export default function App() {
   const [langReady, setLangReady] = useState(false);
+  const initializeAuth = useAuthStore((s) => s.initialize);
   const tvRoute = getTvRoute();
 
   useEffect(() => {
     async function bootstrap() {
       const lang = await loadStoredLanguage();
-      await initializeLanguage(lang);
+      // Run language init and auth init in parallel — neither depends on the other
+      await Promise.all([
+        initializeLanguage(lang),
+        initializeAuth(),
+      ]);
       setLangReady(true);
     }
     bootstrap();
@@ -55,7 +60,6 @@ export default function App() {
     <WebLayout>
       <QueryClientProvider client={queryClient}>
         <SafeAreaProvider>
-          <StatusBar style="dark" />
           <RootNavigator />
         </SafeAreaProvider>
       </QueryClientProvider>

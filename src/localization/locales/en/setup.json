@@ -1,7 +1,7 @@
 {
   "eyebrow": "So2alGawab",
-  "title": "Choose your challenge and start the show.",
-  "subtitle": "Pick 2–6 categories from the grid below, then the host manages the round live.",
+  "title": "Pick what you like",
+  "subtitle": "Choose up to 6 categories for game night",
   "teams": {
     "section_title": "Team Names",
     "team_a_placeholder": "Team A name",
@@ -18,7 +18,13 @@
     "hint": "Choose {{min}}–{{max}} categories",
     "search_placeholder": "Search categories...",
     "search_empty_title": "No matching categories found",
-    "search_empty_body": "Try a different word or browse categories manually."
+    "search_empty_body": "Try a different word or browse categories manually.",
+    "filters": {
+      "all": "All",
+      "mixed": "Mixed",
+      "text": "Text",
+      "image": "Images"
+    }
   },
   "subcategory_card": {
     "remaining": "{{count}} left"
@@ -26,17 +32,36 @@
   "category_picker": {
     "header": "Choose two subcategories"
   },
+  "choose_teams": "Choose Teams",
   "start_game": "Start Game",
+  "start_game_with_count": "Continue • {{count}} categories",
+  "team_setup": {
+    "title": "Set Up Teams",
+    "subtitle": "Pick names and avatars for each team",
+    "team_a_label": "Team One",
+    "team_b_label": "Team Two",
+    "name_placeholder": "Enter team name",
+    "start_btn": "Start Game",
+    "avatar_sheet_title": "Choose an Avatar",
+    "avatar_sheet_subtitle": "Pick an emoji to represent your team"
+  },
+  "selected_categories": {
+    "title": "Selected ({{count}})",
+    "clear": "Clear all"
+  },
   "loading_questions": "Loading questions...",
-  "cast_to_tv": "📺 Cast to TV",
+  "cast_to_tv": "Cast to TV",
   "mode_sheet": {
-    "title": "Choose Game Mode",
+    "title": "How do you want to play?",
+    "subtitle": "Choose the mode that suits your crew",
     "classic_title": "Classic Mode",
-    "classic_desc": "Random sequential questions — the default way to play",
-    "classic_badge": "Original",
-    "selection_title": "Teams' Selection",
-    "selection_desc": "Teams pick questions from a category board by point value",
+    "classic_desc": "Questions one after another, the clock is ticking",
+    "classic_badge": "Quick",
+    "selection_title": "Teams & Challenge",
+    "selection_desc": "A scoreboard like game shows • pick the category and the points",
     "selection_badge": "New",
+    "confirm": "OK, Continue",
+    "back": "Back",
     "loading": "Loading..."
   }
 }

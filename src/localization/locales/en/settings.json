@@ -4,6 +4,7 @@
   "language_subtitle": "Choose the app interface language",
   "applying_language": "Applying language...",
   "direction_note": "The app will automatically restart to apply the new layout direction",
+  "close_btn": "Close",
   "languages": {
     "ar": "العربية",
     "en": "English",

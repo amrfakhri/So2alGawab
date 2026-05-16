@@ -3,7 +3,7 @@
     "name": "So2alGawab",
     "slug": "seenjeem-mvp",
     "scheme": "so2algawab",
-    "version": "0.1.0",
+    "version": "0.1.2",
     "orientation": "default",
     "userInterfaceStyle": "light",
     "splash": {
@@ -15,13 +15,26 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.amrfakhri.so2algawab"
+      "bundleIdentifier": "com.amrfakhri.so2algawab",
+      "usesAppleSignIn": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIViewControllerBasedStatusBarAppearance": true
+      }
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#F7F1E8"
       },
-      "package": "com.amrfakhri.so2algawab"
+      "package": "com.amrfakhri.so2algawab",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [{ "scheme": "so2algawab" }],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -29,7 +42,16 @@
     },
     "plugins": [
       "expo-asset",
-      "expo-localization"
+      "expo-localization",
+      "expo-updates",
+      "expo-apple-authentication",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "So2alGawab needs camera access to scan the TV pairing QR code."
+        }
+      ],
+      "expo-web-browser"
     ],
     "extra": {
       "eas": {
@@ -37,10 +59,11 @@
       }
     },
     "runtimeVersion": {
-      "policy": "appVersion"
+      "policy": "sdkVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/4bbc6c82-39fa-4db3-badf-23870acba098"
+      "url": "https://u.expo.dev/4bbc6c82-39fa-4db3-badf-23870acba098",
+      "enabled": true
     }
   }
 }

@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  I18nManager,
   Pressable,
   StyleSheet,
   Text,
@@ -10,6 +9,7 @@ import {
 import { Category } from '../../game/types/game';
 import { colors } from '../../../shared/theme/colors';
 import { AppIcon } from '../../../shared/components/AppIcon';
+import { useLocale } from '../../../localization/useLocale';
 
 interface CategoryPickerProps {
   categories: Category[];
@@ -22,6 +22,8 @@ export function CategoryPicker({
   selectedSubcategoryIds,
   onToggle,
 }: CategoryPickerProps) {
+  const { textAlign } = useLocale();
+
   return (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -31,7 +33,7 @@ export function CategoryPicker({
 
       {categories.map((category) => (
         <View key={category.id} style={styles.section}>
-          <Text style={styles.sectionTitle}>{category.name}</Text>
+          <Text style={[styles.sectionTitle, { textAlign }]}>{category.name}</Text>
           <View style={styles.grid}>
             {category.subcategories.map((subcategory) => {
               const selected = selectedSubcategoryIds.includes(subcategory.id);
@@ -55,8 +57,8 @@ export function CategoryPicker({
                     <Text style={styles.typeBadge}>{subcategory.type}</Text>
                   </View>
 
-                  <Text style={styles.cardTitle}>{subcategory.name}</Text>
-                  <Text style={styles.cardDescription}>{subcategory.description}</Text>
+                  <Text style={[styles.cardTitle, { textAlign }]}>{subcategory.name}</Text>
+                  <Text style={[styles.cardDescription, { textAlign }]}>{subcategory.description}</Text>
                 </Pressable>
               );
             })}
@@ -77,7 +79,7 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   header: {
-    flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
@@ -97,7 +99,6 @@ const styles = StyleSheet.create({
     color: colors.secondary,
     fontSize: 17,
     fontWeight: '800',
-    textAlign: I18nManager.isRTL ? 'right' : 'left',
   },
   grid: {
     gap: 12,
@@ -120,7 +121,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   cardTopRow: {
-    flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
@@ -134,12 +135,10 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 16,
     fontWeight: '700',
-    textAlign: I18nManager.isRTL ? 'right' : 'left',
   },
   cardDescription: {
     color: colors.mutedText,
     fontSize: 13,
     lineHeight: 18,
-    textAlign: I18nManager.isRTL ? 'right' : 'left',
   },
 });

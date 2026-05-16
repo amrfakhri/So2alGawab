@@ -1,8 +1,8 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
-import { colors } from '../../../shared/theme/colors';
-import { useLanguageStore } from '../../../localization/languageStore';
+import { dark, r, textStyle } from '../../../shared/theme/tokens';
+import { useLocale } from '../../../localization/useLocale';
 
 interface AnswerOptionProps {
   label: string;
@@ -19,27 +19,31 @@ export function AnswerOption({
   revealState = 'neutral',
   onPress,
 }: AnswerOptionProps) {
-  const { isRTL } = useLanguageStore();
+  const { textAlign } = useLocale('game');
+
   const backgroundColor =
-    revealState === 'correct'
-      ? '#DFF5E6'
-      : revealState === 'wrong'
-        ? '#F9E0E0'
-        : isSelected
-          ? '#FBE8D9'
-          : colors.card;
+    revealState === 'correct' ? dark.answerCorrect
+    : revealState === 'wrong' ? dark.answerWrong
+    : isSelected              ? dark.answerSelected
+    : dark.answerIdle;
+
+  const borderColor =
+    revealState === 'correct' ? dark.answerCorrectBorder
+    : revealState === 'wrong' ? dark.answerWrongBorder
+    : isSelected               ? dark.answerSelectedBorder
+    : dark.borderSubtle;
 
   return (
     <Pressable
       disabled={isDisabled}
       onPress={onPress}
-      style={[
+      style={({ pressed }) => [
         styles.button,
-        { backgroundColor },
-        isSelected && styles.selected,
+        { backgroundColor, borderColor },
+        pressed && !isDisabled && styles.pressed,
       ]}
     >
-      <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{label}</Text>
+      <Text style={[styles.label, { textAlign }]}>{label}</Text>
     </Pressable>
   );
 }
@@ -47,17 +51,13 @@ export function AnswerOption({
 const styles = StyleSheet.create({
   button: {
     padding: 16,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  selected: {
-    borderColor: colors.primary,
+    borderRadius: r.card,
     borderWidth: 1.5,
   },
+  pressed: { opacity: 0.8 },
   label: {
-    color: colors.text,
-    fontSize: 16,
+    color: dark.textPrimary,
+    ...textStyle.bodyPrimary,
     fontWeight: '600',
     lineHeight: 22,
   },

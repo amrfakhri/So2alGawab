@@ -1,5 +1,15 @@
 {
   "timer_label": "الوقت",
+  "timer_unit": "ثانية",
+  "question_eyebrow": "السؤال {{current}}",
+  "team_status": {
+    "active": "دورهم",
+    "waiting": "مستنيين"
+  },
+  "cast_status": {
+    "active": "شغّال على التلفزيون",
+    "inactive": "اعرض علي التلفزيون"
+  },
   "round": "الجولة {{current}}/{{total}}",
   "lifelines_title": "وسائل المساعدة",
   "current_category": "الفئة الحالية",
@@ -42,6 +52,12 @@
     "next_turn": "الدور التالي",
     "final_results": "عرض النتائج النهائية"
   },
+  "countdown": {
+    "header": "المباراة بتبتدي",
+    "ready": "استعدوا...",
+    "ready_sub": "السؤال الأول جاي",
+    "start": "ابدأ!"
+  },
   "back_to_board": "العودة للوحة",
   "results": {
     "game_over_eyebrow": "انتهت المباراة",
@@ -50,10 +66,22 @@
     "draw_title": "تعادل الفريقان",
     "subtitle": "النتيجة النهائية بعد {{count}} سؤال.",
     "subtitle_early": "النتيجة عند إنهاء اللعبة.",
-    "new_game": "لعبة جديدة"
+    "new_game": "لعبة جديدة",
+    "screen_title": "خلصت السهرة",
+    "winner_badge": "الكسبانين",
+    "winner_congrats": "ألف مبروك يا أبطال 🏆",
+    "draw_badge": "تعادل",
+    "draw_congrats": "لعبة رائعة من الجميع 🤝",
+    "total_points_label": "إجمالي النقط",
+    "back_to_home": "الرجوع للرئيسية"
   },
   "board": {
     "title": "لوحة الأسئلة",
+    "choose_question": "اختار سؤالك",
+    "turn": "الدور {{current}} من {{total}}",
+    "points_unit": "نقطة",
+    "choose_subtitle": "اختاروا تصنيف ونقطة، ويلا",
+    "remaining": "فاضل {{count}} سؤال",
     "active_team": "دور {{name}}",
     "answered_label": "تمت الإجابة",
     "end_game_btn": "إنهاء اللعبة",

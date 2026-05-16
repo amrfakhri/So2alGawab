@@ -4,9 +4,9 @@ import { ResizeMode, Video } from 'expo-av';
 import { useTranslation } from 'react-i18next';
 
 import { Question } from '../types/game';
-import { colors } from '../../../shared/theme/colors';
+import { alpha, dark, palette, r, spacing, textStyle } from '../../../shared/theme/tokens';
 import { AudioPlayer } from './AudioPlayer';
-import { useLanguageStore } from '../../../localization/languageStore';
+import { useLocale } from '../../../localization/useLocale';
 
 interface QuestionCardProps {
   categoryName: string;
@@ -15,26 +15,22 @@ interface QuestionCardProps {
   hint: string | null;
 }
 
-export function QuestionCard({
-  categoryName,
-  subcategoryName,
-  question,
-  hint,
-}: QuestionCardProps) {
+export function QuestionCard({ categoryName, subcategoryName, question, hint }: QuestionCardProps) {
   const { t } = useTranslation('game');
-  const { isRTL } = useLanguageStore();
-  const textAlign = isRTL ? 'right' : 'left';
+  const { textAlign, rowLTR } = useLocale('game');
 
   return (
     <View style={styles.card}>
-      <View style={[styles.metaRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+      <View style={[styles.metaRow, { flexDirection: rowLTR }]}>
         <View style={styles.metaCopy}>
-          <Text style={[styles.category, { textAlign }]}>{categoryName}</Text>
+          <Text style={[styles.category,    { textAlign }]}>{categoryName}</Text>
           <Text style={[styles.subcategory, { textAlign }]}>{subcategoryName}</Text>
         </View>
-        <Text style={styles.points}>
-          {t('question_card.points', { points: question.points })}
-        </Text>
+        <View style={styles.pointsBadge}>
+          <Text style={styles.pointsText}>
+            {t('question_card.points', { points: question.points })}
+          </Text>
+        </View>
       </View>
 
       {question.mediaUrl ? (
@@ -43,12 +39,11 @@ export function QuestionCard({
             <View style={styles.imageFrame}>
               <Image
                 source={{ uri: question.mediaUrl }}
-                style={styles.image}
-                resizeMode="cover"
+                style={styles.mediaFill}
+                resizeMode="contain"
               />
             </View>
           )}
-
           {question.mediaType === 'video' && (
             <View style={styles.videoFrame}>
               <Video
@@ -59,7 +54,6 @@ export function QuestionCard({
               />
             </View>
           )}
-
           {question.mediaType === 'audio' && (
             <View style={styles.audioFrame}>
               <AudioPlayer uri={question.mediaUrl} />
@@ -73,7 +67,7 @@ export function QuestionCard({
       {hint ? (
         <View style={styles.hintBox}>
           <Text style={[styles.hintLabel, { textAlign }]}>{t('question_card.hint_label')}</Text>
-          <Text style={[styles.hintText, { textAlign }]}>{hint}</Text>
+          <Text style={[styles.hintText,  { textAlign }]}>{hint}</Text>
         </View>
       ) : null}
     </View>
@@ -82,86 +76,92 @@ export function QuestionCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.card,
-    borderRadius: 22,
+    backgroundColor: dark.bgGlass,
+    borderRadius: r.card,
     padding: 18,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: dark.borderSubtle,
     gap: 14,
   },
   metaRow: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    gap: 12,
+    gap: spacing.xs,
   },
-  metaCopy: {
-    flex: 1,
-    gap: 4,
-  },
+  metaCopy: { flex: 1, gap: spacing['3xs'] },
   category: {
-    color: colors.secondary,
+    color: dark.textAccent,
+    ...textStyle.labelMd,
     fontWeight: '800',
-    fontSize: 14,
   },
   subcategory: {
-    color: colors.mutedText,
+    color: dark.textSecondary,
+    ...textStyle.labelMd,
     fontWeight: '600',
-    fontSize: 13,
   },
-  points: {
-    color: colors.primary,
+  pointsBadge: {
+    backgroundColor: alpha.gold[8],
+    borderRadius: r.chip,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: palette.gold[600],
+    flexShrink: 0,
+  },
+  pointsText: {
+    color: dark.textAccent,
+    ...textStyle.labelSm,
     fontWeight: '800',
-    fontSize: 14,
   },
   imageFrame: {
-    borderRadius: 20,
+    alignSelf: 'stretch',
+    height: 200,
+    borderRadius: r.card,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#EDD2BE',
+    borderColor: dark.borderSubtle,
+    backgroundColor: dark.bgSurface,
   },
-  image: {
-    width: '100%',
-    height: 220,
-  },
+  mediaFill: { width: '100%', height: '100%' },
   videoFrame: {
-    borderRadius: 20,
+    borderRadius: r.card,
     overflow: 'hidden',
     backgroundColor: '#000000',
     borderWidth: 1,
-    borderColor: '#EDD2BE',
+    borderColor: dark.borderSubtle,
   },
-  video: {
-    width: '100%',
-    height: 220,
-  },
+  video: { width: '100%', height: 220 },
   audioFrame: {
-    backgroundColor: '#FFF5EA',
-    borderRadius: 20,
+    backgroundColor: dark.bgGlassSubtle,
+    borderRadius: r.card,
     paddingVertical: 28,
     paddingHorizontal: 18,
     borderWidth: 1,
-    borderColor: '#F1D8C5',
+    borderColor: dark.borderSubtle,
     alignItems: 'center',
   },
   prompt: {
-    color: colors.text,
-    fontSize: 24,
+    color: dark.textPrimary,
+    ...textStyle.displayQuestionSm,
     lineHeight: 36,
     fontWeight: '800',
   },
   hintBox: {
-    backgroundColor: '#FFF5EA',
-    borderRadius: 16,
+    backgroundColor: alpha.gold[8],
+    borderRadius: r.card,
     padding: 14,
     gap: 6,
+    borderWidth: 1,
+    borderColor: palette.gold[600],
   },
   hintLabel: {
-    color: colors.primaryDark,
+    color: dark.textAccent,
+    ...textStyle.labelMd,
     fontWeight: '800',
   },
   hintText: {
-    color: colors.text,
+    color: dark.textPrimary,
+    ...textStyle.bodyPrimary,
     lineHeight: 22,
   },
 });

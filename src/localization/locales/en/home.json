@@ -1,0 +1,39 @@
+{
+  "greeting": "Welcome back 👋",
+  "welcome": "Hello, {{name}}",
+  "guest_name": "Guest",
+  "tonight": "🔥 Tonight",
+  "hero_title_1": "Ready to play?",
+  "hero_title_2": "Your friends are waiting",
+  "hero_subtitle": "2 teams • TV ready",
+  "play_btn": "Let's Play",
+  "tv_btn": "Cast to TV",
+  "stats": {
+    "points": "Points",
+    "wins": "Wins",
+    "games": "Games"
+  },
+  "most_played": {
+    "title": "Most Played",
+    "see_all": "See All"
+  },
+  "recommended": {
+    "title": "Your Favorites",
+    "see_all": "See All"
+  },
+  "tabs": {
+    "home": "Home",
+    "play": "Play",
+    "leaderboard": "Rankings",
+    "profile": "Profile"
+  },
+  "questions_count": "{{count}} questions",
+  "loading_categories": "Loading categories...",
+  "no_categories": "No categories available",
+  "avatar_picker": {
+    "title": "Pick your avatar",
+    "subtitle": "Stand out from the crowd 😎",
+    "update": "Update",
+    "close": "Close"
+  }
+}

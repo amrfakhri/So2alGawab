@@ -55,6 +55,7 @@ export interface TeamLifelines {
 export interface TeamState {
   id: TeamId;
   name: string;
+  avatar: string;
   score: number;
   lifelines: TeamLifelines;
   answerRewardArmed: boolean;

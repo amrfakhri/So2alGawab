@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { supabase } from '../../services/supabase/supabaseClient';
@@ -71,6 +71,8 @@ export function TvScreen({ sessionCode }: { sessionCode: string }) {
 function TvSessionView({ session, sessionCode }: { session: GameSession; sessionCode: string }) {
   const { t } = useTranslation('tv');
   const [timerMs, setTimerMs] = useState<number | null>(null);
+  // Persists across TvMedia remounts — once the presenter taps, all future plays work without a prompt
+  const [browserUnlocked, setBrowserUnlocked] = useState(false);
 
   useEffect(() => {
     if (!session.timer_running || !session.timer_started_at || !session.timer_duration_ms) {
@@ -91,6 +93,8 @@ function TvSessionView({ session, sessionCode }: { session: GameSession; session
   const isFinished = session.current_phase === 'finished';
   const isLobby = !session.current_phase || session.current_phase === 'lobby';
   const hasMedia = Boolean(session.current_media_url && session.current_media_type);
+  // Media plays automatically while the question is active, stops on reveal/result
+  const shouldPlayMedia = session.current_phase === 'question' && hasMedia;
 
   return (
     <View style={styles.root}>
@@ -118,8 +122,12 @@ function TvSessionView({ session, sessionCode }: { session: GameSession; session
                 {hasMedia ? (
                   <View style={styles.mediaPanel}>
                     <TvMedia
+                      key={session.current_media_url}
                       mediaType={session.current_media_type!}
                       mediaUrl={session.current_media_url!}
+                      mediaPlaying={shouldPlayMedia}
+                      browserUnlocked={browserUnlocked}
+                      onUnlock={() => setBrowserUnlocked(true)}
                     />
                   </View>
                 ) : null}
@@ -285,7 +293,48 @@ function LifelineRow({ lifelines }: { lifelines: Lifelines | null }) {
   );
 }
 
-function TvMedia({ mediaType, mediaUrl }: { mediaType: string; mediaUrl: string }) {
+function TvMedia({
+  mediaType,
+  mediaUrl,
+  mediaPlaying,
+  browserUnlocked,
+  onUnlock,
+}: {
+  mediaType: string;
+  mediaUrl: string;
+  mediaPlaying: boolean;
+  browserUnlocked: boolean;
+  onUnlock: () => void;
+}) {
+  const videoRef = useRef<any>(null);
+  const audioRef = useRef<any>(null);
+  const [needsTap, setNeedsTap] = useState(false);
+
+  useEffect(() => {
+    const el = mediaType === 'video' ? videoRef.current : mediaType === 'audio' ? audioRef.current : null;
+    if (!el) return;
+    if (mediaPlaying) {
+      if (!browserUnlocked) {
+        // Browser hasn't had a user gesture yet — show the tap prompt
+        setNeedsTap(true);
+        return;
+      }
+      el.play().then(() => setNeedsTap(false)).catch(() => setNeedsTap(true));
+    } else {
+      el.pause();
+      setNeedsTap(false);
+    }
+  }, [mediaPlaying, mediaType, browserUnlocked]);
+
+  function handleTap() {
+    // Must call .play() synchronously inside the click handler so the browser
+    // records a user gesture — waiting for a React re-render would lose it.
+    const el = mediaType === 'video' ? videoRef.current : mediaType === 'audio' ? audioRef.current : null;
+    if (el) { el.play().catch(() => {}); }
+    onUnlock();       // persists in parent — future questions autoplay without a prompt
+    setNeedsTap(false);
+  }
+
   if (mediaType === 'image') {
     return <Image source={{ uri: mediaUrl }} style={styles.mediaImage} resizeMode="contain" />;
   }
@@ -293,22 +342,36 @@ function TvMedia({ mediaType, mediaUrl }: { mediaType: string; mediaUrl: string 
     return (
       <View style={styles.mediaVideoWrapper}>
         {React.createElement('video', {
+          ref: videoRef,
           src: mediaUrl,
           controls: true,
           style: { width: '100%', height: '100%', objectFit: 'contain', backgroundColor: '#000' },
         })}
+        {needsTap && (
+          <Pressable style={styles.tapOverlay} onPress={handleTap}>
+            <AppIcon name="play" size={64} color={tv.white} weight="fill" />
+            <Text style={styles.tapOverlayText}>TAP TO PLAY</Text>
+          </Pressable>
+        )}
       </View>
     );
   }
   if (mediaType === 'audio') {
     return (
       <View style={styles.mediaAudioWrapper}>
-        <AppIcon name="music-note" size={64} color={tv.muted} weight="fill" />
+        <AppIcon name="music-note" size={64} color={needsTap ? tv.yellow : tv.muted} weight="fill" />
         {React.createElement('audio', {
+          ref: audioRef,
           src: mediaUrl,
           controls: true,
           style: { width: '100%', marginTop: '16px' },
         })}
+        {needsTap && (
+          <Pressable style={styles.tapOverlay} onPress={handleTap}>
+            <AppIcon name="play" size={64} color={tv.white} weight="fill" />
+            <Text style={styles.tapOverlayText}>TAP TO PLAY</Text>
+          </Pressable>
+        )}
       </View>
     );
   }
@@ -420,6 +483,20 @@ const styles = StyleSheet.create({
   mediaImage: { flex: 1, alignSelf: 'stretch' },
   mediaVideoWrapper: { flex: 1, alignSelf: 'stretch' },
   mediaAudioWrapper: { padding: 40, alignItems: 'center', gap: 8 },
+  tapOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+    cursor: 'pointer' as any,
+  },
+  tapOverlayText: {
+    color: tv.white,
+    fontSize: 28,
+    fontWeight: '900',
+    letterSpacing: 3,
+  },
   waitingText: { color: tv.muted, fontSize: 28, fontWeight: '600', textAlign: 'center' },
   scoreBar: {
     flexDirection: 'row',

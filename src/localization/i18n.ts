@@ -8,12 +8,16 @@ import arErrors from './locales/ar/errors.json';
 import arSetup from './locales/ar/setup.json';
 import arGame from './locales/ar/game.json';
 import arTv from './locales/ar/tv.json';
+import arHome from './locales/ar/home.json';
+import arAuth from './locales/ar/auth.json';
 import enCommon from './locales/en/common.json';
 import enSettings from './locales/en/settings.json';
 import enErrors from './locales/en/errors.json';
 import enSetup from './locales/en/setup.json';
 import enGame from './locales/en/game.json';
 import enTv from './locales/en/tv.json';
+import enHome from './locales/en/home.json';
+import enAuth from './locales/en/auth.json';
 
 export const LANGUAGE_STORAGE_KEY = '@so2algawab_language';
 export const DEFAULT_LANGUAGE: AppLanguage = 'ar';
@@ -44,6 +48,8 @@ export const i18nInitPromise = i18n.use(initReactI18next).init({
       setup: arSetup,
       game: arGame,
       tv: arTv,
+      home: arHome,
+      auth: arAuth,
     },
     en: {
       common: enCommon,
@@ -52,12 +58,14 @@ export const i18nInitPromise = i18n.use(initReactI18next).init({
       setup: enSetup,
       game: enGame,
       tv: enTv,
+      home: enHome,
+      auth: enAuth,
     },
   },
   lng: DEFAULT_LANGUAGE,
   fallbackLng: DEFAULT_LANGUAGE,
   defaultNS: 'common',
-  ns: ['common', 'settings', 'errors', 'setup', 'game', 'tv'],
+  ns: ['common', 'settings', 'errors', 'setup', 'game', 'tv', 'home', 'auth'],
   interpolation: { escapeValue: false },
 
   // Warn on missing keys during development to catch untranslated strings early

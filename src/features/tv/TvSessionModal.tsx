@@ -13,10 +13,11 @@ import QRCode from 'react-native-qrcode-svg';
 import { useTranslation } from 'react-i18next';
 
 import { colors } from '../../shared/theme/colors';
+import { dark } from '../../shared/theme/tokens';
 import { createGameSession, GameSession, TV_BASE_URL } from '../../services/supabase/sessionService';
 import { useGameStore } from '../game/store/useGameStore';
 import { AppIcon } from '../../shared/components/AppIcon';
-import { useLanguageStore } from '../../localization/languageStore';
+import { useLocale } from '../../localization/useLocale';
 
 type State =
   | { phase: 'idle' }
@@ -31,8 +32,7 @@ interface TvSessionModalProps {
 
 export function TvSessionModal({ visible, onClose }: TvSessionModalProps) {
   const { t } = useTranslation(['tv', 'common']);
-  const { isRTL } = useLanguageStore();
-  const textAlign = isRTL ? 'right' : 'left';
+  const { textAlign, rowLTR } = useLocale(['tv', 'common']);
   const [state, setState] = useState<State>({ phase: 'idle' });
 
   React.useEffect(() => {
@@ -65,7 +65,7 @@ export function TvSessionModal({ visible, onClose }: TvSessionModalProps) {
     <Modal transparent visible={visible} animationType="slide" onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.card}>
-          <View style={[styles.header, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+          <View style={[styles.header, { flexDirection: rowLTR }]}>
             <Text style={[styles.headerTitle, { textAlign }]}>{t('tv:session_modal.title')}</Text>
             <Pressable onPress={onClose} style={styles.closeBtn} hitSlop={12}>
               <AppIcon name="close" size={14} color={colors.mutedText} weight="bold" />
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   },
   stateCenter: { alignItems: 'center', justifyContent: 'center', paddingVertical: 48, gap: 16 },
   stateText: { color: colors.mutedText, fontSize: 16, fontWeight: '600' },
-  errorText: { color: '#B42318', fontSize: 15, fontWeight: '600', textAlign: 'center', paddingHorizontal: 24 },
+  errorText: { color: dark.statusError, fontSize: 15, fontWeight: '600', textAlign: 'center', paddingHorizontal: 24 },
   retryBtn: { backgroundColor: colors.primary, borderRadius: 14, paddingHorizontal: 22, paddingVertical: 12 },
   retryBtnText: { color: '#FFFFFF', fontWeight: '700', fontSize: 15 },
   content: { alignItems: 'center', paddingHorizontal: 22, paddingTop: 22, gap: 20 },

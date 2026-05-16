@@ -2,7 +2,7 @@ import React, { PropsWithChildren } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { colors } from '../theme/colors';
+import { light, spacing } from '../theme/tokens';
 
 interface ScreenProps extends PropsWithChildren {
   scroll?: boolean;
@@ -27,11 +27,11 @@ export function Screen({ children, scroll = false }: ScreenProps) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: light.bgBase,
   },
   content: {
     flex: 1,
-    padding: 20,
+    padding: spacing.md - 4, // 20px — matches existing behaviour
   },
   scrollContent: {
     flexGrow: 1,

@@ -10,6 +10,7 @@ type ListRow = {
     id: string;
     list_id: string;
     name: string;
+    image_path: string | null;
     sort_order: number;
   }[];
 };
@@ -60,7 +61,7 @@ function buildDescription(type: SubcategoryType): string {
 export async function fetchGameCategories(): Promise<Category[]> {
   const { data: lists, error: listsError } = await supabase
     .from('lists')
-    .select('id,title,created_at,categories(id,list_id,name,sort_order)')
+    .select('id,title,created_at,categories(id,list_id,name,image_path,sort_order)')
     .order('created_at', { ascending: true })
     .order('sort_order', { ascending: true, foreignTable: 'categories' });
 
@@ -101,7 +102,14 @@ export async function fetchGameCategories(): Promise<Category[]> {
         id: subcategory.id,
         categoryId: list.id,
         name: subcategory.name,
-        image: subcategory.name,
+        image:
+          subcategory.image_path
+            ? supabase
+                .storage
+                .from('question-media')
+                .getPublicUrl(subcategory.image_path)
+                .data.publicUrl
+            : '',
         description: buildDescription(type),
         type,
         remainingQuestionCount: summaries.length,

@@ -22,6 +22,7 @@ export type GameSession = {
   timer_duration_ms: number | null;
   timer_started_at: string | null;
   timer_running: boolean;
+  media_playing: boolean;
   team1_score: number;
   team2_score: number;
   team1_lifelines: Lifelines | null;
@@ -131,6 +132,7 @@ export async function updateGameSession(
     timer_duration_ms?: number | null;
     timer_started_at?: string | null;
     timer_running?: boolean;
+    media_playing?: boolean;
     team1_score?: number;
     team2_score?: number;
     team1_lifelines?: Record<string, boolean> | null;
@@ -138,6 +140,10 @@ export async function updateGameSession(
   },
 ): Promise<void> {
   await supabase.from('game_sessions').update(fields).eq('id', sessionId);
+}
+
+export async function deleteGameSession(sessionId: string): Promise<void> {
+  await supabase.from('game_sessions').delete().eq('id', sessionId);
 }
 
 // sessionId = game_sessions.id (UUID)

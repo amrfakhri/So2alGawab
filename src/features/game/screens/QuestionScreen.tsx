@@ -1,34 +1,47 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
-  I18nManager,
   Modal,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  useWindowDimensions,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useTranslation } from 'react-i18next';
+import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
 
 import { RootStackParamList } from '../../../navigation/RootNavigator';
 import { PrimaryButton } from '../../../shared/components/PrimaryButton';
-import { colors } from '../../../shared/theme/colors';
+import { CastToTvModal } from '../../tv/CastToTvModal';
+import { alpha, dark, gradients, r, radius, spacing, textStyle } from '../../../shared/theme/tokens';
 import { AnswerOption } from '../components/AnswerOption';
-import { AnswerRevealSection } from '../components/AnswerRevealSection';
+import { AnswerRevealCard } from '../components/AnswerRevealCard';
+import { CategoryPill } from '../components/CategoryPill';
+import { FixedBottomBar } from '../components/FixedBottomBar';
+import { GameBackdrop } from '../components/GameBackdrop';
+import { GameButton } from '../components/GameButton';
+import { GameHeader } from '../components/GameHeader';
 import { LifelineBar } from '../components/LifelineBar';
-import { PresenterControls } from '../components/PresenterControls';
-import { QuestionCard } from '../components/QuestionCard';
+import { QuestionMediaCard } from '../components/QuestionMediaCard';
+import { QuestionPromptCard } from '../components/QuestionPromptCard';
+import { TeamsVSandTimer } from '../components/TeamsVSandTimer';
+import { QUESTION_DURATION_MS } from '../engine/gameEngine';
 import { useGameStore } from '../store/useGameStore';
-import { useLanguageStore } from '../../../localization/languageStore';
+import { useLocale } from '../../../localization/useLocale';
+import { updateGameSession } from '../../../services/supabase/sessionService';
+
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Question'>;
 
+const HEADER_H    = 96;
+const BOTTOM_BAR_H = 104;
+
 export function QuestionScreen({ navigation }: Props) {
-  const { t } = useTranslation('game');
-  const { isRTL } = useLanguageStore();
+  const { t, textAlign, rowLTR } = useLocale('game');
+  const insets = useSafeAreaInsets();
+
   const {
     phase,
     gameMode,
@@ -40,30 +53,32 @@ export function QuestionScreen({ navigation }: Props) {
     revealedHint,
     selectedAnswerIndex,
     roundFeedback,
+    tvSessionId,
     answerQuestion,
-    revealPresenterAnswer,
+    revealAnswer,
     resolvePresenterAnswer,
     tickQuestionTimer,
-    skipTimer,
+    skipTimerAndReveal,
     useLifeline,
     advanceToNextTurn,
     completeSelectionQuestion,
     endGame,
   } = useGameStore();
-  const [showExitModal, setShowExitModal] = useState(false);
-  const { width, height } = useWindowDimensions();
-  const isPortrait = height > width;
 
-  const question = questionDeck[currentQuestionIndex];
-  const activeTeam = teams[activeTeamId];
-  const isPresenter = question?.answerMode === 'presenter';
-  const categoryName = useMemo(() => question?.categoryName ?? '', [question?.categoryName]);
-  const subcategoryName = useMemo(() => question?.subcategoryName ?? '', [question?.subcategoryName]);
+  const [showExitModal, setShowExitModal] = React.useState(false);
+  const [showCastModal, setShowCastModal] = React.useState(false);
+
+  function handleMediaPlayingChange(playing: boolean) {
+    if (!tvSessionId) return;
+    updateGameSession(tvSessionId, { media_playing: playing }).catch(() => {});
+  }
+
+  const question       = questionDeck[currentQuestionIndex];
+  const activeTeam     = teams[activeTeamId];
+  const isPresenter    = question?.answerMode === 'presenter';
 
   useEffect(() => {
-    if (phase === 'finished') {
-      navigation.replace('Results');
-    }
+    if (phase === 'finished') navigation.replace('Results');
   }, [navigation, phase]);
 
   useEffect(() => {
@@ -72,200 +87,219 @@ export function QuestionScreen({ navigation }: Props) {
     return () => clearInterval(id);
   }, [phase, tickQuestionTimer]);
 
+
   if (!question) return null;
 
-  const totalQuestions = questionDeck.length;
-  const showAnswers = !isPresenter && question.options.length > 1;
-  const showReveal = isPresenter && (phase === 'answer_revealed' || phase === 'result');
-  const shouldShowPresenterControls =
-    isPresenter && (phase === 'waiting_answer' || phase === 'answer_revealed');
+  const totalQuestions  = questionDeck.length;
+  const showAnswers     = !isPresenter && question.options.length > 1;
+  const showReveal      = phase === 'answer_revealed' || phase === 'result';
   const isSelectionMode = gameMode === 'selection';
+
   const nextLabel = isSelectionMode
     ? t('back_to_board')
     : currentQuestionIndex + 1 === totalQuestions
       ? t('show_result')
       : t('next_question');
-  const textAlign = isRTL ? 'right' : 'left';
+
+  // Unified bottom bar: covers every interactive phase
+  const showBottomCTA =
+    phase === 'question' ||
+    phase === 'waiting_answer' ||
+    (phase === 'answer_revealed' && isPresenter) ||
+    phase === 'result';
+
+  // Team meta for the VS bar — A is always primary (fixed position), B always secondary.
+  // Only isActive/statusLabel change when turns switch; positions never swap.
+  const primaryMeta = {
+    name:        teams.A.name,
+    score:       teams.A.score,
+    statusLabel: activeTeamId === 'A' ? t('team_status.active') : t('team_status.waiting'),
+    emoji:       teams.A.avatar,
+    accent:      'gold' as const,
+    isActive:    activeTeamId === 'A',
+  };
+  const secondaryMeta = {
+    name:        teams.B.name,
+    score:       teams.B.score,
+    statusLabel: activeTeamId === 'B' ? t('team_status.active') : t('team_status.waiting'),
+    emoji:       teams.B.avatar,
+    accent:      'blue' as const,
+    isActive:    activeTeamId === 'B',
+  };
 
   return (
     <>
-      <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={styles.layout}>
-          {/* Top row */}
-          <View style={styles.topRow}>
-            <View style={styles.topSlotStart}>
-              <Pressable
-                onPress={() => setShowExitModal(true)}
-                style={({ pressed }) => [styles.endButton, pressed && styles.endButtonPressed]}
-              >
-                <Text style={styles.endButtonText}>{t('end_game_btn')}</Text>
-              </Pressable>
-            </View>
+      <StatusBar style="light" />
 
-            <View style={styles.timerShell}>
-              <Text style={styles.timerLabel}>{t('timer_label')}</Text>
-              <Text style={styles.timerValue}>{Math.ceil(remainingMs / 1000)}</Text>
-            </View>
+      <GameBackdrop>
+        {/* ── Scrollable body ──────────────────────────────────────── */}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[
+            styles.scroll,
+            {
+              paddingTop:    insets.top + HEADER_H,
+              paddingBottom: showBottomCTA
+                ? insets.bottom + BOTTOM_BAR_H + 8
+                : insets.bottom + 24,
+            },
+          ]}
+        >
+          {/* Teams VS timer row */}
+          <TeamsVSandTimer
+            primary={primaryMeta}
+            secondary={secondaryMeta}
+            remainingMs={remainingMs}
+            durationMs={QUESTION_DURATION_MS}
+            timerUnitLabel={t('timer_unit')}
+          />
 
-            <View style={styles.topSlotEnd}>
-              <Text style={[styles.roundText, { textAlign }]}>
-                {t('round', { current: currentQuestionIndex + 1, total: totalQuestions })}
-              </Text>
-              <Text style={[styles.categoryText, { textAlign }]}>{subcategoryName}</Text>
-            </View>
-          </View>
+          {/* Category pill */}
+          <CategoryPill
+            pointsLabel={t('question_card.points', { points: question.points })}
+            categoryName={question.subcategoryName}
+          />
 
-          {/* Portrait: compact team scores + lifelines */}
-          {isPortrait ? (
-            <View style={styles.portraitBar}>
-              <View style={styles.portraitTeams}>
-                {[teams.A, teams.B].map((team) => {
-                  const accent = team.id === 'A' ? colors.teamA : colors.teamB;
-                  const active = team.id === activeTeamId;
-                  return (
-                    <View
-                      key={team.id}
-                      style={[
-                        styles.portraitTeamCard,
-                        active && { borderColor: accent, borderWidth: 2 },
-                      ]}
-                    >
-                      <Text style={[styles.portraitTeamName, { textAlign }]}>{team.name}</Text>
-                      <Text style={[styles.portraitTeamScore, { color: accent }]}>
-                        {team.score}
-                      </Text>
-                    </View>
-                  );
-                })}
-              </View>
-              <View style={styles.portraitLifelines}>
-                <Text style={[styles.portraitLifelinesLabel, { textAlign }]}>
-                  {t('lifelines_title')}
-                </Text>
-                <LifelineBar team={activeTeam} onUseLifeline={useLifeline} />
-              </View>
-            </View>
-          ) : null}
-
-          {/* Body row */}
-          <View style={[styles.bodyRow, { flexDirection: isRTL ? 'row' : 'row-reverse' }]}>
-            <View style={styles.mainColumn}>
-              <QuestionCard
-                categoryName={categoryName}
-                subcategoryName={subcategoryName}
-                question={question}
-                hint={revealedHint}
+          {/* Question area — always visible; answer card appended on reveal */}
+          <View style={styles.questionGroup}>
+            {question.mediaUrl && question.mediaType && (
+              <QuestionMediaCard
+                key={question.id}
+                mediaUrl={question.mediaUrl}
+                mediaType={question.mediaType as 'image' | 'video' | 'audio'}
+                onMediaPlayingChange={handleMediaPlayingChange}
               />
-
-              {isPresenter && phase === 'question' ? (
-                <View style={styles.presenterNotice}>
-                  <Text style={[styles.presenterNoticeText, { textAlign }]}>
-                    {t('presenter_notice')}
-                  </Text>
-                </View>
-              ) : null}
-
-              {phase === 'question' ? (
-                <Pressable
-                  onPress={skipTimer}
-                  style={({ pressed }) => [
-                    styles.revealButton,
-                    pressed && styles.revealButtonPressed,
-                  ]}
-                >
-                  <Text style={styles.revealButtonText}>{t('reveal_answer_btn')}</Text>
-                </Pressable>
-              ) : null}
-
-              {showAnswers ? (
-                <View style={styles.answers}>
-                  {question.options.map((option, index) => {
-                    let revealState: 'correct' | 'wrong' | 'neutral' = 'neutral';
-                    if (phase === 'result' && roundFeedback) {
-                      if (index === roundFeedback.correctIndex) revealState = 'correct';
-                      else if (index === roundFeedback.selectedAnswerIndex) revealState = 'wrong';
-                    }
-                    return (
-                      <AnswerOption
-                        key={`${question.id}-${option}`}
-                        label={option}
-                        isSelected={selectedAnswerIndex === index}
-                        revealState={revealState}
-                        isDisabled={phase !== 'question' || isPresenter}
-                        onPress={() => answerQuestion(index)}
-                      />
-                    );
-                  })}
-                </View>
-              ) : null}
-
-              {showReveal ? <AnswerRevealSection answer={question.correctAnswerText} /> : null}
-
-              {shouldShowPresenterControls ? (
-                <PresenterControls
-                  phase={phase}
-                  onReveal={revealPresenterAnswer}
-                  onMarkCorrect={() => resolvePresenterAnswer(true)}
-                  onMarkWrong={() => resolvePresenterAnswer(false)}
-                />
-              ) : null}
-
-              {phase === 'result' && roundFeedback ? (
-                <View style={styles.resultCard}>
-                  <Text style={[styles.resultStatus, { textAlign }]}>{roundFeedback.message}</Text>
-                  <Text style={[styles.resultPoints, { textAlign }]}>
-                    {t('result_points', { team: activeTeam.name, points: roundFeedback.earnedPoints })}
-                  </Text>
-                  <PrimaryButton
-                    label={nextLabel}
-                    onPress={() => {
-                      if (isSelectionMode) {
-                        completeSelectionQuestion();
-                        navigation.replace('SelectionBoard');
-                      } else {
-                        advanceToNextTurn();
-                      }
-                    }}
-                  />
-                </View>
-              ) : null}
-            </View>
-
-            {/* Landscape sidebar */}
-            {!isPortrait ? (
-              <View style={styles.sidebar}>
-                {[teams.A, teams.B].map((team) => {
-                  const accent = team.id === 'A' ? colors.teamA : colors.teamB;
-                  const active = team.id === activeTeamId;
-                  return (
-                    <View
-                      key={team.id}
-                      style={[
-                        styles.teamCard,
-                        active && { borderColor: accent, borderWidth: 2 },
-                      ]}
-                    >
-                      <Text style={styles.teamCardTitle}>{team.name}</Text>
-                      <Text style={[styles.teamCardScore, { color: accent }]}>{team.score}</Text>
-                    </View>
-                  );
-                })}
-
-                <View style={styles.lifelinePanel}>
-                  <Text style={styles.panelTitle}>{t('lifelines_title')}</Text>
-                  <LifelineBar team={activeTeam} onUseLifeline={useLifeline} vertical />
-                </View>
-
-                <View style={styles.footerMeta}>
-                  <Text style={styles.footerMetaLabel}>{t('current_category')}</Text>
-                  <Text style={styles.footerMetaValue}>{categoryName}</Text>
-                </View>
-              </View>
-            ) : null}
+            )}
+            <QuestionPromptCard
+              eyebrow={t('question_eyebrow', { current: currentQuestionIndex + 1 })}
+              prompt={question.prompt}
+              hint={revealedHint}
+              hintLabel={t('question_card.hint_label')}
+            />
+            {showReveal && (
+              <AnswerRevealCard correctAnswerText={question.correctAnswerText} />
+            )}
           </View>
-        </ScrollView>
-      </SafeAreaView>
 
+          {/* MCQ answer options */}
+          {showAnswers && (
+            <View style={styles.answers}>
+              {question.options.map((option, index) => {
+                let revealState: 'correct' | 'wrong' | 'neutral' = 'neutral';
+                if ((phase === 'result' || phase === 'answer_revealed') && roundFeedback) {
+                  if (index === roundFeedback.correctIndex) revealState = 'correct';
+                  else if (index === roundFeedback.selectedAnswerIndex) revealState = 'wrong';
+                }
+                return (
+                  <AnswerOption
+                    key={`${question.id}-${option}`}
+                    label={option}
+                    isSelected={selectedAnswerIndex === index}
+                    revealState={revealState}
+                    isDisabled={phase !== 'question' || isPresenter}
+                    onPress={() => answerQuestion(index)}
+                  />
+                );
+              })}
+            </View>
+          )}
+
+          {/* Lifeline bar — hidden after answer is revealed */}
+          {!showReveal && (
+            <View style={styles.lifelineCard}>
+              <LinearGradient
+                colors={gradients.cardGlass}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={StyleSheet.absoluteFill}
+              />
+              <View style={styles.lifelineBorder} />
+              <LifelineBar team={activeTeam} onUseLifeline={useLifeline} />
+            </View>
+          )}
+
+          {/* Round result feedback */}
+          {phase === 'result' && roundFeedback && (
+            <View style={styles.resultCard}>
+              <Text style={[styles.resultStatus, { textAlign }]}>
+                {roundFeedback.message}
+              </Text>
+              <Text style={[styles.resultPoints, { textAlign }]}>
+                {t('result_points', {
+                  team:   activeTeam.name,
+                  points: roundFeedback.earnedPoints,
+                })}
+              </Text>
+            </View>
+          )}
+        </ScrollView>
+
+        {/* ── Header (fixed top) ────────────────────────────────────── */}
+        <GameHeader
+          roundLabel={`${currentQuestionIndex + 1}/${totalQuestions}`}
+          castLabel={tvSessionId ? t('cast_status.active') : t('cast_status.inactive')}
+          isCastActive={!!tvSessionId}
+          onClose={() => setShowExitModal(true)}
+          onPressCast={() => setShowCastModal(true)}
+        />
+
+      </GameBackdrop>
+
+      {/* ── Bottom CTA (screen-level absolute — outside GameBackdrop) ── */}
+      {showBottomCTA && (
+        <FixedBottomBar>
+          {/* question: one tap stops timer and reveals answer */}
+          {phase === 'question' && (
+            <GameButton label={t('reveal_answer_btn')} onPress={skipTimerAndReveal} />
+          )}
+
+          {/* waiting_answer: reveal the answer (works for both MCQ and presenter) */}
+          {phase === 'waiting_answer' && (
+            <GameButton label={t('reveal_answer_btn')} onPress={revealAnswer} />
+          )}
+
+          {/* answer_revealed (presenter): judge the oral answer */}
+          {phase === 'answer_revealed' && isPresenter && (
+            <View style={[styles.judgeRow, { flexDirection: rowLTR }]}>
+              <GameButton
+                label={t('presenter.wrong')}
+                variant="error"
+                onPress={() => resolvePresenterAnswer(false)}
+                style={styles.judgeBtn}
+              />
+              <GameButton
+                label={t('presenter.correct')}
+                variant="success"
+                onPress={() => resolvePresenterAnswer(true)}
+                style={styles.judgeBtn}
+              />
+            </View>
+          )}
+
+          {/* result: advance to next turn / show results */}
+          {phase === 'result' && (
+            <GameButton
+              label={nextLabel}
+              onPress={() => {
+                if (isSelectionMode) {
+                  completeSelectionQuestion();
+                  navigation.replace('SelectionBoard');
+                } else {
+                  advanceToNextTurn();
+                }
+              }}
+            />
+          )}
+        </FixedBottomBar>
+      )}
+
+      {/* ── Cast to TV modal ──────────────────────────────────────── */}
+      <CastToTvModal
+        visible={showCastModal}
+        onClose={() => setShowCastModal(false)}
+      />
+
+      {/* ── Exit modal ────────────────────────────────────────────── */}
       <Modal
         transparent
         visible={showExitModal}
@@ -275,8 +309,8 @@ export function QuestionScreen({ navigation }: Props) {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <Text style={[styles.modalTitle, { textAlign }]}>{t('exit_dialog.title')}</Text>
-            <Text style={[styles.modalCopy, { textAlign }]}>{t('exit_dialog.body')}</Text>
-            <View style={[styles.modalActions, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+            <Text style={[styles.modalCopy,  { textAlign }]}>{t('exit_dialog.body')}</Text>
+            <View style={[styles.modalActions, { flexDirection: rowLTR }]}>
               <PrimaryButton
                 label={t('exit_dialog.cancel')}
                 onPress={() => setShowExitModal(false)}
@@ -295,128 +329,78 @@ export function QuestionScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.background },
-  layout: { padding: 20, gap: 18 },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
+  judgeRow: {
+    gap: spacing.xs,
   },
-  topSlotStart: { flex: 1, alignItems: 'flex-start' },
-  topSlotEnd: { flex: 1, alignItems: 'flex-end', gap: 4 },
-  timerShell: {
-    minWidth: 110,
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderRadius: 999,
-    backgroundColor: '#1F2937',
-    alignItems: 'center',
-    gap: 2,
-  },
-  timerLabel: { color: '#D1D5DB', fontSize: 12, fontWeight: '700' },
-  timerValue: { color: '#FFFFFF', fontSize: 28, fontWeight: '900' },
-  roundText: { color: colors.mutedText, fontWeight: '700' },
-  categoryText: { color: colors.secondary, fontWeight: '800' },
-  endButton: {
-    backgroundColor: '#FFF1E9',
-    borderColor: '#F0C7B5',
-    borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  endButtonPressed: { opacity: 0.8 },
-  endButtonText: { color: colors.danger, fontWeight: '800', fontSize: 14 },
-  portraitBar: { gap: 10 },
-  portraitTeams: { flexDirection: 'row', gap: 10 },
-  portraitTeamCard: {
+  judgeBtn: {
     flex: 1,
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
   },
-  portraitTeamName: { color: colors.text, fontWeight: '700', fontSize: 13, flexShrink: 1 },
-  portraitTeamScore: { fontSize: 22, fontWeight: '900', marginStart: 8 },
-  portraitLifelines: {
-    backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: 10,
+
+  scroll: {
+    paddingHorizontal: 24,
+    gap: 16,
   },
-  portraitLifelinesLabel: { color: colors.text, fontWeight: '800', fontSize: 13 },
-  bodyRow: { gap: 14 },
-  mainColumn: { flex: 1, gap: 14 },
-  sidebar: { width: 132, gap: 12 },
-  teamCard: {
-    backgroundColor: colors.card,
-    borderRadius: 20,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-    gap: 6,
-  },
-  teamCardTitle: { color: colors.text, fontWeight: '700', textAlign: 'center', fontSize: 14 },
-  teamCardScore: { fontSize: 30, fontWeight: '900' },
-  lifelinePanel: {
-    backgroundColor: colors.card,
-    borderRadius: 20,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
+
+  questionGroup: {
     gap: 12,
   },
-  panelTitle: { color: colors.text, fontWeight: '800', fontSize: 14, textAlign: 'center' },
-  footerMeta: { backgroundColor: '#F2E7DB', borderRadius: 18, padding: 12, gap: 4 },
-  footerMetaLabel: { color: colors.primaryDark, fontSize: 12, fontWeight: '700', textAlign: 'center' },
-  footerMetaValue: { color: colors.text, fontSize: 14, fontWeight: '800', textAlign: 'center' },
-  presenterNotice: {
-    backgroundColor: '#FFF5EA',
-    borderRadius: 18,
-    padding: 14,
+
+  answers: {
+    gap: 8,
+  },
+
+  lifelineCard: {
+    borderRadius: radius['2xl'],
+    overflow: 'hidden',
+    padding: 16,
+  },
+  lifelineBorder: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: radius['2xl'],
     borderWidth: 1,
-    borderColor: '#F1D8C5',
+    borderColor: alpha.white[8],
   },
-  presenterNoticeText: { color: colors.primaryDark, fontWeight: '700', lineHeight: 22 },
-  revealButton: {
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-    alignItems: 'center',
-    backgroundColor: colors.card,
-  },
-  revealButtonPressed: { backgroundColor: '#F2E7DB', borderColor: colors.primary },
-  revealButtonText: { color: colors.primaryDark, fontWeight: '700', fontSize: 15 },
-  answers: { gap: 12 },
+
   resultCard: {
-    backgroundColor: colors.card,
-    borderRadius: 22,
+    backgroundColor: dark.bgGlass,
+    borderRadius: r.card,
     padding: 18,
     borderWidth: 1,
-    borderColor: colors.border,
-    gap: 12,
+    borderColor: dark.borderSubtle,
+    gap: spacing['2xs'],
   },
-  resultStatus: { color: colors.text, fontSize: 22, fontWeight: '800' },
-  resultPoints: { color: colors.secondary, fontWeight: '700' },
+  resultStatus: {
+    color: dark.textPrimary,
+    ...textStyle.titleSectionLg,
+    fontWeight: '800',
+  },
+  resultPoints: {
+    color: dark.textAccent,
+    ...textStyle.bodyPrimary,
+    fontWeight: '700',
+  },
+
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
-    padding: 24,
-    backgroundColor: 'rgba(31, 41, 55, 0.45)',
+    padding: spacing.md,
+    backgroundColor: dark.bgOverlay,
   },
-  modalCard: { backgroundColor: colors.card, borderRadius: 24, padding: 22, gap: 16 },
-  modalTitle: { color: colors.text, fontSize: 24, fontWeight: '800' },
-  modalCopy: { color: colors.mutedText, lineHeight: 22 },
-  modalActions: { gap: 12 },
-  cancelButton: { flex: 1, backgroundColor: colors.secondary },
+  modalCard: {
+    backgroundColor: dark.bgCard,
+    borderRadius: r.card,
+    padding: 22,
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: dark.borderSubtle,
+  },
+  modalTitle:   { color: dark.textPrimary,   ...textStyle.titleSectionLg, fontWeight: '800' },
+  modalCopy:    { color: dark.textSecondary, ...textStyle.bodyPrimary,    lineHeight: 22 },
+  modalActions: { gap: spacing.xs },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: dark.bgGlassStrong,
+    borderWidth: 1,
+    borderColor: dark.borderDefault,
+  },
 });

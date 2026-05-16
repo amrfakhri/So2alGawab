@@ -2,10 +2,9 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { useLanguageStore } from '../../../localization/languageStore';
-
-import { PrimaryButton } from '../../../shared/components/PrimaryButton';
+import { useLocale } from '../../../localization/useLocale';
 import { GamePhase } from '../types/game';
+import { GameButton } from './GameButton';
 
 interface PresenterControlsProps {
   phase: GamePhase;
@@ -21,21 +20,27 @@ export function PresenterControls({
   onMarkWrong,
 }: PresenterControlsProps) {
   const { t } = useTranslation('game');
-  const { isRTL } = useLanguageStore();
+  const { rowLTR } = useLocale('game');
 
   if (phase === 'waiting_answer') {
-    return <PrimaryButton label={t('presenter.reveal_answer')} onPress={onReveal} />;
+    return <GameButton label={t('presenter.reveal_answer')} onPress={onReveal} />;
   }
 
   if (phase === 'answer_revealed') {
     return (
-      <View style={[styles.row, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-        <PrimaryButton
+      <View style={[styles.row, { flexDirection: rowLTR }]}>
+        <GameButton
           label={t('presenter.wrong')}
+          variant="secondary"
           onPress={onMarkWrong}
-          style={styles.secondaryAction}
+          style={styles.half}
         />
-        <PrimaryButton label={t('presenter.correct')} onPress={onMarkCorrect} />
+        <GameButton
+          label={t('presenter.correct')}
+          variant="success"
+          onPress={onMarkCorrect}
+          style={styles.half}
+        />
       </View>
     );
   }
@@ -44,11 +49,6 @@ export function PresenterControls({
 }
 
 const styles = StyleSheet.create({
-  row: {
-    gap: 12,
-  },
-  secondaryAction: {
-    flex: 1,
-    backgroundColor: '#1B4965',
-  },
+  row: { gap: 12 },
+  half: { flex: 1 },
 });

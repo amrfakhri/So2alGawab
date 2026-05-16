@@ -3,53 +3,78 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { LifelineId, TeamState } from '../types/game';
-import { colors } from '../../../shared/theme/colors';
+import { alpha, dark, palette, r, radius, textStyle } from '../../../shared/theme/tokens';
 import { AppIcon, type AppIconName } from '../../../shared/components/AppIcon';
 
 interface LifelineBarProps {
   team: TeamState;
   onUseLifeline: (id: LifelineId) => void;
-  vertical?: boolean;
 }
+
+type LifelineTheme = {
+  bg: string;
+  border: string;
+  iconColor: string;
+  badgeBg: string;
+  badgeText: string;
+};
+
+const LIFELINE_THEMES: Record<LifelineId, LifelineTheme> = {
+  callFriend:      { bg: alpha.gold[8],   border: palette.gold[600],  iconColor: palette.gold[400],  badgeBg: palette.gold[500],  badgeText: '#1A0F00' },
+  discardQuestion: { bg: alpha.blue[16],  border: palette.blue[300],  iconColor: palette.blue[300],  badgeBg: palette.blue[400],  badgeText: '#FFFFFF' },
+  answerReward:    { bg: '#440a18',       border: palette.error[400], iconColor: palette.error[400], badgeBg: palette.error[500], badgeText: '#FFFFFF' },
+};
+
+const LIFELINE_ICON_MAP: Record<LifelineId, AppIconName> = {
+  callFriend:      'lifeline-call',
+  discardQuestion: 'lifeline-discard',
+  answerReward:    'lifeline-reward',
+};
 
 const LIFELINE_IDS: LifelineId[] = ['callFriend', 'discardQuestion', 'answerReward'];
 
-const LIFELINE_ICON_MAP: Record<LifelineId, AppIconName> = {
-  callFriend: 'lifeline-call',
-  discardQuestion: 'lifeline-discard',
-  answerReward: 'lifeline-reward',
-};
-
-export function LifelineBar({ team, onUseLifeline, vertical }: LifelineBarProps) {
+export function LifelineBar({ team, onUseLifeline }: LifelineBarProps) {
   const { t } = useTranslation('game');
 
   return (
-    <View style={[styles.wrapper, vertical && styles.verticalWrapper]}>
+    <View style={styles.container}>
       {LIFELINE_IDS.map((id) => {
         const available = team.lifelines[id];
+        const theme = LIFELINE_THEMES[id];
         return (
-          <Pressable
-            key={id}
-            disabled={!available}
-            onPress={() => onUseLifeline(id)}
-            style={[
-              styles.button,
-              vertical && styles.verticalButton,
-              !available && styles.disabled,
-            ]}
-          >
-            <View style={styles.buttonContent}>
-              <AppIcon
-                name={LIFELINE_ICON_MAP[id]}
-                size={13}
-                color={available ? colors.text : colors.mutedText}
-                weight="bold"
-              />
-              <Text style={[styles.text, !available && styles.disabledText]}>
-                {t(`lifelines.${id}`)}
+          <View key={id} style={styles.buttonWrapper}>
+            <View style={[styles.badge, { backgroundColor: theme.badgeBg }]}>
+              <Text style={[styles.badgeText, { color: theme.badgeText }]}>
+                {available ? '1' : '0'}
               </Text>
             </View>
-          </Pressable>
+            <Pressable
+              disabled={!available}
+              onPress={() => onUseLifeline(id)}
+              style={({ pressed }) => [
+                styles.button,
+                { backgroundColor: theme.bg, borderColor: theme.border },
+                !available && styles.buttonDisabled,
+                pressed && available && styles.buttonPressed,
+              ]}
+            >
+              <AppIcon
+                name={LIFELINE_ICON_MAP[id]}
+                size={14}
+                color={available ? theme.iconColor : dark.textTertiary}
+                weight="bold"
+              />
+              <Text
+                style={[
+                  styles.label,
+                  { color: available ? dark.textPrimary : dark.textTertiary },
+                ]}
+                numberOfLines={1}
+              >
+                {t(`lifelines.${id}`)}
+              </Text>
+            </Pressable>
+          </View>
         );
       })}
     </View>
@@ -57,41 +82,48 @@ export function LifelineBar({ team, onUseLifeline, vertical }: LifelineBarProps)
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
+  container: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
+    gap: 8,
   },
-  verticalWrapper: {
-    flexDirection: 'column',
-    flexWrap: 'nowrap',
+  buttonWrapper: {
+    flex: 1,
+    paddingTop: 8,
+  },
+  badge: {
+    position: 'absolute',
+    top: 0,
+    start: 6,
+    zIndex: 1,
+    width: 20,
+    height: 20,
+    borderRadius: r.badge,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: {
+    fontSize: 11,
+    fontWeight: '800',
   },
   button: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    backgroundColor: colors.surface,
-    borderRadius: 999,
+    height: 44,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border,
-  },
-  verticalButton: {
-    width: '100%',
-    alignItems: 'center',
-  },
-  disabled: {
-    opacity: 0.4,
-  },
-  buttonContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    justifyContent: 'center',
+    gap: 6,
+    paddingHorizontal: 8,
   },
-  text: {
-    color: colors.text,
+  buttonDisabled: {
+    opacity: 0.38,
+  },
+  buttonPressed: {
+    opacity: 0.75,
+  },
+  label: {
+    ...textStyle.labelSm,
     fontWeight: '700',
-    fontSize: 13,
-  },
-  disabledText: {
-    color: colors.mutedText,
+    flexShrink: 1,
   },
 });

@@ -6,9 +6,10 @@ import { useTranslation } from 'react-i18next';
 import { RootStackParamList } from '../../../navigation/RootNavigator';
 import { Screen } from '../../../shared/components/Screen';
 import { PrimaryButton } from '../../../shared/components/PrimaryButton';
-import { colors } from '../../../shared/theme/colors';
+import { light, r, spacing, textStyle } from '../../../shared/theme/tokens';
 import { useGameStore } from '../store/useGameStore';
 import { useLanguageStore } from '../../../localization/languageStore';
+import { StatusBar } from 'expo-status-bar';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Feedback'>;
 
@@ -37,15 +38,16 @@ export function FeedbackScreen({ navigation }: Props) {
 
   const accent =
     roundFeedback.status === 'correct'
-      ? colors.success
+      ? light.textSuccess
       : roundFeedback.status === 'skipped'
-        ? colors.warning
-        : colors.danger;
+        ? light.textWarning
+        : light.textError;
 
   const isLast = currentQuestionIndex + 1 === questionDeck.length;
 
   return (
     <Screen>
+      <StatusBar style="dark" />
       <View style={styles.card}>
         <Text style={[styles.status, { color: accent, textAlign }]}>
           {roundFeedback.message}
@@ -81,16 +83,16 @@ export function FeedbackScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    backgroundColor: colors.card,
-    borderRadius: 24,
-    padding: 24,
+    backgroundColor: light.bgCard,
+    borderRadius: r.card,
+    padding: spacing.md,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: light.borderSubtle,
     justifyContent: 'center',
-    gap: 12,
+    gap: spacing.xs,
   },
-  status: { fontSize: 28, lineHeight: 34, fontWeight: '800' },
-  points: { fontSize: 18, fontWeight: '700', color: colors.secondary },
-  reward: { color: colors.primaryDark, fontWeight: '700' },
-  progress: { marginTop: 10, color: colors.mutedText, fontSize: 15 },
+  status:   { ...textStyle.titlePage, lineHeight: 34, fontWeight: '800' },
+  points:   { ...textStyle.titleSectionSm, fontWeight: '700', color: light.secondary },
+  reward:   { color: light.textAccentDark, fontWeight: '700' },
+  progress: { marginTop: 10, color: light.textSecondary, ...textStyle.bodySm },
 });

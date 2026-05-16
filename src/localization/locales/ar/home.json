@@ -1,0 +1,39 @@
+{
+  "greeting": "نورت 👋",
+  "welcome": "أهلاً يا {{name}}",
+  "guest_name": "لعيب",
+  "tonight": "🔥 سهرة النهارده",
+  "hero_title_1": "يلا نبتدي؟",
+  "hero_title_2": "الشلة مستنياك",
+  "hero_subtitle": "فرقتين • التلفزيون جاهز",
+  "play_btn": "يلا نبتدي",
+  "tv_btn": "وصّل التلفزيون",
+  "stats": {
+    "points": "نقطة",
+    "wins": "كسبت",
+    "games": "لعبة"
+  },
+  "most_played": {
+    "title": "الأكتر لعب دلوقتي",
+    "see_all": "شوف الكل"
+  },
+  "recommended": {
+    "title": "اللي بتحبها",
+    "see_all": "شوف الكل"
+  },
+  "tabs": {
+    "home": "الرئيسية",
+    "play": "العب",
+    "leaderboard": "الترتيب",
+    "profile": "بروفايل"
+  },
+  "questions_count": "{{count}} سؤال",
+  "loading_categories": "جاري تحميل الفئات...",
+  "no_categories": "لا توجد فئات متاحة",
+  "avatar_picker": {
+    "title": "اختار الأفاتار بتاعك",
+    "subtitle": "وخليك جامد وسط صحابك 😎",
+    "update": "تحديث",
+    "close": "غلق"
+  }
+}

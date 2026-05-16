@@ -2,8 +2,8 @@ import React from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { colors } from '../../../shared/theme/colors';
 import { useLanguageStore } from '../../../localization/languageStore';
+import { dark, r, radius, spacing, textStyle } from '../../../shared/theme/tokens';
 
 interface TeamNameFieldsProps {
   teamAName: string;
@@ -27,14 +27,14 @@ export function TeamNameFields({
       <Text style={[styles.title, { textAlign }]}>{t('teams.section_title')}</Text>
       <TextInput
         placeholder={t('teams.team_a_placeholder')}
-        placeholderTextColor={colors.mutedText}
+        placeholderTextColor={dark.textTertiary}
         value={teamAName}
         onChangeText={onChangeTeamA}
         style={[styles.input, { textAlign }]}
       />
       <TextInput
         placeholder={t('teams.team_b_placeholder')}
-        placeholderTextColor={colors.mutedText}
+        placeholderTextColor={dark.textTertiary}
         value={teamBName}
         onChangeText={onChangeTeamB}
         style={[styles.input, { textAlign }]}
@@ -45,26 +45,26 @@ export function TeamNameFields({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.card,
-    borderRadius: 22,
+    backgroundColor: dark.bgGlass,
+    borderRadius: r.card,
     padding: 18,
-    gap: 12,
+    gap: spacing.xs,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: dark.borderSubtle,
   },
   title: {
-    fontSize: 18,
+    color: dark.textPrimary,
+    ...textStyle.titleSectionSm,
     fontWeight: '700',
-    color: colors.text,
   },
   input: {
-    backgroundColor: colors.surface,
-    borderRadius: 14,
+    backgroundColor: dark.bgGlass,
+    borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: dark.borderSubtle,
     paddingHorizontal: 14,
     paddingVertical: 14,
-    color: colors.text,
-    fontSize: 16,
+    color: dark.textPrimary,
+    ...textStyle.bodyPrimary,
   },
 });

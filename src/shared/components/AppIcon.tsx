@@ -18,9 +18,10 @@ import {
   CrownIcon,
   CircleNotchIcon,
   TrophyIcon,
+  CaretRightIcon,
   type Icon as PhosphorIcon,
 } from 'phosphor-react-native';
-import { Settings, Info } from 'lucide-react-native';
+import { Settings, Info, Search, Globe2, Bell, House, Gamepad2, User, Trophy as LucideTrophy } from 'lucide-react-native';
 
 // Phosphor: gameplay, TV, emotional moments, assists, timers, celebrations, status
 // Lucide:   utility/system UI, settings, navigation, technical actions
@@ -37,9 +38,11 @@ export type AppIconName =
   // Content-type badges
   | 'image-type' | 'text-type' | 'mixed-type'
   // Generic UI
-  | 'close' | 'check' | 'circle'
+  | 'close' | 'check' | 'circle' | 'caret-right'
   // Utility / settings (Lucide)
-  | 'settings' | 'info';
+  | 'settings' | 'info' | 'search' | 'globe'
+  // Navigation / Home (Lucide)
+  | 'bell' | 'home-tab' | 'gamepad' | 'profile' | 'leaderboard';
 
 export interface AppIconProps {
   name: AppIconName;
@@ -67,15 +70,19 @@ const PHOSPHOR_MAP: Partial<Record<AppIconName, PhosphorIcon>> = {
   'close':            XIcon,
   'check':            CheckIcon,
   'circle':           CircleIcon,
+  'caret-right':      CaretRightIcon,
 };
 
 export function AppIcon({ name, size = 24, color = '#000000', weight = 'regular' }: AppIconProps) {
-  if (name === 'settings') {
-    return <Settings size={size} color={color} strokeWidth={2} />;
-  }
-  if (name === 'info') {
-    return <Info size={size} color={color} strokeWidth={2} />;
-  }
+  if (name === 'settings')    return <Settings size={size} color={color} strokeWidth={2} />;
+  if (name === 'info')        return <Info size={size} color={color} strokeWidth={2} />;
+  if (name === 'search')      return <Search size={size} color={color} strokeWidth={2} />;
+  if (name === 'globe')       return <Globe2 size={size} color={color} strokeWidth={2} />;
+  if (name === 'bell')        return <Bell size={size} color={color} strokeWidth={2} />;
+  if (name === 'home-tab')    return <House size={size} color={color} strokeWidth={2} />;
+  if (name === 'gamepad')     return <Gamepad2 size={size} color={color} strokeWidth={2} />;
+  if (name === 'profile')     return <User size={size} color={color} strokeWidth={2} />;
+  if (name === 'leaderboard') return <LucideTrophy size={size} color={color} strokeWidth={2} />;
 
   const PhIcon = PHOSPHOR_MAP[name];
   if (!PhIcon) return null;

@@ -8,9 +8,10 @@ import { AppIcon } from '../../../shared/components/AppIcon';
 
 interface AudioPlayerProps {
   uri: string;
+  onPlayingChange?: (playing: boolean) => void;
 }
 
-export function AudioPlayer({ uri }: AudioPlayerProps) {
+export function AudioPlayer({ uri, onPlayingChange }: AudioPlayerProps) {
   const { t } = useTranslation('game');
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -18,7 +19,10 @@ export function AudioPlayer({ uri }: AudioPlayerProps) {
 
   useEffect(() => {
     return () => {
-      sound?.unloadAsync();
+      if (!sound) return;
+      sound.stopAsync()
+        .catch(() => {})
+        .finally(() => sound.unloadAsync().catch(() => {}));
     };
   }, [sound]);
 
@@ -29,9 +33,11 @@ export function AudioPlayer({ uri }: AudioPlayerProps) {
       if (isPlaying) {
         await sound.pauseAsync();
         setIsPlaying(false);
+        onPlayingChange?.(false);
       } else {
         await sound.playAsync();
         setIsPlaying(true);
+        onPlayingChange?.(true);
       }
       return;
     }
@@ -45,11 +51,13 @@ export function AudioPlayer({ uri }: AudioPlayerProps) {
         (status: AVPlaybackStatus) => {
           if (status.isLoaded && status.didJustFinish) {
             setIsPlaying(false);
+            onPlayingChange?.(false);
           }
         },
       );
       setSound(newSound);
       setIsPlaying(true);
+      onPlayingChange?.(true);
     } catch {
       // Loading failure is handled silently so the user can retry
     } finally {
