@@ -868,11 +868,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   portraitCount: {
-    color: dark.bgGlassStrong,  // rgba(255,255,255,0.45) — using closest token
+    color: dark.textSecondary,  // rgba(255,255,255,0.45) — using closest token
     fontSize: 12,
     fontWeight: '500',
     textAlign: 'center',
-    opacity: dark.opMuted,
   },
 
   // ── List cards ────────────────────────────────────────────────────────────────
