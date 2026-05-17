@@ -554,12 +554,13 @@ const styles = StyleSheet.create({
   // Selected chips
   selectedChip: {
     height: 36,
-    maxWidth: 168,
+    minWidth: 96,
+    maxWidth: 220,
     borderRadius: r.badge,
     borderWidth: 1,
     borderColor: dark.textAccent,
     backgroundColor: dark.bgAccentSubtle,
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing['2xs'],
     paddingHorizontal: 9,
@@ -578,7 +579,7 @@ const styles = StyleSheet.create({
     ...textStyle.labelSm,
     lineHeight: 14,
     fontWeight: '700',
-    flex: 1,
+    flexShrink: 1,
   },
 
   // Primary gold button

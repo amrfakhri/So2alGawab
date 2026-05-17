@@ -1,6 +1,7 @@
+import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
-import { Mail, Lock } from 'lucide-react-native';
+import { ChevronLeft, Mail, Lock } from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
 import {
   Alert,
@@ -20,10 +21,12 @@ import { AuthStackParamList } from '../../../navigation/RootNavigator';
 import { useLocale } from '../../../localization/useLocale';
 import { SpotlightFrame } from '../../../shared/components/SpotlightFrame';
 import {
+  alpha,
   dark,
   glow,
   gradients,
   r,
+  radius,
   spacing,
   textStyle,
 } from '../../../shared/theme/tokens';
@@ -45,7 +48,7 @@ function validate(email: string, password: string): FormErrors {
 }
 
 export function EmailLoginScreen({ navigation }: Props) {
-  const { t } = useLocale('auth');
+  const { t, isRTL } = useLocale('auth');
   const insets = useSafeAreaInsets();
 
   const [email, setEmail] = useState('');
@@ -117,6 +120,32 @@ export function EmailLoginScreen({ navigation }: Props) {
         opacity={0.5}
       />
 
+      {/* Back button — absolute so it doesn't affect scroll layout */}
+      <Pressable
+        onPress={() => navigation.goBack()}
+        style={({ pressed }) => [
+          styles.backBtn,
+          { top: insets.top + spacing.md, left: spacing.md },
+          pressed && styles.pressed,
+        ]}
+        hitSlop={8}
+      >
+        <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+        <LinearGradient
+          colors={[alpha.white[8], alpha.white[4]]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+        <View style={styles.backBtnBorder} />
+        <ChevronLeft
+          size={20}
+          color={dark.textPrimary}
+          strokeWidth={2}
+          style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
+        />
+      </Pressable>
+
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -125,7 +154,10 @@ export function EmailLoginScreen({ navigation }: Props) {
         <ScrollView
           contentContainerStyle={[
             styles.content,
-            { paddingTop: insets.top + spacing.xl, paddingBottom: insets.bottom + spacing.lg },
+            {
+              paddingTop: insets.top + 136,
+              paddingBottom: insets.bottom + spacing.lg,
+            },
           ]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
@@ -218,9 +250,30 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
+
+  // ── Back button ──────────────────────────────────────────────────────────────
+  // top + left/right are set inline (depend on insets and isRTL)
+  backBtn: {
+    position: 'absolute',
+    zIndex: 10,
+    width: 40,
+    height: 40,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  backBtnBorder: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: dark.borderSubtle,
+  },
+
+  // ── Scroll content ───────────────────────────────────────────────────────────
   content: {
     flexGrow: 1,
-    paddingHorizontal: spacing.lg - 4,
+    paddingHorizontal: spacing.md,
     justifyContent: 'space-between',
   },
   logoWrapper: {
@@ -235,11 +288,13 @@ const styles = StyleSheet.create({
   actions: {
     gap: spacing.md,
   },
+
+  // ── Buttons ──────────────────────────────────────────────────────────────────
   fullWidthBtn: {
     width: '100%',
   },
   loginBtn: {
-    height: 48,
+    height: 56,
     borderRadius: r.button,
     alignItems: 'center',
     justifyContent: 'center',
@@ -247,18 +302,18 @@ const styles = StyleSheet.create({
   },
   loginBtnLabel: {
     color: dark.textInverse,
-    ...textStyle.buttonSm,
+    ...textStyle.buttonMd,
     fontWeight: '700',
   },
   forgotBtn: {
-    height: 38,
+    height: 56,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
   },
   forgotLabel: {
     color: dark.textPrimary,
-    ...textStyle.buttonSm,
+    ...textStyle.buttonMd,
   },
   pressed: {
     opacity: dark.opPressed,

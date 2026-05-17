@@ -12,6 +12,7 @@ interface GameButtonProps {
   onPress: () => void;
   disabled?: boolean;
   style?: object;
+  icon?: React.ReactNode;
 }
 
 export function GameButton({
@@ -20,6 +21,7 @@ export function GameButton({
   onPress,
   disabled,
   style,
+  icon,
 }: GameButtonProps) {
   const isPrimary   = variant === 'primary';
   const isSuccess   = variant === 'success';
@@ -68,14 +70,17 @@ export function GameButton({
         />
       )}
 
-      <Text
-        style={[
-          styles.label,
-          { color: isPrimary ? dark.textInverse : dark.textPrimary },
-        ]}
-      >
-        {label}
-      </Text>
+      <View style={styles.content}>
+        {icon}
+        <Text
+          style={[
+            styles.label,
+            { color: isPrimary ? dark.textInverse : dark.textPrimary },
+          ]}
+        >
+          {label}
+        </Text>
+      </View>
     </Pressable>
   );
 }
@@ -93,6 +98,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: alpha.white[12],
     borderRadius: radius.pill,
+  },
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   label: {
     ...textStyle.buttonMd,

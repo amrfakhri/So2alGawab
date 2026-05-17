@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
+import { Eye, ThumbsDown, ThumbsUp } from 'lucide-react-native';
 
 import { RootStackParamList } from '../../../navigation/RootNavigator';
 import { PrimaryButton } from '../../../shared/components/PrimaryButton';
@@ -39,7 +40,7 @@ const HEADER_H    = 96;
 const BOTTOM_BAR_H = 104;
 
 export function QuestionScreen({ navigation }: Props) {
-  const { t, textAlign, rowLTR } = useLocale('game');
+  const { t, textAlign } = useLocale('game');
   const insets = useSafeAreaInsets();
 
   const {
@@ -250,28 +251,38 @@ export function QuestionScreen({ navigation }: Props) {
         <FixedBottomBar>
           {/* question: one tap stops timer and reveals answer */}
           {phase === 'question' && (
-            <GameButton label={t('reveal_answer_btn')} onPress={skipTimerAndReveal} />
+            <GameButton
+              label={t('reveal_answer_btn')}
+              onPress={skipTimerAndReveal}
+              icon={<Eye size={18} color={dark.textInverse} strokeWidth={2} />}
+            />
           )}
 
           {/* waiting_answer: reveal the answer (works for both MCQ and presenter) */}
           {phase === 'waiting_answer' && (
-            <GameButton label={t('reveal_answer_btn')} onPress={revealAnswer} />
+            <GameButton
+              label={t('reveal_answer_btn')}
+              onPress={revealAnswer}
+              icon={<Eye size={18} color={dark.textInverse} strokeWidth={2} />}
+            />
           )}
 
           {/* answer_revealed (presenter): judge the oral answer */}
           {phase === 'answer_revealed' && isPresenter && (
-            <View style={[styles.judgeRow, { flexDirection: rowLTR }]}>
+            <View style={styles.judgeRow}>
               <GameButton
                 label={t('presenter.wrong')}
                 variant="error"
                 onPress={() => resolvePresenterAnswer(false)}
                 style={styles.judgeBtn}
+                icon={<ThumbsDown size={18} color={dark.textPrimary} strokeWidth={2} />}
               />
               <GameButton
                 label={t('presenter.correct')}
                 variant="success"
                 onPress={() => resolvePresenterAnswer(true)}
                 style={styles.judgeBtn}
+                icon={<ThumbsUp size={18} color={dark.textPrimary} strokeWidth={2} />}
               />
             </View>
           )}
@@ -310,15 +321,16 @@ export function QuestionScreen({ navigation }: Props) {
           <View style={styles.modalCard}>
             <Text style={[styles.modalTitle, { textAlign }]}>{t('exit_dialog.title')}</Text>
             <Text style={[styles.modalCopy,  { textAlign }]}>{t('exit_dialog.body')}</Text>
-            <View style={[styles.modalActions, { flexDirection: rowLTR }]}>
+            <View style={styles.modalActions}>
+              <PrimaryButton
+                label={t('exit_dialog.confirm')}
+                onPress={() => { setShowExitModal(false); endGame(); }}
+                style={styles.confirmButton}
+              />
               <PrimaryButton
                 label={t('exit_dialog.cancel')}
                 onPress={() => setShowExitModal(false)}
                 style={styles.cancelButton}
-              />
-              <PrimaryButton
-                label={t('exit_dialog.confirm')}
-                onPress={() => { setShowExitModal(false); endGame(); }}
               />
             </View>
           </View>
@@ -330,6 +342,7 @@ export function QuestionScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   judgeRow: {
+    flexDirection: 'row',
     gap: spacing.xs,
   },
   judgeBtn: {
@@ -396,7 +409,8 @@ const styles = StyleSheet.create({
   },
   modalTitle:   { color: dark.textPrimary,   ...textStyle.titleSectionLg, fontWeight: '800' },
   modalCopy:    { color: dark.textSecondary, ...textStyle.bodyPrimary,    lineHeight: 22 },
-  modalActions: { gap: spacing.xs },
+  modalActions: { flexDirection: 'row-reverse', gap: spacing.xs },
+  confirmButton: { flex: 1 },
   cancelButton: {
     flex: 1,
     backgroundColor: dark.bgGlassStrong,

@@ -1,10 +1,10 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { MessageCircleQuestionMark, SkipForward, Zap } from 'lucide-react-native';
 
 import { LifelineId, TeamState } from '../types/game';
 import { alpha, dark, palette, r, radius, textStyle } from '../../../shared/theme/tokens';
-import { AppIcon, type AppIconName } from '../../../shared/components/AppIcon';
 
 interface LifelineBarProps {
   team: TeamState;
@@ -25,11 +25,12 @@ const LIFELINE_THEMES: Record<LifelineId, LifelineTheme> = {
   answerReward:    { bg: '#440a18',       border: palette.error[400], iconColor: palette.error[400], badgeBg: palette.error[500], badgeText: '#FFFFFF' },
 };
 
-const LIFELINE_ICON_MAP: Record<LifelineId, AppIconName> = {
-  callFriend:      'lifeline-call',
-  discardQuestion: 'lifeline-discard',
-  answerReward:    'lifeline-reward',
-};
+function LifelineIcon({ id, color }: { id: LifelineId; color: string }) {
+  const props = { size: 16, color, strokeWidth: 2 } as const;
+  if (id === 'callFriend')      return <MessageCircleQuestionMark {...props} />;
+  if (id === 'discardQuestion') return <SkipForward {...props} />;
+  return <Zap {...props} />;
+}
 
 const LIFELINE_IDS: LifelineId[] = ['callFriend', 'discardQuestion', 'answerReward'];
 
@@ -58,11 +59,9 @@ export function LifelineBar({ team, onUseLifeline }: LifelineBarProps) {
                 pressed && available && styles.buttonPressed,
               ]}
             >
-              <AppIcon
-                name={LIFELINE_ICON_MAP[id]}
-                size={14}
+              <LifelineIcon
+                id={id}
                 color={available ? theme.iconColor : dark.textTertiary}
-                weight="bold"
               />
               <Text
                 style={[

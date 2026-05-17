@@ -1,22 +1,18 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useTranslation } from 'react-i18next';
-
 import { RootStackParamList } from '../../../navigation/RootNavigator';
 import { Screen } from '../../../shared/components/Screen';
 import { PrimaryButton } from '../../../shared/components/PrimaryButton';
 import { light, r, spacing, textStyle } from '../../../shared/theme/tokens';
 import { useGameStore } from '../store/useGameStore';
-import { useLanguageStore } from '../../../localization/languageStore';
+import { useLocale } from '../../../localization/useLocale';
 import { StatusBar } from 'expo-status-bar';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Feedback'>;
 
 export function FeedbackScreen({ navigation }: Props) {
-  const { t } = useTranslation('game');
-  const { isRTL } = useLanguageStore();
-  const textAlign = isRTL ? 'right' : 'left';
+  const { t, textAlign } = useLocale('game');
 
   const {
     phase,

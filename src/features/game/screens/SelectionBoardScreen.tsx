@@ -47,7 +47,7 @@ interface BoardColumn {
 }
 
 export function SelectionBoardScreen({ navigation }: Props) {
-  const { t, textAlign, rowLTR } = useLocale('game');
+  const { t, textAlign } = useLocale('game');
   const insets = useSafeAreaInsets();
   const [showExitModal, setShowExitModal] = useState(false);
 
@@ -151,7 +151,7 @@ export function SelectionBoardScreen({ navigation }: Props) {
           ]}
         >
           {/* ── Team score cards ─────────────────────────────────── */}
-          <View style={[styles.scoreRow, { flexDirection: rowLTR }]}>
+          <View style={styles.scoreRow}>
             {[teams.A, teams.B].map((team) => {
               const isActive = team.id === activeTeamId;
               const id = team.id as 'A' | 'B';
@@ -173,7 +173,7 @@ export function SelectionBoardScreen({ navigation }: Props) {
                   {/* Card content — column */}
                   <View style={styles.scoreCardContent}>
                     {/* Team details row: avatar (right) + text (left) */}
-                    <View style={[styles.scoreTeamRow, { flexDirection: rowLTR }]}>
+                    <View style={styles.scoreTeamRow}>
                       {/* Avatar — first = rightmost in RTL */}
                       <View
                         style={[
@@ -229,7 +229,7 @@ export function SelectionBoardScreen({ navigation }: Props) {
                 <View style={styles.categoryCardBorder} />
 
                 {/* Header row */}
-                <View style={[styles.catHeaderRow, { flexDirection: rowLTR }]}>
+                <View style={styles.catHeaderRow}>
                   {col.imageUrl ? (
                     <Image
                       source={{ uri: col.imageUrl }}
@@ -262,10 +262,7 @@ export function SelectionBoardScreen({ navigation }: Props) {
                   horizontal
                   showsHorizontalScrollIndicator={false}
                   style={styles.chipsScroll}
-                  contentContainerStyle={[
-                    styles.chipsScrollContent,
-                    { flexDirection: rowLTR },
-                  ]}
+                  contentContainerStyle={styles.chipsScrollContent}
                 >
                   {col.questions.map((q) => {
                     const answered = isAnswered(q.id);
@@ -309,7 +306,7 @@ export function SelectionBoardScreen({ navigation }: Props) {
         <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
           <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
           <View style={styles.headerBorder} />
-          <View style={[styles.headerRow, { flexDirection: rowLTR }]}>
+          <View style={styles.headerRow}>
             <Pressable
               onPress={() => setShowExitModal(true)}
               style={({ pressed }) => [styles.closeBtn, pressed && { opacity: 0.75 }]}
@@ -342,7 +339,7 @@ export function SelectionBoardScreen({ navigation }: Props) {
       {/* ── Fixed bottom bar ──────────────────────────────────────── */}
       <FixedBottomBar>
         {/* Active team pill — team-coloured gradient, pill shape */}
-        <View style={[styles.activeTeamPill, { flexDirection: rowLTR }]}>
+        <View style={styles.activeTeamPill}>
           <LinearGradient
             colors={isTeamAActive ? gradients.teamGold : gradients.teamBlue}
             start={{ x: 0, y: 0 }}
@@ -410,12 +407,7 @@ export function SelectionBoardScreen({ navigation }: Props) {
             <Text style={[styles.modalBody, { textAlign }]}>
               {t('board.exit_dialog.body')}
             </Text>
-            <View style={[styles.modalActions, { flexDirection: rowLTR }]}>
-              <PrimaryButton
-                label={t('board.exit_dialog.cancel')}
-                onPress={() => setShowExitModal(false)}
-                style={styles.cancelBtn}
-              />
+            <View style={styles.modalActions}>
               <PrimaryButton
                 label={t('board.exit_dialog.confirm')}
                 onPress={() => {
@@ -423,6 +415,12 @@ export function SelectionBoardScreen({ navigation }: Props) {
                   endGame();
                   navigation.replace('Results');
                 }}
+                style={styles.confirmBtn}
+              />
+              <PrimaryButton
+                label={t('board.exit_dialog.cancel')}
+                onPress={() => setShowExitModal(false)}
+                style={styles.cancelBtn}
               />
             </View>
           </View>
@@ -711,8 +709,10 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   modalActions: {
+    flexDirection: 'row-reverse',
     gap: spacing.xs,
   },
+  confirmBtn: { flex: 1 },
   cancelBtn: {
     flex: 1,
     backgroundColor: dark.bgGlassStrong,

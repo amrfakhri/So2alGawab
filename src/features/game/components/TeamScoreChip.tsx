@@ -3,7 +3,6 @@ import { StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { alpha, dark, gradients, layout, palette, radius, textStyle } from '../../../shared/theme/tokens';
-import { useLocale } from '../../../localization/useLocale';
 
 export type TeamAccent = 'gold' | 'blue';
 
@@ -17,7 +16,8 @@ interface TeamScoreChipProps {
 }
 
 export function TeamScoreChip({ name, score, statusLabel, emoji, accent, isActive }: TeamScoreChipProps) {
-  const { rowLTR } = useLocale('game');
+
+  const isBlue = accent === 'blue';
 
   const colors      = isActive
     ? (accent === 'gold' ? gradients.teamGold : gradients.teamBlue)
@@ -43,21 +43,27 @@ export function TeamScoreChip({ name, score, statusLabel, emoji, accent, isActiv
       />
       <View style={[styles.border, { borderColor, borderWidth }]} />
 
-      {/* rowLTR: score sits on the outer edge, details face the timer */}
-      <View style={[styles.row, { flexDirection: rowLTR }]}>
-        <Text style={styles.score}>{score.toLocaleString()}</Text>
-
-        <View style={[styles.details, { flexDirection: rowLTR }]}>
-          <View style={styles.textCol}>
-            <Text style={styles.name} numberOfLines={1}>{name}</Text>
-            <Text style={[styles.status, { color: statusColor }]} numberOfLines={1}>
-              {statusLabel}
-            </Text>
-          </View>
+      <View style={[styles.row, isBlue && styles.rowReverse]}>
+        <View style={[styles.leftSide, isBlue && styles.leftSideReverse]}>
           <View style={[styles.avatar, { backgroundColor: avatarBg }]}>
             <Text style={styles.avatarText}>{emoji}</Text>
           </View>
+
+          <View style={styles.textCol}>
+            <Text style={styles.name} numberOfLines={1}>
+              {name}
+            </Text>
+
+            <Text
+              style={[styles.status, { color: statusColor }]}
+              numberOfLines={1}
+            >
+              {statusLabel}
+            </Text>
+          </View>
         </View>
+
+        <Text style={styles.score}>{score.toLocaleString()}</Text>
       </View>
     </View>
   );
@@ -77,8 +83,13 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
   row: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 8,
+  },
+  rowReverse: {
+    flexDirection: 'row-reverse',
   },
   score: {
     color: dark.textPrimary,
@@ -86,21 +97,25 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     flexShrink: 0,
   },
-  details: {
-    flex: 1,
+  leftSide: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: 4,
+    flex: 1,
+    gap: 8,
+  },
+  leftSideReverse: {
+    flexDirection: 'row-reverse',
   },
   textCol: {
     flex: 1,
     justifyContent: 'center',
+    gap: 2,
   },
   name: {
     color: dark.textPrimary,
     ...textStyle.overline,
     fontWeight: '700',
-    textAlign: 'right',
+    textAlign: 'auto',
   },
   status: {
     ...textStyle.captionSm,

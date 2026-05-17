@@ -33,7 +33,7 @@ const STEP_DURATION = 900;
 
 export function CountdownScreen({ navigation, route }: Props) {
   const { gameMode } = route.params;
-  const { t, rowLTR, textAlign } = useLocale('game');
+  const { t, textAlign } = useLocale('game');
   const insets = useSafeAreaInsets();
   const { teams } = useGameStore();
 
@@ -143,7 +143,7 @@ export function CountdownScreen({ navigation, route }: Props) {
                 style={StyleSheet.absoluteFill}
               />
               <View style={styles.teamCardBorderB} />
-              <View style={[styles.teamRow, { flexDirection: rowLTR }]}>
+              <View style={styles.teamRow}>
                 {/* Avatar first = rightmost in RTL */}
                 <View style={[styles.avatar, { backgroundColor: dark.bgHighlight }]}>
                   <Text style={styles.avatarEmoji}>{teamB.avatar}</Text>
@@ -155,7 +155,7 @@ export function CountdownScreen({ navigation, route }: Props) {
             </View>
 
             {/* VS separator */}
-            <View style={[styles.vsRow, { flexDirection: rowLTR }]}>
+            <View style={styles.vsRow}>
               <View style={styles.vsDivider} />
               <View style={styles.vsCircle}>
                 <LinearGradient
@@ -179,7 +179,7 @@ export function CountdownScreen({ navigation, route }: Props) {
                 style={StyleSheet.absoluteFill}
               />
               <View style={styles.teamCardBorderA} />
-              <View style={[styles.teamRow, { flexDirection: rowLTR }]}>
+              <View style={styles.teamRow}>
                 <View style={[styles.avatar, { backgroundColor: dark.bgAccent }]}>
                   <Text style={styles.avatarEmoji}>{teamA.avatar}</Text>
                 </View>

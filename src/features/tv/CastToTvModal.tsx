@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   alpha, dark, glow, gradients, palette, r, radius, spacing, textStyle,
 } from '../../shared/theme/tokens';
+import { SheetHeader } from '../../shared/components/SheetHeader';
 import {
   fetchTvDevice,
   linkTvDeviceToSession,
@@ -182,14 +183,11 @@ export function CastToTvModal({ visible, onClose }: CastToTvModalProps) {
               </View>
 
               {/* Title + subtitle */}
-              <View style={styles.textBlock}>
-                <Text style={[styles.title, { textAlign: 'center' }]}>
-                  {t('cast.modal_title')}
-                </Text>
-                <Text style={[styles.subtitle, { textAlign: 'center' }]}>
-                  {t('cast.modal_subtitle')}
-                </Text>
-              </View>
+              <SheetHeader
+                title={t('cast.modal_title')}
+                subtitle={t('cast.modal_subtitle')}
+                textAlign="center"
+              />
 
               {/* Numbered steps card */}
               <View style={styles.listCard}>
@@ -363,22 +361,6 @@ const styles = StyleSheet.create({
     ...glow.gold.xs,
   },
 
-  // ── Text block ─────────────────────────────────────────────────────────────
-  textBlock: {
-    alignSelf: 'stretch',
-    gap: spacing['3xs'],
-  },
-  title: {
-    color: dark.textPrimary,
-    fontSize: 20,
-    fontWeight: '700',
-    lineHeight: 25,
-  },
-  subtitle: {
-    color: dark.textSecondary,
-    ...textStyle.labelMd,
-  },
-
   // ── Steps list card ────────────────────────────────────────────────────────
   listCard: {
     alignSelf: 'stretch',
@@ -487,7 +469,7 @@ const styles = StyleSheet.create({
 
   // ── Bottom actions ─────────────────────────────────────────────────────────
   fixedActions: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,

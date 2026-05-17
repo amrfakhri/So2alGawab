@@ -12,6 +12,7 @@ import { BlurView } from 'expo-blur';
 
 import { useLocale } from '../../../localization/useLocale';
 import { alpha, dark, gradients, glow, radius, spacing, textStyle } from '../../../shared/theme/tokens';
+import { SheetHeader } from '../../../shared/components/SheetHeader';
 import { AVATAR_IMAGES } from '../avatars';
 import { useUserStore } from '../store/useUserStore';
 import { ProfileAvatar } from './ProfileAvatar';
@@ -22,7 +23,7 @@ interface AvatarPickerSheetProps {
 }
 
 export function AvatarPickerSheet({ visible, onClose }: AvatarPickerSheetProps) {
-  const { t, textAlign, rowLTR } = useLocale('home');
+  const { t } = useLocale('home');
   const insets = useSafeAreaInsets();
   const { avatarIndex, setAvatar } = useUserStore();
 
@@ -60,14 +61,10 @@ export function AvatarPickerSheet({ visible, onClose }: AvatarPickerSheetProps) 
           {/* Content */}
           <View style={styles.content}>
             {/* Header */}
-            <View style={styles.headerBlock}>
-              <Text style={[styles.headerTitle, { textAlign }]}>
-                {t('avatar_picker.title')}
-              </Text>
-              <Text style={[styles.headerSubtitle, { textAlign }]}>
-                {t('avatar_picker.subtitle')}
-              </Text>
-            </View>
+            <SheetHeader
+              title={t('avatar_picker.title')}
+              subtitle={t('avatar_picker.subtitle')}
+            />
 
             {/* Avatar grid */}
             <View style={styles.grid}>
@@ -91,7 +88,7 @@ export function AvatarPickerSheet({ visible, onClose }: AvatarPickerSheetProps) 
           </View>
 
           {/* Actions */}
-          <View style={[styles.actions, { flexDirection: rowLTR }]}>
+          <View style={styles.actions}>
             {/* Update — primary, flex:1 */}
             <Pressable
               onPress={handleUpdate}
@@ -162,19 +159,6 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
   },
 
-  headerBlock: {
-    gap: spacing['3xs'],
-  },
-  headerTitle: {
-    color: dark.textPrimary,
-    ...textStyle.numericScoreSm,
-    fontWeight: '700',
-  },
-  headerSubtitle: {
-    color: dark.textTertiary,
-    ...textStyle.labelMd,
-  },
-
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -196,8 +180,8 @@ const styles = StyleSheet.create({
   },
 
   actions: {
+    flexDirection: 'row-reverse',
     gap: spacing.sm,
-    alignItems: 'center',
   },
   pressed: {
     opacity: 0.75,
@@ -219,13 +203,12 @@ const styles = StyleSheet.create({
   },
 
   closeBtn: {
+    flex: 1,
     height: 56,
-    paddingHorizontal: spacing.md,
     borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-    flexShrink: 0,
   },
   closeBtnBorder: {
     ...StyleSheet.absoluteFillObject,

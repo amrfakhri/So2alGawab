@@ -7,7 +7,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppIcon } from '../../../shared/components/AppIcon';
 import { alpha, dark, palette, radius, spacing, textStyle } from '../../../shared/theme/tokens';
-import { useLocale } from '../../../localization/useLocale';
 
 interface GameHeaderProps {
   /** e.g. "7/12" */
@@ -29,41 +28,14 @@ export function GameHeader({
   onPressCast,
 }: GameHeaderProps) {
   const insets = useSafeAreaInsets();
-  const { rowLTR } = useLocale('game');
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
+    <View style={[styles.container, {paddingTop: insets.top + 12 }]}>
       <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
       <View style={styles.borderBottom} />
 
-      <View style={[styles.row, { flexDirection: rowLTR }]}>
-        {/* Round counter */}
-        <Text style={styles.counter}>{roundLabel}</Text>
-
-        {/* TV cast pill — always visible, tappable when inactive */}
-        <Pressable
-          onPress={isCastActive ? undefined : onPressCast}
-          style={({ pressed }) => [
-            styles.castPill,
-            pressed && !isCastActive && styles.pressed,
-          ]}
-          hitSlop={6}
-        >
-          {/* Active: green dot indicator */}
-          {isCastActive && (
-            <View style={styles.castDot} />
-          )}
-
-          <Text style={styles.castText}>{castLabel}</Text>
-
-          <Cast
-            size={14}
-            color={isCastActive ? palette.success[400] : dark.textSecondary}
-            strokeWidth={2}
-          />
-        </Pressable>
-
-        {/* Close button */}
+      <View style={styles.row}>
+        {/* Close button — first in JSX so RTL mirroring places it on the right */}
         <Pressable
           onPress={onClose}
           style={({ pressed }) => [styles.closeBtn, pressed && styles.pressed]}
@@ -76,6 +48,29 @@ export function GameHeader({
           <View style={styles.closeBorder} />
           <AppIcon name="close" size={18} color={dark.textSecondary} weight="bold" />
         </Pressable>
+
+        {/* TV cast pill — centre */}
+        <Pressable
+          onPress={isCastActive ? undefined : onPressCast}
+          style={({ pressed }) => [
+            styles.castPill,
+            pressed && !isCastActive && styles.pressed,
+          ]}
+          hitSlop={6}
+        >
+          {isCastActive && (
+            <View style={styles.castDot} />
+          )}
+          <Text style={styles.castText}>{castLabel}</Text>
+          <Cast
+            size={14}
+            color={isCastActive ? palette.success[400] : dark.textSecondary}
+            strokeWidth={2}
+          />
+        </Pressable>
+
+        {/* Round counter — last in JSX so RTL mirroring places it on the left */}
+        <Text style={styles.counter}>{roundLabel}</Text>
       </View>
     </View>
   );
@@ -101,6 +96,7 @@ const styles = StyleSheet.create({
     backgroundColor: alpha.white[8],
   },
   row: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     minHeight: 40,

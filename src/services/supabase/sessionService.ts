@@ -135,8 +135,8 @@ export async function updateGameSession(
     media_playing?: boolean;
     team1_score?: number;
     team2_score?: number;
-    team1_lifelines?: Record<string, boolean> | null;
-    team2_lifelines?: Record<string, boolean> | null;
+    team1_lifelines?: Lifelines | null;
+    team2_lifelines?: Lifelines | null;
   },
 ): Promise<void> {
   await supabase.from('game_sessions').update(fields).eq('id', sessionId);

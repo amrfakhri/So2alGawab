@@ -21,7 +21,7 @@ const POLL_FALLBACK_MS = 5000;
 
 export function TvLobbyScreen() {
   const { t } = useTranslation('tv');
-  const { textAlign, rowLTR } = useLocale('tv');
+  const { textAlign } = useLocale('tv');
   const [state, setState] = useState<State>({ phase: 'creating' });
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -139,7 +139,7 @@ export function TvLobbyScreen() {
               <Text style={[styles.stepsTitle, { textAlign }]}>{t('lobby.how_to_connect')}</Text>
               <View style={styles.stepsList}>
                 {steps.map((text, i) => (
-                  <View key={i} style={[styles.stepRow, { flexDirection: rowLTR }]}>
+                  <View key={i} style={styles.stepRow}>
                     <View style={styles.stepBadge}>
                       <Text style={styles.stepBadgeText}>{stepNums[i]}</Text>
                     </View>

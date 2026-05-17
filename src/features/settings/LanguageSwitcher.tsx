@@ -28,7 +28,7 @@ const LANGUAGE_META: Record<AppLanguage, { flag: string; label: string }> = {
 };
 
 export function LanguageSwitcher({ visible, onClose }: LanguageSwitcherProps) {
-  const { t, textAlign, rowLTR } = useLocale('settings');
+  const { t, textAlign } = useLocale('settings');
   const { language, setLanguage } = useLanguageStore();
   const insets = useSafeAreaInsets();
   const [isApplying, setIsApplying] = useState(false);
@@ -84,7 +84,6 @@ export function LanguageSwitcher({ visible, onClose }: LanguageSwitcherProps) {
                   onPress={() => handleSelect(lang)}
                   style={({ pressed }) => [
                     styles.card,
-                    { flexDirection: rowLTR },
                     selected ? styles.cardActive : styles.cardInactive,
                     pressed && styles.cardPressed,
                   ]}

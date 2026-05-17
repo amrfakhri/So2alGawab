@@ -17,11 +17,11 @@ interface QuestionCardProps {
 
 export function QuestionCard({ categoryName, subcategoryName, question, hint }: QuestionCardProps) {
   const { t } = useTranslation('game');
-  const { textAlign, rowLTR } = useLocale('game');
+  const { textAlign } = useLocale('game');
 
   return (
     <View style={styles.card}>
-      <View style={[styles.metaRow, { flexDirection: rowLTR }]}>
+      <View style={styles.metaRow}>
         <View style={styles.metaCopy}>
           <Text style={[styles.category,    { textAlign }]}>{categoryName}</Text>
           <Text style={[styles.subcategory, { textAlign }]}>{subcategoryName}</Text>

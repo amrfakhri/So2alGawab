@@ -17,9 +17,9 @@ import {
   r,
   radius,
   spacing,
-  textStyle,
 } from '../../../shared/theme/tokens';
 import { useLocale } from '../../../localization/useLocale';
+import { SheetHeader } from '../../../shared/components/SheetHeader';
 
 const AVATARS = [
   '🦁', '🦅', '🐯', '🦊', '🐺', '🦋', '🦄', '🐉',
@@ -43,7 +43,7 @@ export function AvatarSelectorSheet({
   onSelect,
   onClose,
 }: AvatarSelectorSheetProps) {
-  const { t, textAlign } = useLocale('setup');
+  const { t } = useLocale('setup');
   const insets = useSafeAreaInsets();
 
   const isA = teamId === 'A';
@@ -67,14 +67,10 @@ export function AvatarSelectorSheet({
         <View style={styles.dragger} />
 
         {/* Header */}
-        <View style={styles.header}>
-          <Text style={[styles.title, { textAlign }]}>
-            {t('team_setup.avatar_sheet_title')}
-          </Text>
-          <Text style={[styles.subtitle, { textAlign }]}>
-            {t('team_setup.avatar_sheet_subtitle')}
-          </Text>
-        </View>
+        <SheetHeader
+          title={t('team_setup.avatar_sheet_title')}
+          subtitle={t('team_setup.avatar_sheet_subtitle')}
+        />
 
         {/* Emoji grid */}
         <FlatList
@@ -124,18 +120,6 @@ const styles = StyleSheet.create({
     borderRadius: r.button,
     alignSelf: 'center',
     backgroundColor: dark.bgCardAlt,
-  },
-  header: {
-    gap: spacing['3xs'],
-  },
-  title: {
-    color: dark.textPrimary,
-    ...textStyle.titleSectionSm,
-    fontWeight: '800',
-  },
-  subtitle: {
-    color: dark.textTertiary,
-    ...textStyle.bodySm,
   },
   grid: {
     gap: spacing['2xs'],

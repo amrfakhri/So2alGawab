@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
-import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { ChevronRight } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { useQuery } from '@tanstack/react-query';
@@ -111,7 +111,6 @@ interface ListCardProps {
 }
 
 function CategoryListCard({ subcategory, questionLabel, textAlign, onPress }: ListCardProps) {
-  const { rowLTR } = useLocale();
   const blobColor = getCategoryBlobColor(subcategory.id);
   const emoji     = getCategoryEmoji(subcategory.name);
   const hasImage  = !!subcategory.image;
@@ -122,7 +121,7 @@ function CategoryListCard({ subcategory, questionLabel, textAlign, onPress }: Li
         colors={gradients.cardGlass}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.listCard, { flexDirection: rowLTR }]}
+        style={styles.listCard}
       >
         <View style={styles.listCardText}>
           <Text style={[styles.listCardTitle, { textAlign }]} numberOfLines={2} textBreakStrategy="simple">
@@ -169,18 +168,27 @@ interface SectionHeaderProps {
 }
 
 function SectionHeader({ title, seeAllLabel, isRTL, onSeeAll }: SectionHeaderProps) {
-  const { rowLTR } = useLocale();
-  const ChevronIcon = isRTL ? ChevronLeft : ChevronRight;
   return (
-    <View style={[styles.sectionHeader, { flexDirection: rowLTR }]}>
-      <Text style={styles.sectionTitle}>{title}</Text>
+    <View style={styles.sectionHeader}>
+      <Text style={[styles.sectionTitle, isRTL ? styles.sectionTitleRtl : styles.sectionTitleLtr]}>
+        {title}
+      </Text>
       <Pressable
         onPress={onSeeAll}
-        style={({ pressed }) => [styles.seeAllBtn, { flexDirection: rowLTR }, pressed && styles.pressed]}
+        style={({ pressed }) => [
+          styles.seeAllBtn,
+          isRTL ? styles.seeAllBtnRtl : styles.seeAllBtnLtr,
+          pressed && styles.pressed,
+        ]}
         hitSlop={8}
       >
         <Text style={styles.seeAllText}>{seeAllLabel}</Text>
-        <ChevronIcon size={14} color={dark.textAccent} strokeWidth={2.5} />
+        <ChevronRight
+          size={14}
+          color={dark.textAccent}
+          strokeWidth={2.5}
+          style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
+        />
       </Pressable>
     </View>
   );
@@ -197,7 +205,6 @@ interface TabBarProps {
 }
 
 function HomeTabBar({ activeTab, onTabPress, labels }: TabBarProps) {
-  const { rowLTR } = useLocale();
 
   const tabs: {
     key: TabKey;
@@ -213,7 +220,7 @@ function HomeTabBar({ activeTab, onTabPress, labels }: TabBarProps) {
     <BlurView
       tint="dark"
       intensity={72}
-      style={[styles.tabBarPill, { flexDirection: rowLTR }]}
+      style={styles.tabBarPill}
     >
       {tabs.map(({ key, icon }) => {
         const active = key === activeTab;
@@ -258,7 +265,7 @@ function HomeTabBar({ activeTab, onTabPress, labels }: TabBarProps) {
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export function HomeScreen({ navigation }: Props) {
-  const { t, isRTL, textAlign, rowLTR } = useLocale('home');
+  const { t, isRTL, textAlign } = useLocale('home');
 
   const insets        = useSafeAreaInsets();
   const [showCastModal, setShowCastModal]     = useState(false);
@@ -320,18 +327,26 @@ export function HomeScreen({ navigation }: Props) {
             {/* Gold spotlight glow */}
             <SpotlightFrame style={styles.heroSpotlightWrap} opacity={0.6} />
 
-            <Text style={[styles.heroEyebrow, { textAlign }]}>{t('tonight')}</Text>
+            <Text style={[styles.heroEyebrow, isRTL ? styles.heroTextRtl : styles.heroTextLtr]}>
+              {t('tonight')}
+            </Text>
 
             <View style={styles.heroTitleBlock}>
-              <Text style={[styles.heroTitle, { textAlign }]}>{t('hero_title_1')}</Text>
-              <Text style={[styles.heroTitle, { textAlign }]}>{t('hero_title_2')}</Text>
+              <Text style={[styles.heroTitle, isRTL ? styles.heroTextRtl : styles.heroTextLtr]}>
+                {t('hero_title_1')}
+              </Text>
+              <Text style={[styles.heroTitle, isRTL ? styles.heroTextRtl : styles.heroTextLtr]}>
+                {t('hero_title_2')}
+              </Text>
             </View>
 
-            <Text style={[styles.heroSubtitle, { textAlign }]}>{t('hero_subtitle')}</Text>
+            <Text style={[styles.heroSubtitle, isRTL ? styles.heroTextRtl : styles.heroTextLtr]}>
+              {t('hero_subtitle')}
+            </Text>
 
             {/* CTA row */}
             <View
-              style={[styles.heroCtas, { flexDirection: rowLTR }]}
+              style={styles.heroCtas}
             >
               {/* Primary: Play */}
               <Pressable
@@ -368,14 +383,8 @@ export function HomeScreen({ navigation }: Props) {
           </LinearGradient>
 
           {/* ── Stats row ──────────────────────────────────────────────── */}
-          <View style={[styles.statsRow, { flexDirection: rowLTR }]}>
-            {(isRTL
-              ? [
-                  { value: '12',  key: 'games',  label: t('stats.games')  },
-                  { value: '7',   key: 'wins',   label: t('stats.wins')   },
-                  { value: '12K', key: 'points', label: t('stats.points') },
-                ]
-              : [
+          <View style={styles.statsRow}>
+            {([
                   { value: '12K', key: 'points', label: t('stats.points') },
                   { value: '7',   key: 'wins',   label: t('stats.wins')   },
                   { value: '12',  key: 'games',  label: t('stats.games')  },
@@ -425,7 +434,7 @@ export function HomeScreen({ navigation }: Props) {
                 seeAllLabel={t('recommended.see_all')}
                 isRTL={isRTL}
               />
-              <View style={[styles.recommendedGrid, { flexDirection: rowLTR }]}>
+              <View style={styles.recommendedGrid}>
                 <View style={styles.recommendedCol}>
                   {recommended[0] && (
                     <CategoryListCard
@@ -483,7 +492,7 @@ export function HomeScreen({ navigation }: Props) {
           />
         </BlurView>
 
-        <View style={[styles.headerRow, { flexDirection: rowLTR }]}>
+        <View style={styles.headerRow}>
           {/* Avatar — tap to open picker */}
           <Pressable
             onPress={() => setShowAvatarPicker(true)}
@@ -495,12 +504,16 @@ export function HomeScreen({ navigation }: Props) {
 
           {/* Greeting */}
           <View style={styles.headerTextBlock}>
-            <Text style={[styles.headerGreeting, { textAlign }]}>{t('greeting')}</Text>
-            <Text style={[styles.headerName,     { textAlign }]}>{t('welcome', { name: displayName })}</Text>
+            <Text style={[styles.headerGreeting, isRTL ? styles.headerTextRtl : styles.headerTextLtr]}>
+              {t('greeting')}
+            </Text>
+            <Text style={[styles.headerName, isRTL ? styles.headerTextRtl : styles.headerTextLtr]}>
+              {t('welcome', { name: displayName })}
+            </Text>
           </View>
 
           {/* Icon buttons */}
-          <View style={[styles.headerIcons, { flexDirection: rowLTR }]}>
+          <View style={styles.headerIcons}>
             {/* Bell + badge */}
             <View style={styles.headerIconBtn}>
               {/* <LinearGradient
@@ -626,6 +639,12 @@ const styles = StyleSheet.create({
     ...textStyle.titleSectionSm,
     fontWeight: '800',
   },
+  headerTextLtr: {
+    textAlign: 'left',
+  },
+  headerTextRtl: {
+    textAlign: 'left',
+  },
   headerIcons: {
     flexDirection: 'row',
     gap: 10,
@@ -697,6 +716,14 @@ const styles = StyleSheet.create({
     color: dark.textSecondary,
     ...textStyle.captionMd,
   },
+  heroTextLtr: {
+    textAlign: 'left',
+    writingDirection: 'ltr',
+  },
+  heroTextRtl: {
+    textAlign: 'left',
+    writingDirection: 'rtl',
+  },
   heroCtas: {
     gap: spacing.xs,
     marginTop: spacing['3xs'],
@@ -764,20 +791,37 @@ const styles = StyleSheet.create({
   // ── Section ───────────────────────────────────────────────────────────────────
   section: { gap: 14 },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    width: '100%',
+    minHeight: 24,
+    justifyContent: 'center',
   },
   sectionTitle: {
     color: dark.textPrimary,
     ...textStyle.titleCard,
     fontWeight: '800',
-    flex: 1,
+    width: '100%',
+  },
+  sectionTitleLtr: {
+    textAlign: 'left',
+    paddingRight: 96,
+  },
+  sectionTitleRtl: {
+    textAlign: 'left',
+    paddingRight: 96,
   },
   seeAllBtn: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing['3xs'],
+  },
+  seeAllBtnLtr: {
+    right: 0,
+  },
+  seeAllBtnRtl: {
+    right: 0,
   },
   seeAllText: {
     color: dark.textAccent,

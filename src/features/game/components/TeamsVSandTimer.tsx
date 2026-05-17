@@ -2,7 +2,6 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { layout } from '../../../shared/theme/tokens';
-import { useLocale } from '../../../localization/useLocale';
 import { TeamScoreChip, TeamAccent } from './TeamScoreChip';
 import { CircularTimer } from './CircularTimer';
 
@@ -32,9 +31,8 @@ export function TeamsVSandTimer({
   durationMs,
   timerUnitLabel,
 }: TeamsVSandTimerProps) {
-  const { rowLTR } = useLocale();
   return (
-    <View style={[styles.row, { flexDirection: rowLTR }]}>
+    <View style={styles.row}>
       <TeamScoreChip {...primary} />
       <TeamScoreChip {...secondary} />
 
@@ -52,6 +50,7 @@ export function TeamsVSandTimer({
 
 const styles = StyleSheet.create({
   row: {
+    flexDirection: 'row',
     alignItems: 'center',
     gap: layout.timerSize - 14, // chips overlap inward so timer sits in the gap
   },

@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Subcategory } from '../../game/types/game';
@@ -17,39 +17,38 @@ export function SelectedCategoriesPreview({
   onRemove,
   onClear,
 }: SelectedCategoriesPreviewProps) {
-  const { t, textAlign, rowLTR, needsRTLScrollFix } = useLocale('setup');
-  const scrollRef = useRef<ScrollView>(null);
-
-  const scrollToStart = useCallback(() => {
-    if (needsRTLScrollFix) scrollRef.current?.scrollToEnd({ animated: false });
-  }, [needsRTLScrollFix]);
-
-  const displayedSubs = needsRTLScrollFix ? [...subcategories].reverse() : subcategories;
+  const { t, isRTL } = useLocale('setup');
 
   if (subcategories.length === 0) return null;
 
   return (
     <View style={styles.wrapper}>
-      <View style={[styles.titleRow, { flexDirection: rowLTR }]}>
-        <Text style={[styles.title, { textAlign }]}>
+      <View style={styles.titleRow}>
+        <Text style={[styles.title, isRTL ? styles.titleRtl : styles.titleLtr]}>
           {t('selected_categories.title', { count: subcategories.length })}
         </Text>
         {onClear ? (
-          <Pressable onPress={onClear} hitSlop={10} style={({ pressed }) => pressed && styles.pressed}>
+          <Pressable
+            onPress={onClear}
+            hitSlop={10}
+            style={({ pressed }) => [
+              styles.clearButton,
+              isRTL ? styles.clearButtonRtl : styles.clearButtonLtr,
+              pressed && styles.pressed,
+            ]}
+          >
             <Text style={styles.clearText}>{t('selected_categories.clear')}</Text>
           </Pressable>
         ) : null}
       </View>
 
       <ScrollView
-        ref={scrollRef}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
-        onContentSizeChange={scrollToStart}
       >
-        {displayedSubs.map((sub) => (
+        {subcategories.map((sub) => (
           <SelectedCategoryChip
             key={sub.id}
             label={sub.name}
@@ -66,13 +65,35 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   titleRow: {
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    width: '100%',
+    minHeight: 18,
+    justifyContent: 'center',
   },
   title: {
     color: dark.textTertiary,
     ...textStyle.overline,
     fontWeight: '800',
+    width: '100%',
+  },
+  titleLtr: {
+    textAlign: 'left',
+    paddingRight: 96,
+  },
+  titleRtl: {
+    textAlign: 'left',
+    paddingRight: 96,
+  },
+  clearButton: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+  },
+  clearButtonLtr: {
+    right: 0,
+  },
+  clearButtonRtl: {
+    right: 0,
   },
   clearText: {
     color: dark.textAccent,

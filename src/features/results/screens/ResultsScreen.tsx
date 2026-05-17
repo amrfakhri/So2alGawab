@@ -46,9 +46,10 @@ export function ResultsScreen({ navigation }: Props) {
   const { teams, resetGame } = useGameStore();
 
   const sortedTeams = [teams.A, teams.B].sort((a, b) => b.score - a.score);
+  const topTeam = sortedTeams[0] ?? teams.A;
   const maxScore = Math.max(teams.A.score, teams.B.score, 1);
   const isDraw = teams.A.score === teams.B.score;
-  const winner = isDraw ? null : sortedTeams[0];
+  const winner = isDraw ? null : topTeam;
 
   const headerTotalH = insets.top + HEADER_H;
   const footerTotalH = insets.bottom + 56 + spacing.md + spacing.xl;
@@ -108,7 +109,7 @@ export function ResultsScreen({ navigation }: Props) {
             glow.gold.md,
           ]}>
             <Text style={styles.winnerEmoji}>
-              {(winner ?? sortedTeams[0]).avatar}
+              {(winner ?? topTeam).avatar}
             </Text>
           </View>
 

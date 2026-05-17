@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GameMode } from '../types/game';
 import { useLocale } from '../../../localization/useLocale';
 import { alpha, dark, gradients, r, radius, spacing, textStyle } from '../../../shared/theme/tokens';
+import { SheetHeader } from '../../../shared/components/SheetHeader';
 import { GoldPrimaryButton } from '../../setup/components/CategorySelectionUI';
 import { SecondaryButton } from '../../../shared/components/SecondaryButton';
 
@@ -147,7 +148,7 @@ export function GameModeSheet({
   onSelectMode,
 }: GameModeSheetProps) {
   const { t } = useTranslation('setup');
-  const { isRTL, textAlign, rowLTR } = useLocale('setup');
+  const { isRTL, textAlign } = useLocale('setup');
   const insets = useSafeAreaInsets();
   const [selectedMode, setSelectedMode] = useState<GameMode>('classic');
 
@@ -169,14 +170,10 @@ export function GameModeSheet({
         <View style={styles.dragger} />
 
         {/* Header */}
-        <View style={styles.header}>
-          <Text style={[styles.sheetTitle, { textAlign }]}>
-            {t('mode_sheet.title')}
-          </Text>
-          <Text style={[styles.sheetSubtitle, { textAlign }]}>
-            {t('mode_sheet.subtitle')}
-          </Text>
-        </View>
+        <SheetHeader
+          title={t('mode_sheet.title')}
+          subtitle={t('mode_sheet.subtitle')}
+        />
 
         {/* Mode cards */}
         <View style={styles.cardList}>
@@ -217,7 +214,7 @@ export function GameModeSheet({
         ) : null}
 
         {/* Footer */}
-        <View style={[styles.footer, { flexDirection: rowLTR }]}>
+        <View style={styles.footer}>
           <GoldPrimaryButton
             label={t('mode_sheet.confirm')}
             onPress={handleConfirm}
@@ -228,6 +225,7 @@ export function GameModeSheet({
             label={t('mode_sheet.back')}
             onPress={onClose}
             disabled={isLoading}
+            style={styles.backBtn}
           />
         </View>
       </View>
@@ -258,25 +256,12 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     backgroundColor: dark.bgCardAlt,
   },
-  header: {
-    gap: spacing['3xs'],
-  },
-  sheetTitle: {
-    color: dark.textPrimary,
-    ...textStyle.titleSectionMd,
-    fontWeight: '800',
-  },
-  sheetSubtitle: {
-    color: dark.textTertiary,
-    ...textStyle.bodySm,
-  },
-
   // Cards
   cardList: {
     gap: spacing.sm,
   },
   card: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     borderRadius: r.card,
     borderWidth: 1,
     borderColor: dark.borderSubtle,
@@ -364,10 +349,13 @@ const styles = StyleSheet.create({
 
   // Footer
   footer: {
+    flexDirection: 'row-reverse',
     gap: spacing.sm,
-    alignItems: 'center',
   },
   confirmBtn: {
+    flex: 1,
+  },
+  backBtn: {
     flex: 1,
   },
 

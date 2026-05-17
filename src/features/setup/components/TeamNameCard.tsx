@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     borderRadius: radius['2xl'],
     borderWidth: 0.5,
     padding: spacing.md,
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
     overflow: 'hidden',
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   },
 
   labelRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing['3xs'],
   },
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: r.input,
     backgroundColor: 'rgba(5,7,15,0.6)',
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing['2xs'],
     paddingHorizontal: spacing.sm,

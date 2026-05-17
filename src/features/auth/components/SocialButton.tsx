@@ -2,7 +2,7 @@ import { AppleLogo } from 'phosphor-react-native';
 import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
 
-import { radius, spacing, textStyle } from '../../../shared/theme/tokens';
+import { r, spacing, textStyle } from '../../../shared/theme/tokens';
 import { GoogleIcon } from './GoogleIcon';
 
 interface SocialButtonProps {
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     height: 56,
     backgroundColor: '#FFFFFF',
-    borderRadius: radius.md,
+    borderRadius: r.button,
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing['2xs'],

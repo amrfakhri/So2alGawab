@@ -25,7 +25,7 @@ export function SubcategoryGrid({
   selectedSubcategoryIds,
   onToggle,
 }: SubcategoryGridProps) {
-  const { t, isRTL, textAlign, rowLTR, needsRTLScrollFix } = useLocale('setup');
+  const { t, isRTL, textAlign } = useLocale('setup');
   const [query, setQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterId>('all');
   const [isFocused, setIsFocused] = useState(false);
@@ -33,8 +33,13 @@ export function SubcategoryGrid({
   const filterScrollRef = useRef<ScrollView>(null);
 
   const scrollFiltersToStart = useCallback(() => {
-    if (needsRTLScrollFix) filterScrollRef.current?.scrollToEnd({ animated: false });
-  }, [needsRTLScrollFix]);
+    if (isRTL) {
+      filterScrollRef.current?.scrollToEnd({ animated: false });
+      return;
+    }
+
+    filterScrollRef.current?.scrollTo({ x: 0, animated: false });
+  }, [isRTL]);
 
   const normalizedQuery = query.trim().toLowerCase();
 
@@ -45,15 +50,10 @@ export function SubcategoryGrid({
     );
   }, [categories]);
 
-  // Filter pills: "All" + one pill per list (category group)
-  // In RTL, reverse so "All" ends up at max-x; scrollToEnd puts it in view first.
-  const filters = useMemo<Array<{ id: FilterId; label: string }>>(() => {
-    const base: Array<{ id: FilterId; label: string }> = [
-      { id: 'all', label: t('subcategory_grid.filters.all') },
-      ...categories.map((cat) => ({ id: cat.id, label: cat.name })),
-    ];
-    return needsRTLScrollFix ? [...base].reverse() : base;
-  }, [categories, t, needsRTLScrollFix]);
+  const filters = useMemo<Array<{ id: FilterId; label: string }>>(() => [
+    { id: 'all', label: t('subcategory_grid.filters.all') },
+    ...categories.map((cat) => ({ id: cat.id, label: cat.name })),
+  ], [categories, t]);
 
   const filteredSubcategories = useMemo(() => {
     return subcategories.filter((sub) => {
@@ -87,7 +87,7 @@ export function SubcategoryGrid({
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.filterScroll}
-        contentContainerStyle={styles.filters}
+        contentContainerStyle={[styles.filters,{ flexDirection: 'row' },]}
         keyboardShouldPersistTaps="handled"
         onContentSizeChange={scrollFiltersToStart}
       >
@@ -109,7 +109,7 @@ export function SubcategoryGrid({
         </View>
       ) : null}
 
-      <View style={[styles.grid, { flexDirection: rowLTR }]}>
+      <View style={styles.grid}>
         {filteredSubcategories.map((subcategory) => (
           <SubcategoryCard
             key={subcategory.id}
@@ -139,6 +139,7 @@ const styles = StyleSheet.create({
   },
 
   grid: {
+    flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     rowGap: spacing.sm,

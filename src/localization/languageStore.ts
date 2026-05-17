@@ -10,13 +10,20 @@ interface LanguageStore {
   setLanguage: (lang: AppLanguage) => Promise<void>;
 }
 
-function applyDirection(isRTL: boolean) {
-  // RTL layout is handled manually via rowLTR/rowRTL helpers in useLocale.
-  // I18nManager.forceRTL is intentionally NOT used — it auto-flips all flex rows
-  // and conflicts with the manual helpers, causing a double-flip on native.
+function applyWebDirection(isRTL: boolean) {
   if (typeof document !== 'undefined') {
     document.documentElement.setAttribute('dir', isRTL ? 'rtl' : 'ltr');
     document.documentElement.setAttribute('lang', isRTL ? 'ar' : 'en');
+  }
+}
+
+function syncNativeDirection(isRTL: boolean) {
+  // Set I18nManager immediately so the current render session uses the correct
+  // direction. Persisted via UserDefaults/SharedPreferences — future cold starts
+  // will already have the right value and skip this call.
+  if (Platform.OS !== 'web' && I18nManager.isRTL !== isRTL) {
+    I18nManager.allowRTL(isRTL);
+    I18nManager.forceRTL(isRTL);
   }
 }
 
@@ -27,9 +34,14 @@ export const useLanguageStore = create<LanguageStore>((set) => ({
     const isRTL = lang === 'ar';
     await i18n.changeLanguage(lang);
     await persistLanguage(lang);
-    applyDirection(isRTL);
+    applyWebDirection(isRTL);
+    const directionChanging = Platform.OS !== 'web' && I18nManager.isRTL !== isRTL;
+    syncNativeDirection(isRTL);
     set({ language: lang, isRTL });
-    // No native reload needed — RTL is handled manually, not via I18nManager
+    // Reload so native layout engine picks up the new direction.
+    if (directionChanging) {
+      await Updates.reloadAsync();
+    }
   },
 }));
 
@@ -39,14 +51,9 @@ export async function initializeLanguage(lang: AppLanguage): Promise<void> {
   if (i18n.language !== lang) {
     await i18n.changeLanguage(lang);
   }
-  // One-time migration: if a previous build left I18nManager in RTL mode, clear it and
-  // reload so native starts fresh with manual RTL (no I18nManager auto-flip).
-  if (Platform.OS !== 'web' && I18nManager.isRTL) {
-    I18nManager.allowRTL(false);
-    I18nManager.forceRTL(false);
-    await Updates.reloadAsync();
-    return;
-  }
-  applyDirection(isRTL);
+  applyWebDirection(isRTL);
+  // forceRTL during init — takes effect for this session without reloading.
+  // On the next cold start I18nManager.isRTL will already match, so this is a no-op.
+  syncNativeDirection(isRTL);
   useLanguageStore.setState({ language: lang, isRTL });
 }

@@ -1,5 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
+import { ArrowRight } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
   Alert,
@@ -32,7 +33,7 @@ import { SocialButton } from '../components/SocialButton';
 type Props = NativeStackScreenProps<AuthStackParamList, 'AuthStart'>;
 
 export function AuthStartScreen({ navigation }: Props) {
-  const { t } = useLocale('auth');
+  const { t, isRTL } = useLocale('auth');
   const insets = useSafeAreaInsets();
   const setGuest = useAuthStore((s) => s.setGuest);
 
@@ -89,7 +90,10 @@ export function AuthStartScreen({ navigation }: Props) {
       <View
         style={[
           styles.content,
-          { paddingTop: insets.top + spacing.xl, paddingBottom: insets.bottom + spacing.lg },
+          {
+            paddingTop: insets.top + spacing['4xl'] + spacing.sm,
+            paddingBottom: insets.bottom + spacing.lg,
+          },
         ]}
       >
         {/* Logo */}
@@ -156,7 +160,7 @@ export function AuthStartScreen({ navigation }: Props) {
               </LinearGradient>
             </Pressable>
 
-            {/* Continue as guest — text only */}
+            {/* Continue as guest — text + directional arrow */}
             <Pressable
               onPress={handleGuest}
               disabled={isAnyLoading}
@@ -164,6 +168,12 @@ export function AuthStartScreen({ navigation }: Props) {
               style={({ pressed }) => [styles.guestBtn, pressed && styles.pressed]}
             >
               <Text style={styles.guestLabel}>{t('continue_guest')}</Text>
+              <ArrowRight
+                size={20}
+                color={dark.textPrimary}
+                strokeWidth={2}
+                style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
+              />
             </Pressable>
           </View>
         </View>
@@ -185,7 +195,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: spacing.lg - 4, // 28px — matches Figma 382/430 ratio
+    paddingHorizontal: spacing.md,
     justifyContent: 'space-between',
   },
   logoWrapper: {
@@ -209,7 +219,7 @@ const styles = StyleSheet.create({
   },
   // Gold primary button
   primaryBtn: {
-    height: 48,
+    height: 56,
     borderRadius: r.button,
     alignItems: 'center',
     justifyContent: 'center',
@@ -217,12 +227,12 @@ const styles = StyleSheet.create({
   },
   primaryBtnLabel: {
     color: dark.textInverse,
-    ...textStyle.buttonSm,
+    ...textStyle.buttonMd,
     fontWeight: '700',
   },
   // Glass secondary button
   secondaryBtn: {
-    height: 48,
+    height: 56,
     borderRadius: r.button,
     borderWidth: 1.5,
     borderColor: dark.borderSubtle,
@@ -232,18 +242,19 @@ const styles = StyleSheet.create({
   },
   secondaryBtnLabel: {
     color: dark.textPrimary,
-    ...textStyle.buttonSm,
+    ...textStyle.buttonMd,
   },
   // Guest text button
   guestBtn: {
-    height: 38,
+    height: 56,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',
+    gap: spacing['2xs'],
   },
   guestLabel: {
     color: dark.textPrimary,
-    ...textStyle.buttonSm,
+    ...textStyle.buttonMd,
   },
   pressed: {
     opacity: dark.opPressed,

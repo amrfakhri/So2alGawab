@@ -63,12 +63,13 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 48,
+    height: 56,
     backgroundColor: dark.bgOverlay,
     borderWidth: 1,
     borderColor: dark.borderSubtle,
     borderRadius: radius.md,
     paddingHorizontal: spacing.sm,
+    paddingVertical: spacing['2xs'],
     gap: spacing['2xs'],
     overflow: 'hidden',
   },
@@ -78,11 +79,11 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     color: dark.textPrimary,
-    ...textStyle.bodySm,
+    ...textStyle.bodyPrimary,
     paddingVertical: 0,
   },
   eyeBtn: {
-    paddingLeft: spacing['3xs'],
+    padding: spacing['3xs'],
   },
   error: {
     color: dark.textError,

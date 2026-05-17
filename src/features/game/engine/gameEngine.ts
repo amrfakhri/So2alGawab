@@ -154,6 +154,8 @@ export function selectBoardQuestion(state: GameState, questionId: string): GameS
   const idx = state.questionDeck.findIndex((q) => q.id === questionId);
   if (idx === -1) return state;
   const question = state.questionDeck[idx];
+  if (!question) return state;
+
   return {
     ...state,
     currentQuestionIndex: idx,

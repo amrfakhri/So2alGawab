@@ -1,8 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
 
-import { useLanguageStore } from '../../../localization/languageStore';
+import { useLocale } from '../../../localization/useLocale';
 import { dark, r, radius, spacing, textStyle } from '../../../shared/theme/tokens';
 
 interface TeamNameFieldsProps {
@@ -18,9 +17,7 @@ export function TeamNameFields({
   onChangeTeamA,
   onChangeTeamB,
 }: TeamNameFieldsProps) {
-  const { t } = useTranslation('setup');
-  const { isRTL } = useLanguageStore();
-  const textAlign = isRTL ? 'right' : 'left';
+  const { t, textAlign } = useLocale('setup');
 
   return (
     <View style={styles.card}>

@@ -5,5 +5,9 @@
     "resolveJsonModule": true,
     "noUncheckedIndexedAccess": true,
     "baseUrl": "."
-  }
+  },
+  "exclude": [
+    "dist",
+    "node_modules"
+  ]
 }
