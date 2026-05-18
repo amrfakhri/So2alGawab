@@ -14,6 +14,9 @@ import { SelectionBoardScreen } from '../features/game/screens/SelectionBoardScr
 import { AuthStartScreen } from '../features/auth/screens/AuthStartScreen';
 import { EmailLoginScreen } from '../features/auth/screens/EmailLoginScreen';
 import { SignUpScreen } from '../features/auth/screens/SignUpScreen';
+import { GamesScreen } from '../features/games/screens/GamesScreen';
+import { RanksScreen } from '../features/ranks/screens/RanksScreen';
+import { ProfileScreen } from '../features/profile/screens/ProfileScreen';
 import { GameMode } from '../features/game/types/game';
 import { useAuthStore } from '../features/auth/store/useAuthStore';
 import { dark } from '../shared/theme/tokens';
@@ -28,6 +31,9 @@ export type AuthStackParamList = {
 
 export type AppStackParamList = {
   Home: undefined;
+  Games: undefined;
+  Ranks: undefined;
+  Profile: undefined;
   GameSetup: undefined;
   TeamSetup: undefined;
   Countdown: { gameMode: GameMode };
@@ -61,7 +67,10 @@ function AppNavigator() {
       initialRouteName="Home"
       screenOptions={{ headerShown: false }}
     >
-      <AppStack.Screen name="Home"           component={HomeScreen} />
+      <AppStack.Screen name="Home"    component={HomeScreen}    options={{ animation: 'fade' }} />
+      <AppStack.Screen name="Games"   component={GamesScreen}   options={{ animation: 'fade' }} />
+      <AppStack.Screen name="Ranks"   component={RanksScreen}   options={{ animation: 'fade' }} />
+      <AppStack.Screen name="Profile" component={ProfileScreen} options={{ animation: 'fade' }} />
       <AppStack.Screen name="GameSetup"      component={GameSetupScreen} />
       <AppStack.Screen name="TeamSetup"      component={TeamSetupScreen} />
       <AppStack.Screen name="Countdown"      component={CountdownScreen} />

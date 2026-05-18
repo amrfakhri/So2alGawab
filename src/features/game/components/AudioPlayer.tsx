@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Audio, AVPlaybackStatus } from 'expo-av';
+import { useAudioPlayer, useAudioPlayerStatus, setAudioModeAsync } from 'expo-audio';
 import { useTranslation } from 'react-i18next';
-
 import { colors } from '../../../shared/theme/colors';
 import { AppIcon } from '../../../shared/components/AppIcon';
 
@@ -13,55 +12,37 @@ interface AudioPlayerProps {
 
 export function AudioPlayer({ uri, onPlayingChange }: AudioPlayerProps) {
   const { t } = useTranslation('game');
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
+  // useAudioPlayer auto-releases the player when the component unmounts.
+  const player = useAudioPlayer({ uri });
+  const status = useAudioPlayerStatus(player);
+
+  // Enable playback through iOS silent switch once on mount.
   useEffect(() => {
-    return () => {
-      if (!sound) return;
-      sound.stopAsync()
-        .catch(() => {})
-        .finally(() => sound.unloadAsync().catch(() => {}));
-    };
-  }, [sound]);
+    setAudioModeAsync({ playsInSilentMode: true }).catch(() => {});
+  }, []);
 
-  async function togglePlay() {
-    if (isLoading) return;
+  // Notify parent whenever the playing state changes.
+  useEffect(() => {
+    onPlayingChange?.(status.playing);
+  }, [status.playing]);
 
-    if (sound) {
-      if (isPlaying) {
-        await sound.pauseAsync();
-        setIsPlaying(false);
-        onPlayingChange?.(false);
-      } else {
-        await sound.playAsync();
-        setIsPlaying(true);
-        onPlayingChange?.(true);
-      }
-      return;
+  // Notify parent when a non-looping track finishes.
+  useEffect(() => {
+    if (status.didJustFinish) {
+      onPlayingChange?.(false);
     }
+  }, [status.didJustFinish]);
 
-    setIsLoading(true);
-    try {
-      await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
-      const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri },
-        { shouldPlay: true },
-        (status: AVPlaybackStatus) => {
-          if (status.isLoaded && status.didJustFinish) {
-            setIsPlaying(false);
-            onPlayingChange?.(false);
-          }
-        },
-      );
-      setSound(newSound);
-      setIsPlaying(true);
-      onPlayingChange?.(true);
-    } catch {
-      // Loading failure is handled silently so the user can retry
-    } finally {
-      setIsLoading(false);
+  const isLoading = !status.isLoaded;
+  const isPlaying = status.playing;
+
+  function togglePlay() {
+    if (isLoading) return;
+    if (isPlaying) {
+      player.pause();
+    } else {
+      player.play();
     }
   }
 

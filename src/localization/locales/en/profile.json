@@ -1,0 +1,10 @@
+{
+  "empty_title": "Nothing here yet",
+  "empty_subtitle": "Your profile details will show up here",
+  "tabs": {
+    "home": "Home",
+    "play": "Play",
+    "leaderboard": "Rankings",
+    "profile": "Profile"
+  }
+}

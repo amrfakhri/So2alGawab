@@ -1,12 +1,26 @@
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
-import { ResizeMode, Video } from 'expo-av';
+import { VideoView, useVideoPlayer } from 'expo-video';
 import { useTranslation } from 'react-i18next';
 
 import { Question } from '../types/game';
 import { alpha, dark, palette, r, spacing, textStyle } from '../../../shared/theme/tokens';
 import { AudioPlayer } from './AudioPlayer';
 import { useLocale } from '../../../localization/useLocale';
+
+// Small wrapper so useVideoPlayer (a hook) is called unconditionally inside its own component.
+function InlineVideo({ uri }: { uri: string }) {
+  const player = useVideoPlayer({ uri }, (p) => { p.loop = false; });
+  return (
+    <VideoView
+      player={player}
+      style={styles.video}
+      nativeControls
+      contentFit="contain"
+      allowsFullscreen
+    />
+  );
+}
 
 interface QuestionCardProps {
   categoryName: string;
@@ -46,12 +60,7 @@ export function QuestionCard({ categoryName, subcategoryName, question, hint }: 
           )}
           {question.mediaType === 'video' && (
             <View style={styles.videoFrame}>
-              <Video
-                source={{ uri: question.mediaUrl }}
-                style={styles.video}
-                useNativeControls
-                resizeMode={ResizeMode.CONTAIN}
-              />
+              <InlineVideo uri={question.mediaUrl} />
             </View>
           )}
           {question.mediaType === 'audio' && (

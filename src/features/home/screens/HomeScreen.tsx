@@ -25,6 +25,7 @@ import {
   getCategoryEmoji,
 } from '../../setup/components/CategorySelectionUI';
 import { AppIcon } from '../../../shared/components/AppIcon';
+import { AppTabBar, AppTabBarWrapper, TAB_BAR_H, TAB_BAR_MARGIN } from '../../../shared/components/AppTabBar';
 import { HeaderGlassBackground } from '../../../shared/components/HeaderGlassBackground';
 import { SpotlightFrame } from '../../../shared/components/SpotlightFrame';
 import { CastToTvModal } from '../../tv/CastToTvModal';
@@ -66,8 +67,6 @@ function deriveFirstName(user: User | null, isGuest: boolean, guestLabel: string
 // ─── Layout constants ─────────────────────────────────────────────────────────
 
 const HEADER_HEIGHT    = 150;
-const TAB_BAR_H        = 72;
-const TAB_BAR_MARGIN   = spacing.sm;   // 16 — margin above pill from screen bottom inset
 
 // ─── CategoryPortraitCard ─────────────────────────────────────────────────────
 
@@ -200,72 +199,6 @@ function SectionHeader({ title, seeAllLabel, isRTL, onSeeAll }: SectionHeaderPro
   );
 }
 
-// ─── HomeTabBar ───────────────────────────────────────────────────────────────
-
-type TabKey = 'home' | 'play' | 'leaderboard' | 'profile';
-
-interface TabBarProps {
-  activeTab: TabKey;
-  onTabPress: (tab: TabKey) => void;
-  labels: Record<TabKey, string>;
-}
-
-function HomeTabBar({ activeTab, onTabPress, labels }: TabBarProps) {
-
-  const tabs: {
-    key: TabKey;
-    icon: 'home-tab' | 'gamepad' | 'leaderboard' | 'profile';
-  }[] = [
-    { key: 'home', icon: 'home-tab' },
-    { key: 'play', icon: 'gamepad' },
-    { key: 'leaderboard', icon: 'leaderboard' },
-    { key: 'profile', icon: 'profile' },
-  ];
-
-  return (
-    <BlurView
-      tint="dark"
-      intensity={72}
-      style={styles.tabBarPill}
-    >
-      {tabs.map(({ key, icon }) => {
-        const active = key === activeTab;
-
-        return (
-          <Pressable
-            key={key}
-            onPress={() => onTabPress(key)}
-            style={styles.tabItem}
-          >
-            {active && (
-              <LinearGradient
-                colors={gradients.tabBarActive}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.tabActiveBackground}
-              />
-            )}
-
-            <AppIcon
-              name={icon}
-              size={20}
-              color={active ? dark.textAccent : dark.textSecondary}
-            />
-
-            <Text
-              style={[
-                styles.tabLabel,
-                active && styles.tabLabelActive,
-              ]}
-            >
-              {labels[key]}
-            </Text>
-          </Pressable>
-        );
-      })}
-    </BlurView>
-  );
-}
 // ─── HomeScreen ───────────────────────────────────────────────────────────────
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
@@ -306,8 +239,7 @@ export function HomeScreen({ navigation }: Props) {
     return allSubs.filter((s) => !mpIds.has(s.id)).slice(0, 4);
   }, [allSubs, mostPlayed]);
 
-  const tabBarBottom    = insets.bottom + TAB_BAR_MARGIN;
-  const scrollBottomPad = tabBarBottom + TAB_BAR_H + spacing.sm;
+  const scrollBottomPad = insets.bottom + TAB_BAR_MARGIN + TAB_BAR_H + spacing.sm;
 
   function makeQuestionLabel(count: number) {
     return t('questions_count', { count });
@@ -554,10 +486,15 @@ export function HomeScreen({ navigation }: Props) {
       </View>
 
       {/* ── Tab bar ─────────────────────────────────────────────────────── */}
-      <View style={[styles.tabBarWrapper, { bottom: tabBarBottom }]} pointerEvents="box-none">
-        <HomeTabBar
+      <AppTabBarWrapper>
+        <AppTabBar
           activeTab="home"
-          onTabPress={(tab) => { if (tab === 'play') navigation.navigate('GameSetup'); }}
+          onTabPress={(tab) => {
+            if (tab === 'play')        navigation.navigate('Games');
+            if (tab === 'leaderboard') navigation.navigate('Ranks');
+            if (tab === 'profile')     navigation.navigate('Profile');
+            if (tab === 'home')        return;
+          }}
           labels={{
             home:        t('tabs.home'),
             play:        t('tabs.play'),
@@ -565,7 +502,7 @@ export function HomeScreen({ navigation }: Props) {
             profile:     t('tabs.profile'),
           }}
         />
-      </View>
+      </AppTabBarWrapper>
 
       {/* ── Modals ──────────────────────────────────────────────────────── */}
       <CastToTvModal visible={showCastModal} onClose={() => setShowCastModal(false)} />
@@ -928,49 +865,4 @@ const styles = StyleSheet.create({
   listImg:   { width: '100%', height: '100%' },
   listEmoji: { fontSize: 20, textAlign: 'center', zIndex: 1 },
 
-  // ── Tab bar ───────────────────────────────────────────────────────────────────
-  tabBarWrapper: {
-    position: 'absolute',
-    left: spacing.md,
-    right: spacing.md,
-    zIndex: zIndex.tabbar,
-  },
-  tabBarPill: {
-    height: TAB_BAR_H,
-    borderRadius: r.button,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: dark.borderDefault,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    paddingHorizontal: spacing['3xs'],
-    ...glow.gold.xs,
-    shadowColor: '#000000',
-    shadowOpacity: 0.55,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 8,
-  },
-  tabItem: {
-    flex: 1,
-    height: 60,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: r.sheet,
-    gap: spacing['3xs'],
-    overflow: 'hidden',
-  },
-  tabActiveBackground: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: r.hero,
-  },
-  tabLabel: {
-    color: dark.textSecondary,
-    ...textStyle.labelSm,
-    textAlign: 'center',
-  },
-  tabLabelActive: {
-    color: dark.textAccent,
-  },
 });

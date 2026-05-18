@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { AVPlaybackStatus, ResizeMode, Video } from 'expo-av';
+import { VideoView, useVideoPlayer } from 'expo-video';
 
 import { alpha, gradients, layout, radius } from '../../../shared/theme/tokens';
 import { AudioPlayer } from './AudioPlayer';
@@ -13,25 +13,24 @@ interface QuestionMediaCardProps {
 }
 
 export function QuestionMediaCard({ mediaUrl, mediaType, onMediaPlayingChange }: QuestionMediaCardProps) {
-  const videoRef = useRef<Video>(null);
-  // Track last reported play state to avoid calling onMediaPlayingChange on every status tick
-  const lastVideoPlaying = useRef<boolean | null>(null);
+  // useVideoPlayer auto-releases the player when the component unmounts.
+  const player = useVideoPlayer(
+    mediaType === 'video' ? { uri: mediaUrl } : null,
+    (p) => {
+      p.loop = false;
+    },
+  );
 
-  // Stop video playback when this card unmounts (question changes or screen leaves)
+  // Subscribe to playing-state changes and forward them to the parent.
   useEffect(() => {
-    return () => {
-      videoRef.current?.stopAsync().catch(() => {});
-    };
-  }, []);
+    if (mediaType !== 'video') return;
 
-  function handleVideoStatus(status: AVPlaybackStatus) {
-    if (!status.isLoaded) return;
-    const playing = status.isPlaying;
-    if (playing !== lastVideoPlaying.current) {
-      lastVideoPlaying.current = playing;
-      onMediaPlayingChange?.(playing);
-    }
-  }
+    const sub = player.addListener('playingChange', ({ isPlaying }) => {
+      onMediaPlayingChange?.(isPlaying);
+    });
+
+    return () => sub.remove();
+  }, [mediaType, onMediaPlayingChange]);
 
   return (
     <View style={styles.shell}>
@@ -51,13 +50,12 @@ export function QuestionMediaCard({ mediaUrl, mediaType, onMediaPlayingChange }:
         />
       )}
       {mediaType === 'video' && (
-        <Video
-          ref={videoRef}
-          source={{ uri: mediaUrl }}
+        <VideoView
+          player={player}
           style={styles.fill}
-          useNativeControls
-          resizeMode={ResizeMode.CONTAIN}
-          onPlaybackStatusUpdate={handleVideoStatus}
+          nativeControls
+          contentFit="contain"
+          allowsFullscreen
         />
       )}
       {mediaType === 'audio' && (

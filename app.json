@@ -31,8 +31,15 @@
         {
           "action": "VIEW",
           "autoVerify": true,
-          "data": [{ "scheme": "so2algawab" }],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "data": [
+            {
+              "scheme": "so2algawab"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -51,7 +58,9 @@
           "cameraPermission": "So2alGawab needs camera access to scan the TV pairing QR code."
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-audio",
+      "expo-video"
     ],
     "extra": {
       "eas": {
