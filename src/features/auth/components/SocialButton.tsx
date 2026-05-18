@@ -39,6 +39,7 @@ export function SocialButton({ provider, label, onPress, loading, disabled }: So
 const styles = StyleSheet.create({
   button: {
     flexDirection: 'row',
+    direction: 'ltr',
     height: 56,
     backgroundColor: '#FFFFFF',
     borderRadius: r.button,

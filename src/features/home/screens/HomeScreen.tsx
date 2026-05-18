@@ -172,10 +172,10 @@ interface SectionHeaderProps {
 }
 
 function SectionHeader({ title, seeAllLabel, onSeeAll }: SectionHeaderProps) {
-  const { isRTL } = useLocale();
+  const { isRTL, textAlign } = useLocale();
   return (
     <View style={styles.sectionHeader}>
-      <Text style={styles.sectionTitle} numberOfLines={1}>
+      <Text style={[styles.sectionTitle, { textAlign }]} numberOfLines={1}>
         {title}
       </Text>
       <Pressable

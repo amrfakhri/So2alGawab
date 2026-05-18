@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
-import { Mail, Lock, User } from 'lucide-react-native';
+import { Mail, Lock } from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
 import {
   Alert,
@@ -33,12 +33,10 @@ import { AuthInput } from '../components/AuthInput';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'SignUp'>;
 
-interface FormErrors { username?: string; email?: string; password?: string }
+interface FormErrors { email?: string; password?: string }
 
-function validate(username: string, email: string, password: string): FormErrors {
+function validate(email: string, password: string): FormErrors {
   const errors: FormErrors = {};
-  if (!username.trim()) errors.username = 'error_username_required';
-  else if (username.trim().length < 2) errors.username = 'error_username_short';
   if (!email.trim()) errors.email = 'error_email_required';
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) errors.email = 'error_email_invalid';
   if (!password) errors.password = 'error_password_required';
@@ -50,17 +48,15 @@ export function SignUpScreen({ navigation }: Props) {
   const { t } = useLocale('auth');
   const insets = useSafeAreaInsets();
 
-  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
 
-  const emailRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
 
   const handleSignUp = async () => {
-    const errs = validate(username, email, password);
+    const errs = validate(email, password);
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
       return;
@@ -68,7 +64,7 @@ export function SignUpScreen({ navigation }: Props) {
     setErrors({});
     setLoading(true);
     try {
-      const { data, error } = await authService.signUpWithEmail(email, password, username);
+      const { data, error } = await authService.signUpWithEmail(email, password);
       if (error) {
         Alert.alert(t('error_title'), error.message);
         return;
@@ -121,18 +117,6 @@ export function SignUpScreen({ navigation }: Props) {
           <View style={styles.form}>
             <View style={styles.inputs}>
               <AuthInput
-                icon={User}
-                placeholder={t('username_placeholder')}
-                value={username}
-                onChangeText={(v) => { setUsername(v); setErrors((e) => ({ ...e, username: undefined })); }}
-                autoCapitalize="none"
-                autoComplete="username"
-                returnKeyType="next"
-                onSubmitEditing={() => emailRef.current?.focus()}
-                error={errors.username ? t(errors.username) : undefined}
-              />
-              <AuthInput
-                ref={emailRef}
                 icon={Mail}
                 placeholder={t('email_placeholder')}
                 value={email}
