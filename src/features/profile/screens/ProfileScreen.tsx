@@ -1,7 +1,6 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { User } from 'lucide-react-native';
@@ -11,7 +10,7 @@ import { useLocale } from '../../../localization/useLocale';
 import { AppTabBar, AppTabBarWrapper, TAB_BAR_H, TAB_BAR_MARGIN } from '../../../shared/components/AppTabBar';
 import { ScreenEmptyState } from '../../../shared/components/ScreenEmptyState';
 import { TabScreenHeader, HEADER_HEIGHT } from '../../../shared/components/TabScreenHeader';
-import { dark, gradients, spacing } from '../../../shared/theme/tokens';
+import { dark, spacing } from '../../../shared/theme/tokens';
 
 type Props = NativeStackScreenProps<AppStackParamList, 'Profile'>;
 
@@ -34,13 +33,7 @@ export function ProfileScreen({ navigation }: Props) {
     <View style={styles.root}>
       <StatusBar style="light" />
 
-      <LinearGradient
-        colors={gradients.screen}
-        locations={[0, 0.55, 1]}
-        style={StyleSheet.absoluteFill}
-      />
-
-      <View style={[styles.content, { paddingTop: topPad, paddingBottom: bottomPad }]}>
+<View style={[styles.content, { paddingTop: topPad, paddingBottom: bottomPad }]}>
         <ScreenEmptyState
           icon={User}
           title={t('empty_title')}
