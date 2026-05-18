@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Image,
-  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -28,7 +27,7 @@ import { useLocale } from '../../../localization/useLocale';
 import { Question } from '../types/game';
 import { GameBackdrop } from '../components/GameBackdrop';
 import { FixedBottomBar } from '../components/FixedBottomBar';
-import { PrimaryButton } from '../../../shared/components/PrimaryButton';
+import { ExitGameSheet } from '../components/ExitGameSheet';
 import { AppIcon } from '../../../shared/components/AppIcon';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SelectionBoard'>;
@@ -392,40 +391,20 @@ export function SelectionBoardScreen({ navigation }: Props) {
         </View>
       </FixedBottomBar>
 
-      {/* ── Exit modal ────────────────────────────────────────────── */}
-      <Modal
-        transparent
+      {/* ── Exit sheet ────────────────────────────────────────────── */}
+      <ExitGameSheet
         visible={showExitModal}
-        animationType="fade"
-        onRequestClose={() => setShowExitModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={[styles.modalTitle, { textAlign }]}>
-              {t('board.exit_dialog.title')}
-            </Text>
-            <Text style={[styles.modalBody, { textAlign }]}>
-              {t('board.exit_dialog.body')}
-            </Text>
-            <View style={styles.modalActions}>
-              <PrimaryButton
-                label={t('board.exit_dialog.cancel')}
-                onPress={() => setShowExitModal(false)}
-                style={styles.cancelBtn}
-              />
-              <PrimaryButton
-                label={t('board.exit_dialog.confirm')}
-                onPress={() => {
-                  setShowExitModal(false);
-                  endGame();
-                  navigation.replace('Results');
-                }}
-                style={styles.confirmBtn}
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
+        title={t('board.exit_dialog.title')}
+        body={t('board.exit_dialog.body')}
+        confirmLabel={t('board.exit_dialog.confirm')}
+        cancelLabel={t('board.exit_dialog.cancel')}
+        onCancel={() => setShowExitModal(false)}
+        onConfirm={() => {
+          setShowExitModal(false);
+          endGame();
+          navigation.replace('Results');
+        }}
+      />
     </>
   );
 }
@@ -697,40 +676,5 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
 
-  // ── Exit modal ───────────────────────────────────────────────────────────
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: spacing.md,
-    backgroundColor: dark.bgOverlay,
-  },
-  modalCard: {
-    backgroundColor: dark.bgCard,
-    borderRadius: radius['2xl'],
-    padding: 22,
-    gap: spacing.sm,
-    borderWidth: 1,
-    borderColor: dark.borderSubtle,
-  },
-  modalTitle: {
-    color: dark.textPrimary,
-    ...textStyle.titleSectionLg,
-    fontWeight: '800',
-  },
-  modalBody: {
-    color: dark.textSecondary,
-    ...textStyle.bodyPrimary,
-    lineHeight: 22,
-  },
-  modalActions: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-  },
-  confirmBtn: { flex: 1 },
-  cancelBtn: {
-    flex: 1,
-    backgroundColor: dark.bgGlassStrong,
-    borderWidth: 1,
-    borderColor: dark.borderDefault,
-  },
 });
+

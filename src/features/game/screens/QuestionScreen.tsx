@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import {
-  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,7 +13,6 @@ import { StatusBar } from 'expo-status-bar';
 import { Eye, ThumbsDown, ThumbsUp } from 'lucide-react-native';
 
 import { RootStackParamList } from '../../../navigation/RootNavigator';
-import { PrimaryButton } from '../../../shared/components/PrimaryButton';
 import { CastToTvModal } from '../../tv/CastToTvModal';
 import { alpha, dark, gradients, r, radius, spacing, textStyle } from '../../../shared/theme/tokens';
 import { AnswerOption } from '../components/AnswerOption';
@@ -28,6 +26,7 @@ import { LifelineBar } from '../components/LifelineBar';
 import { QuestionMediaCard } from '../components/QuestionMediaCard';
 import { QuestionPromptCard } from '../components/QuestionPromptCard';
 import { TeamsVSandTimer } from '../components/TeamsVSandTimer';
+import { ExitGameSheet } from '../components/ExitGameSheet';
 import { QUESTION_DURATION_MS } from '../engine/gameEngine';
 import { useGameStore } from '../store/useGameStore';
 import { useLocale } from '../../../localization/useLocale';
@@ -310,32 +309,16 @@ export function QuestionScreen({ navigation }: Props) {
         onClose={() => setShowCastModal(false)}
       />
 
-      {/* ── Exit modal ────────────────────────────────────────────── */}
-      <Modal
-        transparent
+      {/* ── Exit sheet ────────────────────────────────────────────── */}
+      <ExitGameSheet
         visible={showExitModal}
-        animationType="fade"
-        onRequestClose={() => setShowExitModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={[styles.modalTitle, { textAlign }]}>{t('exit_dialog.title')}</Text>
-            <Text style={[styles.modalCopy,  { textAlign }]}>{t('exit_dialog.body')}</Text>
-            <View style={styles.modalActions}>
-              <PrimaryButton
-                label={t('exit_dialog.cancel')}
-                onPress={() => setShowExitModal(false)}
-                style={styles.cancelButton}
-              />
-              <PrimaryButton
-                label={t('exit_dialog.confirm')}
-                onPress={() => { setShowExitModal(false); endGame(); }}
-                style={styles.confirmButton}
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
+        title={t('exit_dialog.title')}
+        body={t('exit_dialog.body')}
+        confirmLabel={t('exit_dialog.confirm')}
+        cancelLabel={t('exit_dialog.cancel')}
+        onCancel={() => setShowExitModal(false)}
+        onConfirm={() => { setShowExitModal(false); endGame(); }}
+      />
     </>
   );
 }
@@ -393,28 +376,5 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: spacing.md,
-    backgroundColor: dark.bgOverlay,
-  },
-  modalCard: {
-    backgroundColor: dark.bgCard,
-    borderRadius: r.card,
-    padding: spacing.md,
-    gap: spacing.sm,
-    borderWidth: 1,
-    borderColor: dark.borderSubtle,
-  },
-  modalTitle:   { color: dark.textPrimary,   ...textStyle.titleSectionLg, fontWeight: '800' },
-  modalCopy:    { color: dark.textSecondary, ...textStyle.bodyPrimary,    lineHeight: 22 },
-  modalActions: { flexDirection: 'row', gap: spacing.xs },
-  confirmButton: { flex: 1 },
-  cancelButton: {
-    flex: 1,
-    backgroundColor: dark.bgGlassStrong,
-    borderWidth: 1,
-    borderColor: dark.borderDefault,
-  },
 });
+

@@ -66,7 +66,7 @@ function deriveFirstName(user: User | null, isGuest: boolean, guestLabel: string
 
 // ─── Layout constants ─────────────────────────────────────────────────────────
 
-const HEADER_HEIGHT    = 150;
+const HEADER_HEIGHT = 150;
 
 // ─── CategoryPortraitCard ─────────────────────────────────────────────────────
 
@@ -78,8 +78,8 @@ interface PortraitCardProps {
 
 function CategoryPortraitCard({ subcategory, questionLabel, onPress }: PortraitCardProps) {
   const blobColor = getCategoryBlobColor(subcategory.id);
-  const emoji     = getCategoryEmoji(subcategory.name);
-  const hasImage  = !!subcategory.image;
+  const emoji = getCategoryEmoji(subcategory.name);
+  const hasImage = !!subcategory.image;
 
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [pressed && styles.pressed]}>
@@ -117,8 +117,8 @@ interface ListCardProps {
 
 function CategoryListCard({ subcategory, questionLabel, textAlign, onPress }: ListCardProps) {
   const blobColor = getCategoryBlobColor(subcategory.id);
-  const emoji     = getCategoryEmoji(subcategory.name);
-  const hasImage  = !!subcategory.image;
+  const emoji = getCategoryEmoji(subcategory.name);
+  const hasImage = !!subcategory.image;
 
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [pressed && styles.pressed]}>
@@ -168,15 +168,14 @@ function StatCard({ value, label }: { value: string; label: string }) {
 interface SectionHeaderProps {
   title: string;
   seeAllLabel: string;
-  textAlign: 'left' | 'right';
   onSeeAll?: () => void;
 }
 
-function SectionHeader({ title, seeAllLabel, textAlign, onSeeAll }: SectionHeaderProps) {
-  const chevronFlip = textAlign === 'right' ? -1 : 1;
+function SectionHeader({ title, seeAllLabel, onSeeAll }: SectionHeaderProps) {
+  const { isRTL } = useLocale();
   return (
     <View style={styles.sectionHeader}>
-      <Text style={[styles.sectionTitle, { textAlign }]}>
+      <Text style={styles.sectionTitle} numberOfLines={1}>
         {title}
       </Text>
       <Pressable
@@ -189,7 +188,7 @@ function SectionHeader({ title, seeAllLabel, textAlign, onSeeAll }: SectionHeade
           size={14}
           color={dark.textAccent}
           strokeWidth={2.5}
-          style={{ transform: [{ scaleX: chevronFlip }] }}
+          style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
         />
       </Pressable>
     </View>
@@ -203,9 +202,9 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 export function HomeScreen({ navigation }: Props) {
   const { t, textAlign } = useLocale('home');
 
-  const insets        = useSafeAreaInsets();
-  const [showCastModal, setShowCastModal]     = useState(false);
-  const [showSettings, setShowSettings]       = useState(false);
+  const insets = useSafeAreaInsets();
+  const [showCastModal, setShowCastModal] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
   const { avatarIndex, loadAvatar } = useUserStore();
@@ -217,7 +216,7 @@ export function HomeScreen({ navigation }: Props) {
 
   const categoriesQuery = useQuery({
     queryKey: ['game-categories'],
-    queryFn:  fetchGameCategories,
+    queryFn: fetchGameCategories,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -322,10 +321,10 @@ export function HomeScreen({ navigation }: Props) {
           {!isGuest && (
             <View style={styles.statsRow}>
               {([
-                    { value: formatStatPoints(userStats.total_points), key: 'points', label: t('stats.points') },
-                    { value: String(userStats.wins),                   key: 'wins',   label: t('stats.wins')   },
-                    { value: String(userStats.games_played),           key: 'games',  label: t('stats.games')  },
-                  ]
+                { value: formatStatPoints(userStats.total_points), key: 'points', label: t('stats.points') },
+                { value: String(userStats.wins), key: 'wins', label: t('stats.wins') },
+                { value: String(userStats.games_played), key: 'games', label: t('stats.games') },
+              ]
               ).map((s) => (
                 <StatCard key={s.key} value={s.value} label={s.label} />
               ))}
@@ -338,7 +337,6 @@ export function HomeScreen({ navigation }: Props) {
               <SectionHeader
                 title={t('most_played.title')}
                 seeAllLabel={t('most_played.see_all')}
-                textAlign={textAlign}
               />
               {categoriesQuery.isPending ? (
                 <View style={styles.loadingRow}>
@@ -370,7 +368,6 @@ export function HomeScreen({ navigation }: Props) {
               <SectionHeader
                 title={t('recommended.title')}
                 seeAllLabel={t('recommended.see_all')}
-                textAlign={textAlign}
               />
               <View style={styles.recommendedGrid}>
                 <View style={styles.recommendedCol}>
@@ -487,16 +484,16 @@ export function HomeScreen({ navigation }: Props) {
         <AppTabBar
           activeTab="home"
           onTabPress={(tab) => {
-            if (tab === 'play')        navigation.navigate('Games');
+            if (tab === 'play') navigation.navigate('Games');
             if (tab === 'leaderboard') navigation.navigate('Ranks');
-            if (tab === 'profile')     navigation.navigate('Profile');
-            if (tab === 'home')        return;
+            if (tab === 'profile') navigation.navigate('Profile');
+            if (tab === 'home') return;
           }}
           labels={{
-            home:        t('tabs.home'),
-            play:        t('tabs.play'),
+            home: t('tabs.home'),
+            play: t('tabs.play'),
             leaderboard: t('tabs.leaderboard'),
-            profile:     t('tabs.profile'),
+            profile: t('tabs.profile'),
           }}
         />
       </AppTabBarWrapper>
@@ -720,25 +717,21 @@ const styles = StyleSheet.create({
   // ── Section ───────────────────────────────────────────────────────────────────
   section: { gap: 14 },
   sectionHeader: {
-    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
     minHeight: 24,
-    justifyContent: 'center',
   },
   sectionTitle: {
+    flex: 1,
     color: dark.textPrimary,
     ...textStyle.titleCard,
     fontWeight: '800',
-    width: '100%',
-    paddingEnd: 96,
   },
   seeAllBtn: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    end: 0,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing['3xs'],
+    paddingStart: spacing.xs,
   },
   seeAllText: {
     color: dark.textAccent,
@@ -796,7 +789,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 14,
   },
-  recommendedCol:  { flex: 1, gap: 14 },
+  recommendedCol: { flex: 1, gap: 14 },
   listCard: {
     borderRadius: r.card,
     borderWidth: 1,
@@ -833,7 +826,7 @@ const styles = StyleSheet.create({
     top: 0, bottom: 0, left: 4, right: 4,
     borderRadius: r.button,
   },
-  listImg:   { width: '100%', height: '100%' },
+  listImg: { width: '100%', height: '100%' },
   listEmoji: { fontSize: 20, textAlign: 'center', zIndex: 1 },
 
 });
