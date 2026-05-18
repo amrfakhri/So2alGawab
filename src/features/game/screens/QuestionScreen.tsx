@@ -350,22 +350,22 @@ const styles = StyleSheet.create({
   },
 
   scroll: {
-    paddingHorizontal: 24,
-    gap: 16,
+    paddingHorizontal: spacing.md,
+    gap: spacing.sm,
   },
 
   questionGroup: {
-    gap: 12,
+    gap: spacing.xs,
   },
 
   answers: {
-    gap: 8,
+    gap: spacing['2xs'],
   },
 
   lifelineCard: {
     borderRadius: radius['2xl'],
     overflow: 'hidden',
-    padding: 16,
+    padding: spacing.sm,
   },
   lifelineBorder: {
     ...StyleSheet.absoluteFillObject,
@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
   modalCard: {
     backgroundColor: dark.bgCard,
     borderRadius: r.card,
-    padding: 22,
+    padding: spacing.md,
     gap: spacing.sm,
     borderWidth: 1,
     borderColor: dark.borderSubtle,

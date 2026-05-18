@@ -134,22 +134,21 @@ export function CountdownScreen({ navigation, route }: Props) {
 
           {/* Teams section */}
           <View style={styles.teamsContainer}>
-            {/* Team B — blue */}
-            <View style={styles.teamCardB}>
+            {/* Team A — gold */}
+            <View style={styles.teamCardA}>
               <LinearGradient
-                colors={gradients.cardBlueSoft}
+                colors={gradients.cardGoldSoft}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={StyleSheet.absoluteFill}
               />
-              <View style={styles.teamCardBorderB} />
+              <View style={styles.teamCardBorderA} />
               <View style={styles.teamRow}>
-                {/* Avatar first = rightmost in RTL */}
-                <View style={[styles.avatar, { backgroundColor: dark.bgHighlight }]}>
-                  <Text style={styles.avatarEmoji}>{teamB.avatar}</Text>
+                <View style={[styles.avatar, { backgroundColor: dark.bgAccent }]}>
+                  <Text style={styles.avatarEmoji}>{teamA.avatar}</Text>
                 </View>
                 <Text style={[styles.teamName, { textAlign }]} numberOfLines={1}>
-                  {teamB.name}
+                  {teamA.name}
                 </Text>
               </View>
             </View>
@@ -170,21 +169,22 @@ export function CountdownScreen({ navigation, route }: Props) {
               <View style={styles.vsDivider} />
             </View>
 
-            {/* Team A — gold */}
-            <View style={styles.teamCardA}>
+            {/* Team B — blue */}
+            <View style={styles.teamCardB}>
               <LinearGradient
-                colors={gradients.cardGoldSoft}
+                colors={gradients.cardBlueSoft}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={StyleSheet.absoluteFill}
               />
-              <View style={styles.teamCardBorderA} />
+              <View style={styles.teamCardBorderB} />
               <View style={styles.teamRow}>
-                <View style={[styles.avatar, { backgroundColor: dark.bgAccent }]}>
-                  <Text style={styles.avatarEmoji}>{teamA.avatar}</Text>
+                {/* Avatar first = rightmost in RTL */}
+                <View style={[styles.avatar, { backgroundColor: dark.bgHighlight }]}>
+                  <Text style={styles.avatarEmoji}>{teamB.avatar}</Text>
                 </View>
                 <Text style={[styles.teamName, { textAlign }]} numberOfLines={1}>
-                  {teamA.name}
+                  {teamB.name}
                 </Text>
               </View>
             </View>

@@ -65,12 +65,14 @@ const styles = StyleSheet.create({
   eyebrow: {
     color: dark.textSecondary,
     ...textStyle.labelSm,
+    width: '100%',
   },
   prompt: {
     color: dark.textPrimary,
     ...textStyle.titleSectionSm,
     fontWeight: '700',
     lineHeight: 27,
+    width: '100%',
   },
   hintBox: {
     marginTop: 8,
@@ -85,10 +87,12 @@ const styles = StyleSheet.create({
     color: dark.textAccent,
     ...textStyle.labelMd,
     fontWeight: '800',
+    width: '100%',
   },
   hintText: {
     color: dark.textPrimary,
     ...textStyle.bodyPrimary,
     lineHeight: 22,
+    width: '100%',
   },
 });
