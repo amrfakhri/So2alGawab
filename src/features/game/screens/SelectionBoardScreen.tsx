@@ -409,6 +409,11 @@ export function SelectionBoardScreen({ navigation }: Props) {
             </Text>
             <View style={styles.modalActions}>
               <PrimaryButton
+                label={t('board.exit_dialog.cancel')}
+                onPress={() => setShowExitModal(false)}
+                style={styles.cancelBtn}
+              />
+              <PrimaryButton
                 label={t('board.exit_dialog.confirm')}
                 onPress={() => {
                   setShowExitModal(false);
@@ -416,11 +421,6 @@ export function SelectionBoardScreen({ navigation }: Props) {
                   navigation.replace('Results');
                 }}
                 style={styles.confirmBtn}
-              />
-              <PrimaryButton
-                label={t('board.exit_dialog.cancel')}
-                onPress={() => setShowExitModal(false)}
-                style={styles.cancelBtn}
               />
             </View>
           </View>
@@ -723,7 +723,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   modalActions: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: spacing.xs,
   },
   confirmBtn: { flex: 1 },

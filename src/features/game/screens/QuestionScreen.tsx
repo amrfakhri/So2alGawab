@@ -323,14 +323,14 @@ export function QuestionScreen({ navigation }: Props) {
             <Text style={[styles.modalCopy,  { textAlign }]}>{t('exit_dialog.body')}</Text>
             <View style={styles.modalActions}>
               <PrimaryButton
-                label={t('exit_dialog.confirm')}
-                onPress={() => { setShowExitModal(false); endGame(); }}
-                style={styles.confirmButton}
-              />
-              <PrimaryButton
                 label={t('exit_dialog.cancel')}
                 onPress={() => setShowExitModal(false)}
                 style={styles.cancelButton}
+              />
+              <PrimaryButton
+                label={t('exit_dialog.confirm')}
+                onPress={() => { setShowExitModal(false); endGame(); }}
+                style={styles.confirmButton}
               />
             </View>
           </View>
@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
   },
   modalTitle:   { color: dark.textPrimary,   ...textStyle.titleSectionLg, fontWeight: '800' },
   modalCopy:    { color: dark.textSecondary, ...textStyle.bodyPrimary,    lineHeight: 22 },
-  modalActions: { flexDirection: 'row-reverse', gap: spacing.xs },
+  modalActions: { flexDirection: 'row', gap: spacing.xs },
   confirmButton: { flex: 1 },
   cancelButton: {
     flex: 1,

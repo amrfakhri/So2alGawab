@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { useLocale } from '../../../localization/useLocale';
 import { MessageCircleQuestionMark, SkipForward, Zap } from 'lucide-react-native';
 
 import { LifelineId, TeamState } from '../types/game';
@@ -35,7 +35,7 @@ function LifelineIcon({ id, color }: { id: LifelineId; color: string }) {
 const LIFELINE_IDS: LifelineId[] = ['callFriend', 'discardQuestion', 'answerReward'];
 
 export function LifelineBar({ team, onUseLifeline }: LifelineBarProps) {
-  const { t } = useTranslation('game');
+  const { t } = useLocale('game');
 
   return (
     <View style={styles.container}>

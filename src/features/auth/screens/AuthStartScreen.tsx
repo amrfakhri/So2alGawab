@@ -160,20 +160,19 @@ export function AuthStartScreen({ navigation }: Props) {
               </LinearGradient>
             </Pressable>
 
-            {/* Continue as guest — text + directional arrow */}
+            {/* Continue as guest — text + arrow, arrow always trails the label */}
             <Pressable
               onPress={handleGuest}
               disabled={isAnyLoading}
               hitSlop={8}
-              style={({ pressed }) => [styles.guestBtn, pressed && styles.pressed]}
+              style={({ pressed }) => [
+                styles.guestBtn,
+                { flexDirection: isRTL ? 'row-reverse' : 'row' },
+                pressed && styles.pressed,
+              ]}
             >
               <Text style={styles.guestLabel}>{t('continue_guest')}</Text>
-              <ArrowRight
-                size={20}
-                color={dark.textPrimary}
-                strokeWidth={2}
-                style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
-              />
+              <ArrowRight size={20} color={dark.textPrimary} strokeWidth={2} />
             </Pressable>
           </View>
         </View>

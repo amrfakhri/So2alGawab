@@ -1,7 +1,7 @@
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { VideoView, useVideoPlayer } from 'expo-video';
-import { useTranslation } from 'react-i18next';
+import { useLocale } from '../../../localization/useLocale';
 
 import { Question } from '../types/game';
 import { alpha, dark, palette, r, spacing, textStyle } from '../../../shared/theme/tokens';
@@ -30,7 +30,7 @@ interface QuestionCardProps {
 }
 
 export function QuestionCard({ categoryName, subcategoryName, question, hint }: QuestionCardProps) {
-  const { t } = useTranslation('game');
+  const { t } = useLocale('game');
   const { textAlign } = useLocale('game');
 
   return (

@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useQuery } from '@tanstack/react-query';
-import { useTranslation } from 'react-i18next';
+import { useLocale } from '../../../localization/useLocale';
 
 import { RootStackParamList } from '../../../navigation/RootNavigator';
 import { SubcategoryGrid } from '../components/SubcategoryGrid';
@@ -25,7 +25,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'GameSetup'>;
 export function GameSetupScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const [showSettings, setShowSettings] = useState(false);
-  const { t } = useTranslation(['setup', 'common']);
+  const { t } = useLocale(['setup', 'common']);
 
   const {
     availableCategories,

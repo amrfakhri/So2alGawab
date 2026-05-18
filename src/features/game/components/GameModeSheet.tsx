@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import { useTranslation } from 'react-i18next';
 import { Check, ChessQueen, ChessKnight } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -147,8 +146,7 @@ export function GameModeSheet({
   onClose,
   onSelectMode,
 }: GameModeSheetProps) {
-  const { t } = useTranslation('setup');
-  const { isRTL, textAlign } = useLocale('setup');
+  const { t, isRTL, textAlign } = useLocale('setup');
   const insets = useSafeAreaInsets();
   const [selectedMode, setSelectedMode] = useState<GameMode>('classic');
 
@@ -215,17 +213,17 @@ export function GameModeSheet({
 
         {/* Footer */}
         <View style={styles.footer}>
-          <GoldPrimaryButton
-            label={t('mode_sheet.confirm')}
-            onPress={handleConfirm}
-            disabled={isLoading}
-            style={styles.confirmBtn}
-          />
           <SecondaryButton
             label={t('mode_sheet.back')}
             onPress={onClose}
             disabled={isLoading}
             style={styles.backBtn}
+          />
+          <GoldPrimaryButton
+            label={t('mode_sheet.confirm')}
+            onPress={handleConfirm}
+            disabled={isLoading}
+            style={styles.confirmBtn}
           />
         </View>
       </View>
@@ -349,7 +347,7 @@ const styles = StyleSheet.create({
 
   // Footer
   footer: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: spacing.sm,
   },
   confirmBtn: {

@@ -15,6 +15,9 @@ export interface LocaleUtils {
   // ── Text alignment ─────────────────────────────────────────────────────────
   /** 'right' in Arabic, 'left' in English — RN does not auto-align text */
   textAlign: 'right' | 'left';
+  // alignItems: 'flex-start' | 'flex-start';
+  // justifyContent: 'flex-end' | 'flex-end';
+  
 
   // ── Number formatting ──────────────────────────────────────────────────────
   /** Format a number using the active locale (Arabic-Indic digits in ar) */
@@ -41,6 +44,9 @@ export function useLocale(ns?: string | string[]): LocaleUtils {
     isRTL,
     setLanguage,
     textAlign: isRTL ? 'right' : 'left',
+    // alignItems: isRTL ? 'flex-start' : 'flex-start',
+    // justifyContent: isRTL ? 'flex-end' : 'flex-end',
+
     localizedNumber: (n: number) =>
       n.toLocaleString(language === 'ar' ? 'ar-SA' : 'en-US'),
   };

@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   textLtr: { textAlign: 'left' },
-  textRtl: { textAlign: 'left' },
+  textRtl: { textAlign: 'right' },
   headerIcons: {
     flexDirection: 'row',
     gap: 10,

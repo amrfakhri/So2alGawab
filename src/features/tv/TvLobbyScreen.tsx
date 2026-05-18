@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-import { useTranslation } from 'react-i18next';
 import { useLocale } from '../../localization/useLocale';
 
 import { supabase } from '../../services/supabase/supabaseClient';
@@ -20,8 +19,7 @@ type State =
 const POLL_FALLBACK_MS = 5000;
 
 export function TvLobbyScreen() {
-  const { t } = useTranslation('tv');
-  const { textAlign } = useLocale('tv');
+  const { t, textAlign } = useLocale('tv');
   const [state, setState] = useState<State>({ phase: 'creating' });
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 

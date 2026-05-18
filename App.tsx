@@ -7,7 +7,6 @@ import { RootNavigator } from './src/navigation/RootNavigator';
 import { WebLayout } from './src/components/layout/WebLayout';
 import { TvScreen } from './src/features/tv/TvScreen';
 import { TvLobbyScreen } from './src/features/tv/TvLobbyScreen';
-import './src/localization/i18n';
 import { loadStoredLanguage } from './src/localization/i18n';
 import { initializeLanguage } from './src/localization/languageStore';
 import { useAuthStore } from './src/features/auth/store/useAuthStore';

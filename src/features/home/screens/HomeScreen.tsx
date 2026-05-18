@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
-import { ChevronRight } from 'lucide-react-native';
+import { AlignJustify, AlignJustifyIcon, ChevronRight } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
 import { useQuery } from '@tanstack/react-query';
@@ -168,23 +168,20 @@ function StatCard({ value, label }: { value: string; label: string }) {
 interface SectionHeaderProps {
   title: string;
   seeAllLabel: string;
-  isRTL: boolean;
+  textAlign: 'left' | 'right';
   onSeeAll?: () => void;
 }
 
-function SectionHeader({ title, seeAllLabel, isRTL, onSeeAll }: SectionHeaderProps) {
+function SectionHeader({ title, seeAllLabel, textAlign, onSeeAll }: SectionHeaderProps) {
+  const chevronFlip = textAlign === 'right' ? -1 : 1;
   return (
     <View style={styles.sectionHeader}>
-      <Text style={[styles.sectionTitle, isRTL ? styles.sectionTitleRtl : styles.sectionTitleLtr]}>
+      <Text style={[styles.sectionTitle, { textAlign }]}>
         {title}
       </Text>
       <Pressable
         onPress={onSeeAll}
-        style={({ pressed }) => [
-          styles.seeAllBtn,
-          isRTL ? styles.seeAllBtnRtl : styles.seeAllBtnLtr,
-          pressed && styles.pressed,
-        ]}
+        style={({ pressed }) => [styles.seeAllBtn, pressed && styles.pressed]}
         hitSlop={8}
       >
         <Text style={styles.seeAllText}>{seeAllLabel}</Text>
@@ -192,7 +189,7 @@ function SectionHeader({ title, seeAllLabel, isRTL, onSeeAll }: SectionHeaderPro
           size={14}
           color={dark.textAccent}
           strokeWidth={2.5}
-          style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
+          style={{ transform: [{ scaleX: chevronFlip }] }}
         />
       </Pressable>
     </View>
@@ -204,7 +201,7 @@ function SectionHeader({ title, seeAllLabel, isRTL, onSeeAll }: SectionHeaderPro
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export function HomeScreen({ navigation }: Props) {
-  const { t, isRTL, textAlign } = useLocale('home');
+  const { t, textAlign } = useLocale('home');
 
   const insets        = useSafeAreaInsets();
   const [showCastModal, setShowCastModal]     = useState(false);
@@ -266,20 +263,20 @@ export function HomeScreen({ navigation }: Props) {
             {/* Gold spotlight glow */}
             <SpotlightFrame style={styles.heroSpotlightWrap} opacity={0.6} />
 
-            <Text style={[styles.heroEyebrow, isRTL ? styles.heroTextRtl : styles.heroTextLtr]}>
+            <Text style={[styles.heroEyebrow, { textAlign }]}>
               {t('tonight')}
             </Text>
 
             <View style={styles.heroTitleBlock}>
-              <Text style={[styles.heroTitle, isRTL ? styles.heroTextRtl : styles.heroTextLtr]}>
+              <Text style={[styles.heroTitle, { textAlign }]}>
                 {t('hero_title_1')}
               </Text>
-              <Text style={[styles.heroTitle, isRTL ? styles.heroTextRtl : styles.heroTextLtr]}>
+              <Text style={[styles.heroTitle, { textAlign }]}>
                 {t('hero_title_2')}
               </Text>
             </View>
 
-            <Text style={[styles.heroSubtitle, isRTL ? styles.heroTextRtl : styles.heroTextLtr]}>
+            <Text style={[styles.heroSubtitle, { textAlign }]}>
               {t('hero_subtitle')}
             </Text>
 
@@ -341,7 +338,7 @@ export function HomeScreen({ navigation }: Props) {
               <SectionHeader
                 title={t('most_played.title')}
                 seeAllLabel={t('most_played.see_all')}
-                isRTL={isRTL}
+                textAlign={textAlign}
               />
               {categoriesQuery.isPending ? (
                 <View style={styles.loadingRow}>
@@ -373,7 +370,7 @@ export function HomeScreen({ navigation }: Props) {
               <SectionHeader
                 title={t('recommended.title')}
                 seeAllLabel={t('recommended.see_all')}
-                isRTL={isRTL}
+                textAlign={textAlign}
               />
               <View style={styles.recommendedGrid}>
                 <View style={styles.recommendedCol}>
@@ -445,10 +442,10 @@ export function HomeScreen({ navigation }: Props) {
 
           {/* Greeting */}
           <View style={styles.headerTextBlock}>
-            <Text style={[styles.headerGreeting, isRTL ? styles.headerTextRtl : styles.headerTextLtr]}>
+            <Text style={[styles.headerGreeting, { textAlign }]}>
               {t('greeting')}
             </Text>
-            <Text style={[styles.headerName, isRTL ? styles.headerTextRtl : styles.headerTextLtr]}>
+            <Text style={[styles.headerName, { textAlign }]}>
               {t('welcome', { name: displayName })}
             </Text>
           </View>
@@ -585,12 +582,6 @@ const styles = StyleSheet.create({
     ...textStyle.titleSectionSm,
     fontWeight: '800',
   },
-  headerTextLtr: {
-    textAlign: 'left',
-  },
-  headerTextRtl: {
-    textAlign: 'left',
-  },
   headerIcons: {
     flexDirection: 'row',
     gap: 10,
@@ -661,14 +652,6 @@ const styles = StyleSheet.create({
   heroSubtitle: {
     color: dark.textSecondary,
     ...textStyle.captionMd,
-  },
-  heroTextLtr: {
-    textAlign: 'left',
-    writingDirection: 'ltr',
-  },
-  heroTextRtl: {
-    textAlign: 'left',
-    writingDirection: 'rtl',
   },
   heroCtas: {
     gap: spacing.xs,
@@ -746,28 +729,16 @@ const styles = StyleSheet.create({
     ...textStyle.titleCard,
     fontWeight: '800',
     width: '100%',
-  },
-  sectionTitleLtr: {
-    textAlign: 'left',
-    paddingRight: 96,
-  },
-  sectionTitleRtl: {
-    textAlign: 'left',
-    paddingRight: 96,
+    paddingEnd: 96,
   },
   seeAllBtn: {
     position: 'absolute',
     top: 0,
     bottom: 0,
+    end: 0,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing['3xs'],
-  },
-  seeAllBtnLtr: {
-    right: 0,
-  },
-  seeAllBtnRtl: {
-    right: 0,
   },
   seeAllText: {
     color: dark.textAccent,

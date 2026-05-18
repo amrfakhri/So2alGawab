@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useAudioPlayer, useAudioPlayerStatus, setAudioModeAsync } from 'expo-audio';
-import { useTranslation } from 'react-i18next';
+import { useLocale } from '../../../localization/useLocale';
 import { colors } from '../../../shared/theme/colors';
 import { AppIcon } from '../../../shared/components/AppIcon';
 
@@ -11,7 +11,7 @@ interface AudioPlayerProps {
 }
 
 export function AudioPlayer({ uri, onPlayingChange }: AudioPlayerProps) {
-  const { t } = useTranslation('game');
+  const { t } = useLocale('game');
 
   // useAudioPlayer auto-releases the player when the component unmounts.
   const player = useAudioPlayer({ uri });

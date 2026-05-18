@@ -1,10 +1,4 @@
 {
   "empty_title": "Nothing here yet",
-  "empty_subtitle": "Leaderboard rankings will appear here",
-  "tabs": {
-    "home": "Home",
-    "play": "Play",
-    "leaderboard": "Rankings",
-    "profile": "Profile"
-  }
+  "empty_subtitle": "Leaderboard rankings will appear here"
 }

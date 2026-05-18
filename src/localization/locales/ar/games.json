@@ -1,10 +1,4 @@
 {
   "empty_title": "مفيش حاجة هنا",
-  "empty_subtitle": "سجل مبارياتك هيظهر هنا",
-  "tabs": {
-    "home": "الرئيسية",
-    "play": "العب",
-    "leaderboard": "الترتيب",
-    "profile": "بروفايل"
-  }
+  "empty_subtitle": "سجل مبارياتك هيظهر هنا"
 }

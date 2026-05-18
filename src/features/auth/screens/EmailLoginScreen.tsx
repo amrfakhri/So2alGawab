@@ -125,7 +125,7 @@ export function EmailLoginScreen({ navigation }: Props) {
         onPress={() => navigation.goBack()}
         style={({ pressed }) => [
           styles.backBtn,
-          { top: insets.top + spacing.md, left: spacing.md },
+          { top: insets.top + spacing.md, start: spacing.md },
           pressed && styles.pressed,
         ]}
         hitSlop={8}

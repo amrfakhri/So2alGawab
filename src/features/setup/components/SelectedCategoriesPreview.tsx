@@ -77,24 +77,21 @@ const styles = StyleSheet.create({
   },
   titleLtr: {
     textAlign: 'left',
-    paddingRight: 96,
+    paddingEnd: 96,
   },
   titleRtl: {
-    textAlign: 'left',
-    paddingRight: 96,
+    textAlign: 'right',
+    paddingEnd: 96,
   },
   clearButton: {
     position: 'absolute',
     top: 0,
     bottom: 0,
+    end: 0,
     justifyContent: 'center',
   },
-  clearButtonLtr: {
-    right: 0,
-  },
-  clearButtonRtl: {
-    right: 0,
-  },
+  clearButtonLtr: {},
+  clearButtonRtl: {},
   clearText: {
     color: dark.textAccent,
     ...textStyle.overline,

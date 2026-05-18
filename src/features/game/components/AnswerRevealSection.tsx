@@ -1,6 +1,5 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
 
 import { alpha, dark, palette, r, textStyle } from '../../../shared/theme/tokens';
 import { useLocale } from '../../../localization/useLocale';
@@ -10,8 +9,7 @@ interface AnswerRevealSectionProps {
 }
 
 export function AnswerRevealSection({ answer }: AnswerRevealSectionProps) {
-  const { t } = useTranslation('game');
-  const { textAlign } = useLocale('game');
+  const { t, textAlign } = useLocale('game');
 
   return (
     <View style={styles.card}>

@@ -10,8 +10,6 @@ import {
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import QRCode from 'react-native-qrcode-svg';
-import { useTranslation } from 'react-i18next';
-
 import { colors } from '../../shared/theme/colors';
 import { dark } from '../../shared/theme/tokens';
 import { createGameSession, GameSession, TV_BASE_URL } from '../../services/supabase/sessionService';
@@ -31,8 +29,7 @@ interface TvSessionModalProps {
 }
 
 export function TvSessionModal({ visible, onClose }: TvSessionModalProps) {
-  const { t } = useTranslation(['tv', 'common']);
-  const { textAlign } = useLocale(['tv', 'common']);
+  const { t, textAlign } = useLocale(['tv', 'common']);
   const [state, setState] = useState<State>({ phase: 'idle' });
 
   React.useEffect(() => {
@@ -109,16 +106,16 @@ export function TvSessionModal({ visible, onClose }: TvSessionModalProps) {
               </View>
               <View style={styles.actions}>
                 <Pressable
-                  style={({ pressed }) => [styles.actionBtn, styles.actionBtnPrimary, pressed && styles.actionBtnPrimaryPressed]}
-                  onPress={() => shareUrl(state.session.session_code)}
-                >
-                  <Text style={[styles.actionBtnText, styles.actionBtnTextPrimary]}>{t('common:share')}</Text>
-                </Pressable>
-                <Pressable
                   style={({ pressed }) => [styles.actionBtn, pressed && styles.actionBtnPressed]}
                   onPress={() => copyUrl(state.session.session_code)}
                 >
                   <Text style={styles.actionBtnText}>{t('common:copy_link')}</Text>
+                </Pressable>
+                <Pressable
+                  style={({ pressed }) => [styles.actionBtn, styles.actionBtnPrimary, pressed && styles.actionBtnPrimaryPressed]}
+                  onPress={() => shareUrl(state.session.session_code)}
+                >
+                  <Text style={[styles.actionBtnText, styles.actionBtnTextPrimary]}>{t('common:share')}</Text>
                 </Pressable>
               </View>
             </View>
@@ -177,7 +174,7 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
   },
   urlText: { color: colors.mutedText, fontSize: 13, fontWeight: '600', textAlign: 'center' },
-  actions: { flexDirection: 'row-reverse', gap: 12, alignSelf: 'stretch' },
+  actions: { flexDirection: 'row', gap: 12, alignSelf: 'stretch' },
   actionBtn: {
     flex: 1,
     borderRadius: 16,

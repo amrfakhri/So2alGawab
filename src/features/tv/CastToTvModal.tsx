@@ -271,6 +271,11 @@ export function CastToTvModal({ visible, onClose }: CastToTvModalProps) {
 
             {/* Pinned bottom actions */}
             <View style={styles.fixedActions}>
+              <SecondaryButton
+                label={t('cast.close_btn')}
+                onPress={handleClose}
+              />
+
               <Pressable
                 disabled={connectDisabled}
                 onPress={() => connect()}
@@ -295,11 +300,6 @@ export function CastToTvModal({ visible, onClose }: CastToTvModalProps) {
                   )}
                 </LinearGradient>
               </Pressable>
-
-              <SecondaryButton
-                label={t('cast.close_btn')}
-                onPress={handleClose}
-              />
             </View>
           </BlurView>
         </KeyboardAvoidingView>
@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
 
   // ── Bottom actions ─────────────────────────────────────────────────────────
   fixedActions: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,

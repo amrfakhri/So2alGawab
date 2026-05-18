@@ -1,10 +1,4 @@
 {
   "empty_title": "مفيش حاجة هنا",
-  "empty_subtitle": "ترتيب المتصدرين هيظهر هنا",
-  "tabs": {
-    "home": "الرئيسية",
-    "play": "العب",
-    "leaderboard": "الترتيب",
-    "profile": "بروفايل"
-  }
+  "empty_subtitle": "ترتيب المتصدرين هيظهر هنا"
 }

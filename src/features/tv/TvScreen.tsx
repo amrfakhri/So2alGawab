@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { useLocale } from '../../localization/useLocale';
 
 import { supabase } from '../../services/supabase/supabaseClient';
 import { fetchSessionByCode, GameSession } from '../../services/supabase/sessionService';
@@ -18,7 +18,7 @@ type Lifelines = {
 };
 
 export function TvScreen({ sessionCode }: { sessionCode: string }) {
-  const { t } = useTranslation('tv');
+  const { t } = useLocale('tv');
   const [state, setState] = useState<LoadState>({ status: 'loading' });
 
   useEffect(() => {
@@ -69,7 +69,7 @@ export function TvScreen({ sessionCode }: { sessionCode: string }) {
 }
 
 function TvSessionView({ session, sessionCode }: { session: GameSession; sessionCode: string }) {
-  const { t } = useTranslation('tv');
+  const { t } = useLocale('tv');
   const [timerMs, setTimerMs] = useState<number | null>(null);
   // Persists across TvMedia remounts — once the presenter taps, all future plays work without a prompt
   const [browserUnlocked, setBrowserUnlocked] = useState(false);
@@ -197,7 +197,7 @@ function TvSessionView({ session, sessionCode }: { session: GameSession; session
 }
 
 function FinishedScreen({ session }: { session: GameSession }) {
-  const { t } = useTranslation('tv');
+  const { t } = useLocale('tv');
   const { team1_score, team2_score } = session;
   const team1Wins = team1_score > team2_score;
   const team2Wins = team2_score > team1_score;
@@ -245,7 +245,7 @@ function FinishedScreen({ session }: { session: GameSession }) {
 }
 
 function TimerBadge({ remainingMs, totalMs }: { remainingMs: number; totalMs: number }) {
-  const { t } = useTranslation('tv');
+  const { t } = useLocale('tv');
   const seconds = Math.ceil(remainingMs / 1000);
   const ratio = remainingMs / totalMs;
   const color = ratio > 0.6 ? tv.yellow : ratio > 0.3 ? '#FF9F0A' : '#FF453A';

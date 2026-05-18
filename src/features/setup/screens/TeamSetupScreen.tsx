@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useTranslation } from 'react-i18next';
+import { useLocale } from '../../../localization/useLocale';
 
 import { RootStackParamList } from '../../../navigation/RootNavigator';
 import { SpotlightFrame } from '../../../shared/components/SpotlightFrame';
@@ -20,7 +20,7 @@ import { alpha, dark, gradients, glow, radius, spacing, textStyle } from '../../
 type Props = NativeStackScreenProps<RootStackParamList, 'TeamSetup'>;
 
 export function TeamSetupScreen({ navigation }: Props) {
-  const { t } = useTranslation('setup');
+  const { t } = useLocale('setup');
   const insets = useSafeAreaInsets();
 
   const {

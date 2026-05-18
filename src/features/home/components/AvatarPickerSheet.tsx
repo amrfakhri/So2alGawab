@@ -89,21 +89,7 @@ export function AvatarPickerSheet({ visible, onClose }: AvatarPickerSheetProps) 
 
           {/* Actions */}
           <View style={styles.actions}>
-            {/* Update — primary, flex:1 */}
-            <Pressable
-              onPress={handleUpdate}
-              style={({ pressed }) => [styles.updateBtn, pressed && styles.pressed]}
-            >
-              <LinearGradient
-                colors={gradients.ctaGold}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={StyleSheet.absoluteFill}
-              />
-              <Text style={styles.updateBtnText}>{t('avatar_picker.update')}</Text>
-            </Pressable>
-
-            {/* Close — ghost */}
+            {/* Close — secondary, flex:1 */}
             <Pressable
               onPress={onClose}
               style={({ pressed }) => [styles.closeBtn, pressed && styles.pressed]}
@@ -116,6 +102,20 @@ export function AvatarPickerSheet({ visible, onClose }: AvatarPickerSheetProps) 
               />
               <View style={styles.closeBtnBorder} />
               <Text style={styles.closeBtnText}>{t('avatar_picker.close')}</Text>
+            </Pressable>
+
+            {/* Update — primary, flex:1 */}
+            <Pressable
+              onPress={handleUpdate}
+              style={({ pressed }) => [styles.updateBtn, pressed && styles.pressed]}
+            >
+              <LinearGradient
+                colors={gradients.ctaGold}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={StyleSheet.absoluteFill}
+              />
+              <Text style={styles.updateBtnText}>{t('avatar_picker.update')}</Text>
             </Pressable>
           </View>
         </Pressable>
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   },
 
   actions: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: spacing.sm,
   },
   pressed: {

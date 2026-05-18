@@ -17,6 +17,7 @@ type Props = NativeStackScreenProps<AppStackParamList, 'Ranks'>;
 
 export function RanksScreen({ navigation }: Props) {
   const { t } = useLocale('ranks');
+  const { t: tHome } = useLocale('home');
   const insets = useSafeAreaInsets();
 
   function handleTabPress(tab: Parameters<typeof AppTabBar>[0]['activeTab']) {
@@ -54,10 +55,10 @@ export function RanksScreen({ navigation }: Props) {
           activeTab="leaderboard"
           onTabPress={handleTabPress}
           labels={{
-            home:        t('tabs.home'),
-            play:        t('tabs.play'),
-            leaderboard: t('tabs.leaderboard'),
-            profile:     t('tabs.profile'),
+            home:        tHome('tabs.home'),
+            play:        tHome('tabs.play'),
+            leaderboard: tHome('tabs.leaderboard'),
+            profile:     tHome('tabs.profile'),
           }}
         />
       </AppTabBarWrapper>

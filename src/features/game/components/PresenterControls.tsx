@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
+import { useLocale } from '../../../localization/useLocale';
 
 import { GamePhase } from '../types/game';
 import { GameButton } from './GameButton';
@@ -18,7 +18,7 @@ export function PresenterControls({
   onMarkCorrect,
   onMarkWrong,
 }: PresenterControlsProps) {
-  const { t } = useTranslation('game');
+  const { t } = useLocale('game');
 
   if (phase === 'waiting_answer') {
     return <GameButton label={t('presenter.reveal_answer')} onPress={onReveal} />;
