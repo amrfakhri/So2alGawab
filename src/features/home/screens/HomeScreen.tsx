@@ -33,6 +33,7 @@ import { AvatarPickerSheet } from '../components/AvatarPickerSheet';
 import { ProfileAvatar } from '../components/ProfileAvatar';
 import { useUserStore } from '../store/useUserStore';
 import { useAuthStore } from '../../auth/store/useAuthStore';
+import { useUserStats } from '../hooks/useUserStats';
 import { Subcategory } from '../../game/types/game';
 import {
   dark,
@@ -46,6 +47,11 @@ import {
 } from '../../../shared/theme/tokens';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function formatStatPoints(n: number): string {
+  if (n >= 1000) return `${Math.floor(n / 1000)}K`;
+  return String(n);
+}
 
 function deriveFirstName(user: User | null, isGuest: boolean, guestLabel: string): string {
   if (isGuest) return guestLabel;
@@ -277,6 +283,7 @@ export function HomeScreen({ navigation }: Props) {
 
   const { user, isGuest } = useAuthStore();
   const displayName = deriveFirstName(user, isGuest, t('guest_name'));
+  const userStats = useUserStats();
 
   const categoriesQuery = useQuery({
     queryKey: ['game-categories'],
@@ -382,17 +389,19 @@ export function HomeScreen({ navigation }: Props) {
             </View>
           </LinearGradient>
 
-          {/* ── Stats row ──────────────────────────────────────────────── */}
-          <View style={styles.statsRow}>
-            {([
-                  { value: '12K', key: 'points', label: t('stats.points') },
-                  { value: '7',   key: 'wins',   label: t('stats.wins')   },
-                  { value: '12',  key: 'games',  label: t('stats.games')  },
-                ]
-            ).map((s) => (
-              <StatCard key={s.key} value={s.value} label={s.label} />
-            ))}
-          </View>
+          {/* ── Stats row (logged-in users only) ───────────────────── */}
+          {!isGuest && (
+            <View style={styles.statsRow}>
+              {([
+                    { value: formatStatPoints(userStats.total_points), key: 'points', label: t('stats.points') },
+                    { value: String(userStats.wins),                   key: 'wins',   label: t('stats.wins')   },
+                    { value: String(userStats.games_played),           key: 'games',  label: t('stats.games')  },
+                  ]
+              ).map((s) => (
+                <StatCard key={s.key} value={s.value} label={s.label} />
+              ))}
+            </View>
+          )}
 
           {/* ── Most Played ────────────────────────────────────────────── */}
           {(categoriesQuery.isPending || mostPlayed.length > 0) && (

@@ -18,6 +18,8 @@ import LottieView from 'lottie-react-native';
 import { RootStackParamList } from '../../../navigation/RootNavigator';
 import { useGameStore } from '../../game/store/useGameStore';
 import { useLocale } from '../../../localization/useLocale';
+import { useAuthStore } from '../../auth/store/useAuthStore';
+import { incrementUserStats } from '../../../services/supabase/statsService';
 import { IconButton } from '../../../shared/components/IconButton';
 import { SpotlightFrame } from '../../../shared/components/SpotlightFrame';
 import { HeaderGlassBackground } from '../../../shared/components/HeaderGlassBackground';
@@ -45,6 +47,17 @@ export function ResultsScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
 
   const { teams, resetGame } = useGameStore();
+  const { user, isGuest } = useAuthStore();
+
+  // Save stats once when results screen mounts
+  React.useEffect(() => {
+    if (isGuest || !user) return;
+    const winnerTeam = teams.A.score === teams.B.score
+      ? null
+      : teams.A.score > teams.B.score ? teams.A : teams.B;
+    const topScore = Math.max(teams.A.score, teams.B.score);
+    incrementUserStats(user.id, { points: topScore, won: winnerTeam !== null }).catch(() => {});
+  }, []);
 
   const sortedTeams = [teams.A, teams.B].sort((a, b) => b.score - a.score);
   const topTeam = sortedTeams[0] ?? teams.A;
