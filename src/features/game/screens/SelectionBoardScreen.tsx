@@ -34,7 +34,7 @@ import { AppIcon } from '../../../shared/components/AppIcon';
 type Props = NativeStackScreenProps<RootStackParamList, 'SelectionBoard'>;
 
 const BOARD_QUESTIONS_PER_SUBCATEGORY = 6;
-const HEADER_H = 112;
+const HEADER_H = 120;
 const CHIP_W = 68;
 const CHIP_H = 72;
 const CAT_CARD_PAD = spacing.md;
@@ -186,7 +186,7 @@ export function SelectionBoardScreen({ navigation }: Props) {
                       {/* Name + status */}
                       <View style={styles.scoreTeamText}>
                         <Text
-                          style={[styles.scoreName, { color: dark.textPrimary, textAlign }]}
+                          style={[styles.scoreName, { color: dark.textPrimary }]}
                           numberOfLines={1}
                         >
                           {team.name}
@@ -241,7 +241,7 @@ export function SelectionBoardScreen({ navigation }: Props) {
                       <AppIcon name="crown" size={18} color={dark.iconAccent} weight="duotone" />
                     </View>
                   )}
-                  <Text style={[styles.catName, { textAlign, flex: 1 }]} numberOfLines={1}>
+                  <Text style={styles.catName} numberOfLines={1}>
                     {col.name}
                   </Text>
                   <Text style={styles.catCount}>
@@ -371,10 +371,10 @@ export function SelectionBoardScreen({ navigation }: Props) {
 
           {/* Name + subtitle — flex 1, fills middle */}
           <View style={styles.pillMeta}>
-            <Text style={[styles.pillName, { textAlign }]} numberOfLines={1}>
+            <Text style={styles.pillName} numberOfLines={1}>
               {t('board.active_team', { name: activeTeam.name })}
             </Text>
-            <Text style={[styles.pillSub, { textAlign }]} numberOfLines={1}>
+            <Text style={styles.pillSub} numberOfLines={1}>
               {t('board.choose_subtitle')}
             </Text>
           </View>
@@ -436,9 +436,10 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
 
-  // ── Score cards — COLUMN layout (avatar top-right, divider, score) ────────
+  // ── Score cards — side-by-side ROW layout ────────────────────────────────
   scoreRow: {
-    gap: spacing.xs,
+    flexDirection: 'row',
+    gap: spacing.sm,
   },
   scoreCard: {
     flex: 1,
@@ -455,6 +456,7 @@ const styles = StyleSheet.create({
     gap: spacing['2xs'],
   },
   scoreTeamRow: {
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing['3xs'],
   },
@@ -474,13 +476,16 @@ const styles = StyleSheet.create({
   scoreTeamText: {
     flex: 1,
     gap: 2,
+    alignItems: 'flex-start',
   },
   scoreName: {
     ...textStyle.buttonSm,
     fontWeight: '700',
+    textAlign: 'auto',
   },
   scoreStatus: {
     ...textStyle.labelSm,
+    textAlign: 'auto',
   },
   // Gradient fades from team colour (right) to transparent (left)
   scoreDividerLine: {
@@ -509,6 +514,7 @@ const styles = StyleSheet.create({
     borderColor: alpha.white[8],
   },
   catHeaderRow: {
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing['2xs'],
   },
@@ -527,11 +533,14 @@ const styles = StyleSheet.create({
   catName: {
     color: dark.textPrimary,
     ...textStyle.buttonMd,
+    flex: 1,
+    textAlign: 'auto',
   },
   catCount: {
     color: dark.textTertiary,
     ...textStyle.labelSm,
     flexShrink: 0,
+    textAlign: 'auto',
   },
   catDivider: {
     height: 1,
@@ -599,6 +608,7 @@ const styles = StyleSheet.create({
     backgroundColor: alpha.white[8],
   },
   headerRow: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     minHeight: 44,
@@ -638,6 +648,7 @@ const styles = StyleSheet.create({
   // ── Active team pill (bottom bar) ─────────────────────────────────────────
   // Layout in RTL: [avatar RIGHT] [meta MIDDLE flex:1] [count LEFT]
   activeTeamPill: {
+    flexDirection: 'row',
     borderRadius: radius.pill,
     overflow: 'hidden',
     paddingVertical: spacing.sm,
@@ -667,15 +678,18 @@ const styles = StyleSheet.create({
   pillMeta: {
     flex: 1,
     gap: 2,
+    alignItems: 'flex-start',
   },
   pillName: {
     color: dark.textPrimary,
     ...textStyle.titleCard,
     fontWeight: '700',
+    textAlign: 'auto',
   },
   pillSub: {
     color: dark.textSecondary,
     ...textStyle.labelSm,
+    textAlign: 'auto',
   },
   // Remaining count — last child = leftmost in RTL
   pillRemaining: {

@@ -18,7 +18,7 @@ import { ScanLine, Tv } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
-  alpha, dark, glow, gradients, palette, r, radius, spacing, textStyle,
+  alpha, dark, glow, gradients, r, radius, spacing, textStyle,
 } from '../../shared/theme/tokens';
 import { SheetHeader } from '../../shared/components/SheetHeader';
 import {
@@ -69,10 +69,9 @@ export function CastToTvModal({ visible, onClose }: CastToTvModalProps) {
     if (!char) return;
 
     if (idx < 3) {
-      // Auto-advance: defer slightly so state flush settles before focus()
+      // Auto-advance: always left→right (idx 0→1→2→3) regardless of RTL layout
       setTimeout(() => cellRefs.current[idx + 1]?.focus(), 10);
     } else {
-      // Last cell filled — auto-connect if all four chars present
       const fullCode = newChars.join('');
       if (fullCode.length === 4 && pairingState.phase === 'idle') {
         Keyboard.dismiss();
@@ -87,9 +86,6 @@ export function CastToTvModal({ visible, onClose }: CastToTvModalProps) {
       setTimeout(() => cellRefs.current[idx - 1]?.focus(), 10);
     }
   }
-
-  // Code cells always render left-to-right (numeric codes are LTR regardless of language).
-  const cellIndices = [0, 1, 2, 3];
 
   const code = chars.join('');
   const isComplete = code.length === 4;
@@ -133,8 +129,14 @@ export function CastToTvModal({ visible, onClose }: CastToTvModalProps) {
   }
 
   const steps = [t('cast.step_1'), t('cast.step_2'), t('cast.step_3')];
-  const stepNums = isRTL ? ['١', '٢', '٣'] : ['1', '2', '3'];
+  // Always use Latin numerals for step badges (matching design)
+  const stepNums = ['1', '2', '3'];
   const connectDisabled = !isComplete || isConnecting || isSuccess;
+
+  // Code inputs always display left-to-right visually regardless of RTL.
+  // In I18nManager RTL, flexDirection:'row' renders first child on the RIGHT.
+  // Using 'row-reverse' in RTL cancels the automatic flip → effective LTR order.
+  const ltrFlexDirection = isRTL ? 'row-reverse' : 'row';
 
   return (
     <Modal
@@ -144,40 +146,35 @@ export function CastToTvModal({ visible, onClose }: CastToTvModalProps) {
       onRequestClose={showScanner ? () => setShowScanner(false) : handleClose}
     >
       {showScanner ? (
-        // Rendered inside this Modal so CameraView gets the native Modal layer —
-        // avoids the double-Modal iOS issue where the camera feed stays black.
         <QrScannerModal
           onCodeScanned={handleCodeScanned}
           onClose={() => setShowScanner(false)}
         />
       ) : (
-        // KeyboardAvoidingView lifts the sheet above the keyboard when a
-        // TextInput is focused. flex:1 is required for it to work correctly.
         <KeyboardAvoidingView
           style={styles.kav}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          {/* Tappable backdrop fills everything above the sheet */}
+          {/* Tappable backdrop */}
           <Pressable style={styles.backdrop} onPress={handleClose} />
 
           <BlurView
             intensity={30}
             tint="dark"
-            style={[styles.sheet, { paddingBottom: insets.bottom + spacing.md }]}
+            style={[styles.sheet, { paddingBottom: insets.bottom + spacing.xl }]}
           >
-            {/* Dark bg layer sits behind all content */}
             <View style={[StyleSheet.absoluteFill, styles.sheetBg]} />
 
             {/* Dragger pill */}
             <View style={styles.dragger} />
 
-            {/* Content */}
+            {/* Scrollable content */}
             <ScrollView
               contentContainerStyle={styles.scrollContent}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
             >
-              {/* TV icon spotlight */}
+              {/* TV icon */}
               <View style={styles.focusIcon}>
                 <Tv size={36} color={dark.iconInverse} strokeWidth={2} />
               </View>
@@ -193,20 +190,24 @@ export function CastToTvModal({ visible, onClose }: CastToTvModalProps) {
               <View style={styles.listCard}>
                 {steps.map((text, i) => (
                   <View key={i} style={styles.stepRow}>
-                    <Text style={[styles.stepText, { textAlign }]} numberOfLines={2}>
-                      {text}
-                    </Text>
+                    {/* Badge first → rightmost in RTL (matching Figma) */}
                     <View style={styles.badge}>
                       <Text style={styles.badgeText}>{stepNums[i]}</Text>
                     </View>
+                    <Text style={[styles.stepText, { textAlign }]} numberOfLines={2}>
+                      {text}
+                    </Text>
                   </View>
                 ))}
               </View>
 
-              {/* Code inputs + vertical divider + scan button */}
-              <View style={styles.inputRow}>
-                <View style={styles.codeInputs}>
-                  {cellIndices.map((arrayIdx) => (
+              {/* Code inputs + divider + scan button
+                  ltrFlexDirection ensures this row always reads left→right
+                  regardless of the app's RTL setting. */}
+              <View style={[styles.inputRow, { flexDirection: ltrFlexDirection }]}>
+                {/* 4-cell code entry — always LTR via ltrFlexDirection */}
+                <View style={[styles.codeInputs, { flexDirection: ltrFlexDirection }]}>
+                  {[0, 1, 2, 3].map((arrayIdx) => (
                     <View
                       key={arrayIdx}
                       style={[
@@ -239,7 +240,7 @@ export function CastToTvModal({ visible, onClose }: CastToTvModalProps) {
                 {/* Vertical separator */}
                 <View style={styles.verticalDivider} />
 
-                {/* QR scan icon button */}
+                {/* QR scan button */}
                 <Pressable
                   onPress={() => setShowScanner(true)}
                   style={({ pressed }) => [styles.scanBtnOuter, pressed && styles.pressed]}
@@ -270,7 +271,6 @@ export function CastToTvModal({ visible, onClose }: CastToTvModalProps) {
 
             {/* Pinned bottom actions */}
             <View style={styles.fixedActions}>
-              {/* Connect — flex 1 */}
               <Pressable
                 disabled={connectDisabled}
                 onPress={() => connect()}
@@ -296,7 +296,6 @@ export function CastToTvModal({ visible, onClose }: CastToTvModalProps) {
                 </LinearGradient>
               </Pressable>
 
-              {/* Close — fixed width */}
               <SecondaryButton
                 label={t('cast.close_btn')}
                 onPress={handleClose}
@@ -311,11 +310,9 @@ export function CastToTvModal({ visible, onClose }: CastToTvModalProps) {
 
 const styles = StyleSheet.create({
   // ── Layout ─────────────────────────────────────────────────────────────────
-  // flex:1 is required for KeyboardAvoidingView to work correctly inside Modal
   kav: {
     flex: 1,
   },
-  // flex:1 backdrop pushes the sheet to the bottom (same pattern as AvatarSelectorSheet)
   backdrop: {
     flex: 1,
     backgroundColor: alpha.black[60],
@@ -323,8 +320,8 @@ const styles = StyleSheet.create({
 
   // ── Sheet ──────────────────────────────────────────────────────────────────
   sheet: {
-    borderTopLeftRadius: r.card,
-    borderTopRightRadius: r.card,
+    borderTopLeftRadius: r.sheet,
+    borderTopRightRadius: r.sheet,
     overflow: 'hidden',
     paddingTop: spacing.md,
   },
@@ -337,7 +334,8 @@ const styles = StyleSheet.create({
     width: 60,
     height: 8,
     borderRadius: r.button,
-    backgroundColor: palette.neutral[600],
+    // Figma: background-glass = rgba(255,255,255,0.08)
+    backgroundColor: dark.bgGlass,
     alignSelf: 'center',
     marginBottom: spacing.md,
   },
@@ -392,20 +390,18 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: dark.textInverse,
-    fontSize: 16,
+    ...textStyle.labelLg,
     fontWeight: '600',
-    lineHeight: 20,
   },
 
   // ── Code inputs row ────────────────────────────────────────────────────────
+  // flexDirection is set inline via `ltrFlexDirection` to always render LTR.
   inputRow: {
-    flexDirection: 'row',
     alignSelf: 'stretch',
     alignItems: 'center',
     gap: spacing.sm,
   },
   codeInputs: {
-    flexDirection: 'row',
     gap: spacing.sm,
     flexShrink: 0,
   },
@@ -436,7 +432,6 @@ const styles = StyleSheet.create({
   verticalDivider: {
     flex: 1,
     height: 1,
-    width: 1,
     backgroundColor: dark.borderSubtle,
     alignSelf: 'center',
   },

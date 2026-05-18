@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { BlurView } from 'expo-blur';
 import { Crown, Home, Share2 } from 'lucide-react-native';
+import LottieView from 'lottie-react-native';
 
 import { RootStackParamList } from '../../../navigation/RootNavigator';
 import { useGameStore } from '../../game/store/useGameStore';
@@ -177,6 +178,17 @@ export function ResultsScreen({ navigation }: Props) {
           })}
         </View>
       </ScrollView>
+
+      {/* ── Confetti animation (full-screen, non-interactive) ──── */}
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+        <LottieView
+          source={require('../../../../assets/confetti.json')}
+          autoPlay
+          loop={false}
+          style={StyleSheet.absoluteFill}
+          resizeMode="cover"
+        />
+      </View>
 
       {/* ── Fixed header ───────────────────────────────────────── */}
       <View

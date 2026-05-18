@@ -43,7 +43,10 @@
     "name_placeholder": "اكتب اسم الفريق",
     "start_btn": "ابدا اللعبة",
     "avatar_sheet_title": "اختار شكل الفريق",
-    "avatar_sheet_subtitle": "اختار إيموجي يمثل فريقك"
+    "avatar_sheet_subtitle": "اختار إيموجي يمثل فريقك",
+    "avatar_random": "عشوائي",
+    "avatar_confirm": "تمام، استخدم الشكل ده",
+    "avatar_cancel": "إلغاء"
   },
   "selected_categories": {
     "title": "اللي اخترتها ({{count}})",

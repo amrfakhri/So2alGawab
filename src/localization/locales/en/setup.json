@@ -43,7 +43,10 @@
     "name_placeholder": "Enter team name",
     "start_btn": "Start Game",
     "avatar_sheet_title": "Choose an Avatar",
-    "avatar_sheet_subtitle": "Pick an emoji to represent your team"
+    "avatar_sheet_subtitle": "Pick an emoji to represent your team",
+    "avatar_random": "Random",
+    "avatar_confirm": "Use this avatar",
+    "avatar_cancel": "Cancel"
   },
   "selected_categories": {
     "title": "Selected ({{count}})",
