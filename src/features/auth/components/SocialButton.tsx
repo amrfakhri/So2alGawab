@@ -1,8 +1,8 @@
-import { AppleLogo } from 'phosphor-react-native';
 import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
 
 import { r, spacing, textStyle } from '../../../shared/theme/tokens';
+import { AppleIcon } from './AppleIcon';
 import { GoogleIcon } from './GoogleIcon';
 
 interface SocialButtonProps {
@@ -29,7 +29,7 @@ export function SocialButton({ provider, label, onPress, loading, disabled }: So
       ) : provider === 'google' ? (
         <GoogleIcon size={22} />
       ) : (
-        <AppleLogo size={22} color="#000000" weight="fill" />
+        <AppleIcon size={22} color="#000000" />
       )}
       <Text style={styles.label}>{label}</Text>
     </Pressable>

@@ -41,17 +41,40 @@ function deriveFirstName(user: User | null, isGuest: boolean, guestLabel: string
 
 export { HEADER_HEIGHT };
 
-export function TabScreenHeader() {
-  const { t, isRTL } = useLocale('home');
+interface TabScreenHeaderProps {
+  title?: string;
+  subtitle?: string;
+
+  namespace?: string | string[];
+
+  showAvatar?: boolean;
+  showSettings?: boolean;
+  showNotifications?: boolean;
+}
+
+export function TabScreenHeader({
+  title,
+  subtitle,
+  namespace,
+  showAvatar = true,
+  showSettings = true,
+  showNotifications = true,
+}: TabScreenHeaderProps) {
+  const { t, isRTL } = useLocale(namespace ?? 'home');
   const insets = useSafeAreaInsets();
   const { user, isGuest } = useAuthStore();
   const { avatarIndex, loadAvatar } = useUserStore();
-  const [showSettings, setShowSettings] = useState(false);
+  const [showSettingsSheet, setShowSettingsSheet] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
   useEffect(() => { loadAvatar(); }, []);
 
   const displayName = deriveFirstName(user, isGuest, t('guest_name'));
+
+  const resolvedTitle = title ?? t('greeting');
+
+  const resolvedSubtitle =
+    subtitle ?? t('welcome', { name: displayName });
 
   return (
     <>
@@ -70,45 +93,63 @@ export function TabScreenHeader() {
         </BlurView>
 
         <View style={styles.headerRow}>
-          <Pressable
-            onPress={() => setShowAvatarPicker(true)}
-            style={({ pressed }) => [pressed && styles.pressed]}
-            hitSlop={4}
-          >
-            <ProfileAvatar index={avatarIndex} size={48} />
-          </Pressable>
+          {showAvatar && (
+            <Pressable
+              onPress={() => setShowAvatarPicker(true)}
+              style={({ pressed }) => [pressed && styles.pressed]}
+              hitSlop={4}
+            >
+              <ProfileAvatar index={avatarIndex} size={48} />
+            </Pressable>
+          )}
 
           <View style={styles.headerTextBlock}>
             <Text style={[styles.headerGreeting, isRTL ? styles.textRtl : styles.textLtr]}>
-              {t('greeting')}
+              {resolvedTitle}
             </Text>
             <Text style={[styles.headerName, isRTL ? styles.textRtl : styles.textLtr]}>
-              {t('welcome', { name: displayName })}
+              {resolvedSubtitle}
             </Text>
           </View>
 
           <View style={styles.headerIcons}>
-            <View style={styles.iconBtn}>
-              <AppIcon name="bell" size={20} color={dark.iconTertiary} />
-              <View style={styles.notifBadge}>
-                <Text style={styles.notifBadgeText}>2</Text>
-              </View>
-            </View>
+            {showSettings && (
+              <Pressable
+                onPress={() => setShowSettingsSheet(true)}
+                style={({ pressed }) => [pressed && styles.pressed]}
+                hitSlop={4}
+              >
+                <LinearGradient
+                  colors={gradients.cardGlass}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.iconBtn}
+                >
+                  <AppIcon name="settings-2" size={24} color={dark.iconTertiary} />
+                </LinearGradient>
+              </Pressable>
+            )}
 
-            <Pressable
-              onPress={() => setShowSettings(true)}
-              style={({ pressed }) => [pressed && styles.pressed]}
-              hitSlop={4}
-            >
-              <View style={styles.iconBtn}>
-                <AppIcon name="globe" size={20} color={dark.iconTertiary} />
+            {showNotifications && (
+              <View style={styles.bellWrap}>
+                <LinearGradient
+                  colors={gradients.cardGlass}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.iconBtn}
+                >
+                  <AppIcon name="bell" size={24} color={dark.iconTertiary} />
+                </LinearGradient>
+                <View style={styles.notifBadge}>
+                  <Text style={styles.notifBadgeText}>2</Text>
+                </View>
               </View>
-            </Pressable>
+            )}
           </View>
         </View>
       </View>
 
-      <LanguageSwitcher visible={showSettings} onClose={() => setShowSettings(false)} />
+      <LanguageSwitcher visible={showSettingsSheet} onClose={() => setShowSettingsSheet(false)} />
       <AvatarPickerSheet visible={showAvatarPicker} onClose={() => setShowAvatarPicker(false)} />
     </>
   );
@@ -120,8 +161,8 @@ const styles = StyleSheet.create({
     top: 0, left: 0, right: 0,
     height: HEADER_HEIGHT,
     paddingHorizontal: spacing.md,
-    paddingBottom: spacing.md - 4,
-    justifyContent: 'flex-end',
+    paddingBottom: spacing.lg,
+    // justifyContent: 'flex-end',
     zIndex: zIndex.appbar,
   },
   headerGlass: {
@@ -132,11 +173,13 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
+    height: 50,
     gap: spacing.xs,
   },
   headerTextBlock: {
     flex: 1,
+    alignItems:'flex-start',
     gap: 2,
   },
   headerGreeting: {
@@ -152,28 +195,28 @@ const styles = StyleSheet.create({
   textRtl: { textAlign: 'right' },
   headerIcons: {
     flexDirection: 'row',
-    gap: 10,
+    gap: spacing.sm,
     alignItems: 'center',
     flexShrink: 0,
   },
+  bellWrap: {
+    position: 'relative',
+  },
   iconBtn: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     borderRadius: r.avatar,
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'visible',
     borderWidth: 1,
-    borderColor: dark.borderDefault,
-    backgroundColor: dark.bgGlassSubtle,
+    borderColor: dark.borderSubtle,
   },
   notifBadge: {
     position: 'absolute',
-    top: -4, right: -4,
+    top: -3, right: -3,
     zIndex: zIndex.raised,
-    width: 18,
-    height: 18,
-    paddingHorizontal: spacing['3xs'],
+    width: 20,
+    height: 20,
     borderRadius: r.badge,
     backgroundColor: dark.statusError,
     borderWidth: 2,

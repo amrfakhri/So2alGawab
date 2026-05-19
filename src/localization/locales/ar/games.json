@@ -1,4 +1,23 @@
 {
+  "screen_title": "اختار سهرتك",
+  "screen_subtitle": "الألعاب",
+  "quick_game_badge": "⚡️ لعبة سريعة",
+  "quick_game_title_1": "مفيش وقت تحضير؟",
+  "quick_game_title_2": "ابدأ في ثانية",
+  "play_btn": "يلا نبتدي",
+  "game_types": {
+    "title": "أنواع الألعاب",
+    "see_all": "شوف الكل"
+  },
+  "classic": {
+    "title": "الكلاسيك",
+    "subtitle": "أسئلة وأجوبة للجميع",
+    "badge": "الأشهر"
+  },
+  "teams": {
+    "title": "فرق وتحدي",
+    "subtitle": "انقسموا وتنافسوا"
+  },
   "empty_title": "مفيش حاجة هنا",
   "empty_subtitle": "سجل مبارياتك هيظهر هنا"
 }

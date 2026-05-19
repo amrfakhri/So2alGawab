@@ -9,6 +9,15 @@ interface SpotlightFrameProps {
   opacity?: number;
   /** Color variant: 'gold' (default) or 'error' (pink/red for team setup screen). */
   variant?: 'gold' | 'error';
+  /**
+   * SVG objectBoundingBox cy for the radial gradient center (default "0%").
+   * Use "-50%" for profile-card style: the Figma places the 686px circle with
+   * bottom:-99px, which centres it ~50% above the card — giving a wide, diffuse
+   * top-glow rather than a sharp point at the edge.
+   */
+  gradientCy?: string;
+  /** SVG objectBoundingBox ry for the radial gradient radius (default "85%"). */
+  gradientRy?: string;
 }
 
 /**
@@ -16,7 +25,13 @@ interface SpotlightFrameProps {
  * 'gold' variant: warm gold glow (game screen).
  * 'error' variant: pink/red glow (team setup screen).
  */
-export function SpotlightFrame({ style, opacity = 1, variant = 'gold' }: SpotlightFrameProps) {
+export function SpotlightFrame({
+  style,
+  opacity = 1,
+  variant = 'gold',
+  gradientCy = '0%',
+  gradientRy = '85%',
+}: SpotlightFrameProps) {
   const color = variant === 'error' ? '#FF5C7A' : '#f6d366';
   const centerOpacity = variant === 'error' ? 0.3 * opacity : 0.35 * opacity;
   const gradientId = variant === 'error' ? 'errorSpot' : 'goldSpot';
@@ -33,11 +48,11 @@ export function SpotlightFrame({ style, opacity = 1, variant = 'gold' }: Spotlig
           <RadialGradient
             id={gradientId}
             cx="50%"
-            cy="0%"
+            cy={gradientCy}
             rx="100%"
-            ry="85%"
+            ry={gradientRy}
             fx="50%"
-            fy="0%"
+            fy={gradientCy}
             gradientUnits="objectBoundingBox"
           >
             <Stop offset="0" stopColor={color} stopOpacity={centerOpacity} />

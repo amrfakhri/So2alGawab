@@ -41,7 +41,14 @@ export function RanksScreen({ navigation }: Props) {
         />
       </View>
 
-      <TabScreenHeader />
+      <TabScreenHeader
+        namespace="ranks"
+        title={t('')}
+        subtitle={t('title')}
+        showAvatar={false}
+        showSettings
+        showNotifications
+      />
 
       <AppTabBarWrapper>
         <AppTabBar

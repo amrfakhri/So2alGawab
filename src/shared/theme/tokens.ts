@@ -354,6 +354,12 @@ export const gradients = {
   // Scrim
   scrimBottom:    ['rgba(5,7,15,0)', 'rgba(5,7,15,0.80)'] as const,
 
+  // Profile award card backgrounds (diagonal ~160° gradient)
+  awardYellow: ['rgba(245,200,75,0.10)',  'rgba(19,20,28,0.95)'] as const,
+  awardRed:    ['rgba(255,107,87,0.10)',  'rgba(19,20,28,0.95)'] as const,
+  awardBlue:   ['rgba(59,130,246,0.10)',  'rgba(19,20,28,0.95)'] as const,
+  awardPurple: ['rgba(167,139,250,0.10)', 'rgba(19,20,28,0.95)'] as const,
+
   // Game screen
   screen:        ['#1b1530', '#131021', '#0a0b12'] as const,
   teamGold:      ['rgba(245,200,75,0.24)', 'rgba(245,200,75,0.08)'] as const,

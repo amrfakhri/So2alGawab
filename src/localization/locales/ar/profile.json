@@ -1,4 +1,34 @@
 {
-  "empty_title": "مفيش حاجة هنا",
-  "empty_subtitle": "تفاصيل حسابك هتظهر هنا"
+  "title": "بروفايل",
+  "vip_badge": "VIP",
+  "xp_label": "{{current}} / {{max}} XP",
+  "level_label": "المستوى {{level}} • {{rank}}",
+  "rank": {
+    "beginner": "مبتدئ",
+    "player": "لاعيب",
+    "senior": "لاعيب كبير",
+    "pro": "محترف",
+    "expert": "خبير",
+    "champion": "بطل"
+  },
+  "stats": {
+    "points": "نقطة",
+    "win_rate": "نسبة",
+    "wins": "كسبت",
+    "games": "سهرة"
+  },
+  "achievements": {
+    "title": "إنجازاتي",
+    "see_all": "شوف الكل"
+  },
+  "awards": {
+    "first_night_title": "أول سهرة",
+    "first_night_time": "امبارح",
+    "streak_title": "5 متتالية",
+    "streak_time": "الأسبوع ده",
+    "sniper_title": "صياد دقيق",
+    "sniper_time": "الشهر اللي فات",
+    "king_title": "ملك السهرة",
+    "king_time": "من 3 شهور"
+  }
 }

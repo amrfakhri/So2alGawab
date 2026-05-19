@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { MagnifyingGlassIcon } from 'phosphor-react-native';
+import { Search } from 'lucide-react-native';
 
 import { Category } from '../../game/types/game';
 import { SubcategoryCard } from './SubcategoryCard';
@@ -103,7 +103,7 @@ export function SubcategoryGrid({
 
       {isEmpty ? (
         <View style={styles.emptyState}>
-          <MagnifyingGlassIcon size={36} color={dark.borderDefault} weight="duotone" />
+          <Search size={36} color={dark.borderDefault} strokeWidth={1.5} />
           <Text style={styles.emptyTitle}>{t('subcategory_grid.search_empty_title')}</Text>
           <Text style={styles.emptyBody}>{t('subcategory_grid.search_empty_body')}</Text>
         </View>

@@ -17,7 +17,7 @@ export function IconButton({
   icon: Icon,
   onPress,
   color = dark.iconTertiary,
-  size = 20,
+  size = 24,
   hitSlop = 10,
 }: IconButtonProps) {
   return (

@@ -51,3 +51,4 @@ export function useLocale(ns?: string | string[]): LocaleUtils {
       n.toLocaleString(language === 'ar' ? 'ar-SA' : 'en-US'),
   };
 }
+

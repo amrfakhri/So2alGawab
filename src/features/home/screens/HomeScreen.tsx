@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -10,12 +10,10 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
-import { AlignJustify, AlignJustifyIcon, ChevronRight } from 'lucide-react-native';
+import { Cast, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BlurView } from 'expo-blur';
 import { useQuery } from '@tanstack/react-query';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { User } from '@supabase/supabase-js';
 
 import { RootStackParamList } from '../../../navigation/RootNavigator';
 import { useLocale } from '../../../localization/useLocale';
@@ -26,13 +24,9 @@ import {
 } from '../../setup/components/CategorySelectionUI';
 import { AppIcon } from '../../../shared/components/AppIcon';
 import { AppTabBar, AppTabBarWrapper, TAB_BAR_H, TAB_BAR_MARGIN } from '../../../shared/components/AppTabBar';
-import { HeaderGlassBackground } from '../../../shared/components/HeaderGlassBackground';
+import { TabScreenHeader, HEADER_HEIGHT } from '../../../shared/components/TabScreenHeader';
 import { SpotlightFrame } from '../../../shared/components/SpotlightFrame';
 import { CastToTvModal } from '../../tv/CastToTvModal';
-import { LanguageSwitcher } from '../../settings/LanguageSwitcher';
-import { AvatarPickerSheet } from '../components/AvatarPickerSheet';
-import { ProfileAvatar } from '../components/ProfileAvatar';
-import { useUserStore } from '../store/useUserStore';
 import { useAuthStore } from '../../auth/store/useAuthStore';
 import { useUserStats } from '../hooks/useUserStats';
 import { Subcategory } from '../../game/types/game';
@@ -44,7 +38,6 @@ import {
   radius,
   spacing,
   textStyle,
-  zIndex,
 } from '../../../shared/theme/tokens';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -53,20 +46,6 @@ function formatStatPoints(n: number): string {
   if (n >= 1000) return `${Math.floor(n / 1000)}K`;
   return String(n);
 }
-
-function deriveFirstName(user: User | null, isGuest: boolean, guestLabel: string): string {
-  if (isGuest) return guestLabel;
-  if (!user) return '';
-  const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
-  const full = String(meta.username ?? meta.full_name ?? meta.name ?? '').trim();
-  if (full) return full.split(/\s+/)[0] ?? full;
-  if (user.email) return user.email.split('@')[0] ?? user.email;
-  return '';
-}
-
-// ─── Layout constants ─────────────────────────────────────────────────────────
-
-const HEADER_HEIGHT = 150;
 
 // ─── CategoryPortraitCard ─────────────────────────────────────────────────────
 
@@ -164,7 +143,6 @@ function StatCard({ value, label }: { value: string; label: string }) {
 }
 
 // ─── SectionHeader ────────────────────────────────────────────────────────────
-
 interface SectionHeaderProps {
   title: string;
   seeAllLabel: string;
@@ -173,6 +151,7 @@ interface SectionHeaderProps {
 
 function SectionHeader({ title, seeAllLabel, onSeeAll }: SectionHeaderProps) {
   const { isRTL, textAlign } = useLocale();
+  const ChevronIcon = isRTL ? ChevronLeft : ChevronRight;
   return (
     <View style={styles.sectionHeader}>
       <Text style={[styles.sectionTitle, { textAlign }]} numberOfLines={1}>
@@ -184,11 +163,10 @@ function SectionHeader({ title, seeAllLabel, onSeeAll }: SectionHeaderProps) {
         hitSlop={8}
       >
         <Text style={styles.seeAllText}>{seeAllLabel}</Text>
-        <ChevronRight
+        <ChevronIcon
           size={14}
           color={dark.textAccent}
           strokeWidth={2.5}
-          style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
         />
       </Pressable>
     </View>
@@ -204,14 +182,7 @@ export function HomeScreen({ navigation }: Props) {
 
   const insets = useSafeAreaInsets();
   const [showCastModal, setShowCastModal] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
-
-  const { avatarIndex, loadAvatar } = useUserStore();
-  useEffect(() => { loadAvatar(); }, []);
-
-  const { user, isGuest } = useAuthStore();
-  const displayName = deriveFirstName(user, isGuest, t('guest_name'));
+  const { isGuest } = useAuthStore();
   const userStats = useUserStats();
 
   const categoriesQuery = useQuery({
@@ -259,33 +230,47 @@ export function HomeScreen({ navigation }: Props) {
             end={{ x: 1, y: 1 }}
             style={styles.heroCard}
           >
-            {/* Gold spotlight glow */}
-            <SpotlightFrame style={styles.heroSpotlightWrap} opacity={0.6} />
+            <SpotlightFrame style={styles.heroSpotlightWrap} opacity={0.6} gradientCy="-50%" gradientRy="200%" />
 
-            <Text style={[styles.heroEyebrow, { textAlign }]}>
-              {t('tonight')}
-            </Text>
-
-            <View style={styles.heroTitleBlock}>
-              <Text style={[styles.heroTitle, { textAlign }]}>
-                {t('hero_title_1')}
+            {/* Event details */}
+            <View style={styles.heroEventDetails}>
+              <Text style={[styles.heroEyebrow, { textAlign }]}>
+                {t('tonight')}
               </Text>
-              <Text style={[styles.heroTitle, { textAlign }]}>
-                {t('hero_title_2')}
+              <View style={styles.heroTitleBlock}>
+                <Text style={[styles.heroTitle, { textAlign }]}>
+                  {t('hero_title_1')}
+                </Text>
+                <Text style={[styles.heroTitle, { textAlign }]}>
+                  {t('hero_title_2')}
+                </Text>
+              </View>
+              <Text style={[styles.heroSubtitle, { textAlign }]}>
+                {t('hero_subtitle')}
               </Text>
             </View>
 
-            <Text style={[styles.heroSubtitle, { textAlign }]}>
-              {t('hero_subtitle')}
-            </Text>
-
-            {/* CTA row */}
-            <View
-              style={styles.heroCtas}
-            >
-              {/* Primary: Play */}
+            {/* CTAs — stacked column, TV Cast on top, Play (primary) on bottom */}
+            <View style={styles.heroCtas}>
+              {/* TV Cast (top, secondary) */}
               <Pressable
-                style={({ pressed }) => [styles.heroCtaFlex, pressed && styles.pressed]}
+                style={({ pressed }) => [pressed && styles.pressed]}
+                onPress={() => setShowCastModal(true)}
+              >
+                <LinearGradient
+                  colors={gradients.cardGlass}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.heroTvBtn}
+                >
+                  <Cast size={20} color={dark.textPrimary} strokeWidth={2} />
+                  <Text style={styles.heroTvBtnText}>{t('tv_btn')}</Text>
+                </LinearGradient>
+              </Pressable>
+
+              {/* Play (bottom, primary) */}
+              <Pressable
+                style={({ pressed }) => [pressed && styles.pressed]}
                 onPress={() => navigation.navigate('GameSetup')}
               >
                 <LinearGradient
@@ -294,24 +279,8 @@ export function HomeScreen({ navigation }: Props) {
                   end={{ x: 1, y: 0 }}
                   style={styles.heroPlayBtn}
                 >
-                  <AppIcon name="gamepad" size={18} color={dark.iconInverse} weight="fill" />
-                  <Text style={[styles.heroPlayBtnText, { textAlign: 'center' }]}>{t('play_btn')}</Text>
-                </LinearGradient>
-              </Pressable>
-
-              {/* Secondary: Cast to TV */}
-              <Pressable
-                style={({ pressed }) => [styles.heroCtaFlex, pressed && styles.pressed]}
-                onPress={() => setShowCastModal(true)}
-              >
-                <LinearGradient
-                  colors={['rgba(255,255,255,0.10)', 'rgba(255,255,255,0.05)']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.heroTvBtn}
-                >
-                  <AppIcon name="cast-tv" size={18} color={dark.textPrimary} />
-                  <Text style={[styles.heroTvBtnText, { textAlign: 'center' }]}>{t('tv_btn')}</Text>
+                  <AppIcon name="play" size={20} color={dark.iconInverse} weight="fill" />
+                  <Text style={styles.heroPlayBtnText}>{t('play_btn')}</Text>
                 </LinearGradient>
               </Pressable>
             </View>
@@ -412,72 +381,13 @@ export function HomeScreen({ navigation }: Props) {
         </View>
       </ScrollView>
 
-      {/* ── Header overlay (absolute) ────────────────────────────────────── */}
-      <View
-        style={[styles.header, { paddingTop: insets.top + spacing['2xs'] + 4 }]}
-        pointerEvents="box-none"
-      >
-        <BlurView tint="dark" intensity={72} style={styles.headerGlass}>
-          <LinearGradient
-            colors={gradients.headerOverlay}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={StyleSheet.absoluteFillObject}
-            pointerEvents="none"
-          />
-        </BlurView>
-
-        <View style={styles.headerRow}>
-          {/* Avatar — tap to open picker */}
-          <Pressable
-            onPress={() => setShowAvatarPicker(true)}
-            style={({ pressed }) => [pressed && styles.pressed]}
-            hitSlop={4}
-          >
-            <ProfileAvatar index={avatarIndex} size={48} />
-          </Pressable>
-
-          {/* Greeting */}
-          <View style={styles.headerTextBlock}>
-            <Text style={[styles.headerGreeting, { textAlign }]}>
-              {t('greeting')}
-            </Text>
-            <Text style={[styles.headerName, { textAlign }]}>
-              {t('welcome', { name: displayName })}
-            </Text>
-          </View>
-
-          {/* Icon buttons */}
-          <View style={styles.headerIcons}>
-            {/* Bell + badge */}
-            <View style={styles.headerIconBtn}>
-              {/* <LinearGradient
-                colors={['rgba(255,255,255,0.22)', 'rgba(255,255,255,0.08)', 'rgba(255,255,255,0.02)']}
-                style={StyleSheet.absoluteFillObject}
-              /> */}
-              <AppIcon name="bell" size={20} color={dark.iconTertiary} />
-              <View style={styles.notifBadge}>
-                <Text style={styles.notifBadgeText}>2</Text>
-              </View>
-            </View>
-
-            {/* Globe */}
-            <Pressable
-              onPress={() => setShowSettings(true)}
-              style={({ pressed }) => [pressed && styles.pressed]}
-              hitSlop={4}
-            >
-              <View style={styles.headerIconBtn}>
-                {/* <LinearGradient
-                  colors={['rgba(255,255,255,0.22)', 'rgba(255,255,255,0.08)', 'rgba(255,255,255,0.02)']}
-                  style={StyleSheet.absoluteFillObject}
-                /> */}
-                <AppIcon name="globe" size={20} color={dark.iconTertiary} />
-              </View>
-            </Pressable>
-          </View>
-        </View>
-      </View>
+      {/* ── Header ──────────────────────────────────────────────────────── */}
+      <TabScreenHeader
+        namespace="home"
+        showAvatar
+        showSettings
+        showNotifications
+      />
 
       {/* ── Tab bar ─────────────────────────────────────────────────────── */}
       <AppTabBarWrapper>
@@ -500,8 +410,6 @@ export function HomeScreen({ navigation }: Props) {
 
       {/* ── Modals ──────────────────────────────────────────────────────── */}
       <CastToTvModal visible={showCastModal} onClose={() => setShowCastModal(false)} />
-      <LanguageSwitcher visible={showSettings} onClose={() => setShowSettings(false)} />
-      <AvatarPickerSheet visible={showAvatarPicker} onClose={() => setShowAvatarPicker(false)} />
     </View>
   );
 }
@@ -525,106 +433,18 @@ const styles = StyleSheet.create({
   },
   pressed: { opacity: dark.opPressed },
 
-  // ── Header ───────────────────────────────────────────────────────────────────
-  header: {
-    position: 'absolute',
-    top: 0, left: 0, right: 0,
-    height: HEADER_HEIGHT,
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.md - 4, // 20
-    justifyContent: 'flex-end',
-    zIndex: zIndex.appbar,
-  },
-  headerGlass: {
-    ...StyleSheet.absoluteFillObject,
-    overflow: 'hidden',
-    borderBottomWidth: 1,
-    borderBottomColor: dark.borderSubtle,
-  },
-  headerGlassHighlight: {
-    position: 'absolute',
-    top: -20, left: -40, right: -40,
-    height: 120,
-    borderBottomLeftRadius: radius['4xl'],
-    borderBottomRightRadius: radius['4xl'],
-    opacity: 0.9,
-  },
-  headerGlassBottomFade: {
-    position: 'absolute',
-    left: 0, right: 0, bottom: 0,
-    height: 40,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: r.avatar,
-    overflow: 'hidden',
-    flexShrink: 0,
-  },
-  headerTextBlock: {
-    flex: 1,
-    gap: 2,
-  },
-  headerGreeting: {
-    color: dark.textTertiary,
-    ...textStyle.labelSm,
-  },
-  headerName: {
-    color: dark.textPrimary,
-    ...textStyle.titleSectionSm,
-    fontWeight: '800',
-  },
-  headerIcons: {
-    flexDirection: 'row',
-    gap: 10,
-    alignItems: 'center',
-    flexShrink: 0,
-  },
-  headerIconBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: r.avatar,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'visible',
-    borderWidth: 1,
-    borderColor: dark.borderDefault,
-    backgroundColor: dark.bgGlassSubtle,
-  },
-  notifBadge: {
-    position: 'absolute',
-    top: -4, right: -4,
-    zIndex: zIndex.raised,
-    width: 18,
-    height: 18,
-    paddingHorizontal: spacing['3xs'],
-    borderRadius: r.badge,
-    backgroundColor: dark.statusError,
-    borderWidth: 2,
-    borderColor: dark.bgBase,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  notifBadgeText: {
-    color: dark.textPrimary,
-    fontSize: 10,
-    fontWeight: '800',
-    lineHeight: 12,
-  },
-
   // ── Hero card ─────────────────────────────────────────────────────────────────
   heroCard: {
     borderRadius: r.card,
     borderWidth: 1,
     borderColor: dark.borderSubtle,
     padding: spacing.md,
-    gap: spacing.xs,
+    gap: spacing.md,
     overflow: 'hidden',
+  },
+  heroEventDetails: {
+    gap: spacing['2xs'],
+    alignItems: 'flex-start',
   },
   heroSpotlightWrap: {
     ...StyleSheet.absoluteFillObject,
@@ -640,6 +460,8 @@ const styles = StyleSheet.create({
   },
   heroTitleBlock: {
     gap: 0,
+    alignSelf: 'stretch',
+    alignItems: 'flex-start',
   },
   heroTitle: {
     color: dark.textPrimary,
@@ -647,14 +469,12 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   heroSubtitle: {
-    color: dark.textSecondary,
+    color: dark.textTertiary,
     ...textStyle.captionMd,
   },
   heroCtas: {
-    gap: spacing.xs,
-    marginTop: spacing['3xs'],
+    gap: spacing.sm,
   },
-  heroCtaFlex: { flex: 1 },
   heroPlayBtn: {
     height: 48,
     borderRadius: r.button,
@@ -719,11 +539,13 @@ const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    alignContent:'space-between',
+    flex:1,
     minHeight: 24,
   },
   sectionTitle: {
-    flex: 1,
     color: dark.textPrimary,
+    alignSelf:'flex-start',
     ...textStyle.titleCard,
     fontWeight: '800',
   },

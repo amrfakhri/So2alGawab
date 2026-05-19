@@ -1,4 +1,34 @@
 {
-  "empty_title": "Nothing here yet",
-  "empty_subtitle": "Your profile details will show up here"
+  "title": "Profile",
+  "vip_badge": "VIP",
+  "xp_label": "{{current}} / {{max}} XP",
+  "level_label": "Level {{level}} • {{rank}}",
+  "rank": {
+    "beginner": "Beginner",
+    "player": "Player",
+    "senior": "Senior",
+    "pro": "Pro",
+    "expert": "Expert",
+    "champion": "Champion"
+  },
+  "stats": {
+    "points": "Points",
+    "win_rate": "Win Rate",
+    "wins": "Wins",
+    "games": "Games"
+  },
+  "achievements": {
+    "title": "Achievements",
+    "see_all": "See All"
+  },
+  "awards": {
+    "first_night_title": "First Night",
+    "first_night_time": "Yesterday",
+    "streak_title": "5 in a Row",
+    "streak_time": "This Week",
+    "sniper_title": "Sharp Shooter",
+    "sniper_time": "Last Month",
+    "king_title": "Night King",
+    "king_time": "3 Months Ago"
+  }
 }

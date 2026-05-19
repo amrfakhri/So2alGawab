@@ -1,4 +1,23 @@
 {
+  "screen_title": "Pick Your Night",
+  "screen_subtitle": "Games",
+  "quick_game_badge": "⚡️ Quick Game",
+  "quick_game_title_1": "No prep time?",
+  "quick_game_title_2": "Start in a second",
+  "play_btn": "Let's Go",
+  "game_types": {
+    "title": "Game Types",
+    "see_all": "See All"
+  },
+  "classic": {
+    "title": "Classic",
+    "subtitle": "Q&A for everyone",
+    "badge": "Most Popular"
+  },
+  "teams": {
+    "title": "Teams & Challenge",
+    "subtitle": "Split up and compete"
+  },
   "empty_title": "Nothing here yet",
   "empty_subtitle": "Your game history will show up here"
 }

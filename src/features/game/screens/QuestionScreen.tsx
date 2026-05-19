@@ -29,6 +29,7 @@ import { TeamsVSandTimer } from '../components/TeamsVSandTimer';
 import { ExitGameSheet } from '../components/ExitGameSheet';
 import { QUESTION_DURATION_MS } from '../engine/gameEngine';
 import { useGameStore } from '../store/useGameStore';
+import { useAnswerSound } from '../hooks/useAnswerSound';
 import { useLocale } from '../../../localization/useLocale';
 import { updateGameSession } from '../../../services/supabase/sessionService';
 
@@ -86,6 +87,8 @@ export function QuestionScreen({ navigation }: Props) {
     const id = setInterval(() => { tickQuestionTimer(250); }, 250);
     return () => clearInterval(id);
   }, [phase, tickQuestionTimer]);
+
+  useAnswerSound(phase, roundFeedback);
 
 
   if (!question) return null;
